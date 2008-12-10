@@ -262,7 +262,10 @@ int main (int argc, char *argv[])
         if (mask_filename != NULL){
           mask[i] = get_volume_voxel_value(mask_in,x,y,z,0,0);
           if (correct_nu) nu[i] = 0.0;        
-        } else mask[i] = 255;
+        } else {
+          if (src[i] == 0) mask[i] = 0;
+          else mask[i] = 255;
+        }
       }
     }
   }
