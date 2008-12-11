@@ -135,13 +135,15 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   int i, j, l, k, x, y, z;
   double e, emin, eps, *nu, *src_bak, th_src, val_nu;
   double last_err = 1e10;
+  double max_src = -1e10;
+  double mean_nu = 0.0;
   long n[nclusters];
   double mean[nclusters];
   double var[nclusters];
   double mu[nclusters];
   double Mu[nclusters];
   int val, nc;
-  long vol, area, z_area, y_dims;
+  long vol, count, area, z_area, y_dims;
 
   area = dims[0]*dims[1];
   vol  = area*dims[2];
@@ -151,17 +153,19 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   if (iters_nu > 0) 
     nu = (double *)malloc(sizeof(double)*vol);
   
-  // find maximum and mean
-  double max_src = -1e10;
-  for (i = 0; i < vol; i++)
-    max_src = MAX(src[i], max_src);
-
+  // find maximum and mean inside mask
+  count = 0;
+  for (i = 0; i < vol; i++) {
+    if (mask[i] > 0) {
+      max_src = MAX(src[i], max_src);
+    }
+  }
+  
   // for reducing 5 labels to 3 restrict initial segmentation
   // to 3 classes
   int nc_initial = nclusters;
-  if (labelto3)
-    nc_initial = 3;
-
+  if (labelto3) nc_initial = 3;
+  
   // go through all sizes of cluster beginning with two clusters
   for (nc=2; nc<=nc_initial; nc++) {
 
@@ -211,8 +215,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
           mu[i] = mean[i];
       }
     }
-    for (i=0; i<nc; i++) 
-      Mu[i] = mu[i]; 
+    for (i=0; i<nc; i++) Mu[i] = mu[i];     
   }
 
   // extend initial 3 clusters to 5 clusters by averaging clusters
@@ -239,8 +242,8 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     // only use values above the mean of the lower two cluster for nu-estimate
 	th_src = max_src*(double)((mu[0]+mu[1])/2.0)/255.0;
     for (j = 0; j <= iters_nu; j++) {  
-      long count = 0;
-      double mean_nu = 0.0;
+      count = 0;
+      mean_nu = 0.0;
       for (i = 0; i < vol; i++) {
         nu[i] = 0.0;
         // only use values above threshold where mask is defined for nu-estimate

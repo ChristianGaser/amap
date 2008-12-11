@@ -37,7 +37,7 @@ void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int BG,
                                 plab = (int)label[z_area + y_dims + x];
                                 
                                 zero = plab;
-                                //if (zero < BG) continue;
+                                if (zero < BG) continue;
                                 n++;
                                 alpha[zero - BG] += 1.0;
                                 
