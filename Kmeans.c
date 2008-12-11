@@ -18,7 +18,7 @@
 #endif
 
 double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, int nc, double *mean, int ni, int BG, int *dims, int thresh_mask, int thresh_kmeans, double max_src)
-// perform k-means algorithm give initial mean estimates    
+/* perform k-means algorithm give initial mean estimates */    
 {
   int i, j, j0, x, y, z, v;
   int count;
@@ -29,7 +29,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
   area = dims[0]*dims[1];
   vol  = area*dims[2];
 
-  // build intensity histogram
+  /* build intensity histogram */
   for (i = 0; i < 256; i++) histo[i] = 0;
   for (z=0;z<dims[2];z++) {
     z_area = z*area;
@@ -47,18 +47,18 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
     }
   }
 
-  // use only value in histogram where cumsum is between 1..99%
+  /* use only value in histogram where cumsum is between 1..99% */
   long cumsum[256];
   cumsum[0] = histo[0];
   for (i = 1; i < 256; i++) cumsum[i] = cumsum[i-1] + histo[i];
   for (i = 0; i < 256; i++) cumsum[i] = (long) round(1000.0*(double)cumsum[i]/(double)cumsum[255]);
   for (i = 0; i < 256; i++) if ((cumsum[i] <= 10) || (cumsum[i] >= 990)) histo[i] = 0;
 
-  // loop through
+  /* loop through */
   diff = 1e15;  count = 0;
   while (diff > 1.0 && count < ni) {
 
-    // assign class labels
+    /* assign class labels */
     for (i = BG; i < 256; i++) {
       dmin = 256.0 * 256.0;
       for (j = 0; j < nc; j++) {
@@ -71,7 +71,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
       }
     }
 
-    // find the new cluster centers
+    /* find the new cluster centers */
     diff = 0;
     for (i = 0; i < nc; i++) {
       xnorm = 0.0; sum = 0.0;
@@ -89,7 +89,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
     count++;
   }
 
-  // assign final labels to voxels
+  /* assign final labels to voxels */
   for (i=BG; i<256; i++) {
     dmin = 1e15;
     j0 = 0;
@@ -104,7 +104,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
   
   if (BG == 1) lut[0] = 0;
 
-  // adjust for the background label
+  /* adjust for the background label */
   diff = 0;
   
   for (z=0;z<dims[2];z++) {
@@ -126,7 +126,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
     }
   }
 
-  // return square error
+  /* return square error */
   return(diff);
 }
 
@@ -153,7 +153,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   if (iters_nu > 0) 
     nu = (double *)malloc(sizeof(double)*vol);
   
-  // find maximum and mean inside mask
+  /* find maximum and mean inside mask */
   count = 0;
   for (i = 0; i < vol; i++) {
     if (mask[i] > 0) {
@@ -161,16 +161,15 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     }
   }
   
-  // for reducing 5 labels to 3 restrict initial segmentation
-  // to 3 classes
+  /* for reducing 5 labels to 3 restrict initial segmentation to 3 classes */
   int nc_initial = nclusters;
   if (labelto3) nc_initial = 3;
   
-  // go through all sizes of cluster beginning with two clusters
+  /* go through all sizes of cluster beginning with two clusters */
   for (nc=2; nc<=nc_initial; nc++) {
 
     if (nc == 2) {
-      // initialize for the two cluster case;
+      /* initialize for the two cluster case; */
       n[0]=0; mean[0] = 0.0; var[0] = 0.0;
 
       for (z=0;z<dims[2];z++) {
@@ -192,7 +191,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       eps = 0.5*sqrt(var[0]);
     }
     else {
-      // find the deviant (epsilon) for the node being divided
+      /* find the deviant (epsilon) for the node being divided */
       eps = Mu[0];
       for (i=0; i<nc-2; i++)
         if (Mu[i+1] - Mu[i] < eps)
@@ -202,7 +201,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       eps = eps*0.5;
     }
 
-    // go through low order clustering
+    /* go through low order clustering */
     emin = 1e15;
     for (k=0; k<nc-1; k++) {
       for (i=nc-1; i>k+1; i--) mean[i] = Mu[i-1];
@@ -218,7 +217,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     for (i=0; i<nc; i++) Mu[i] = mu[i];     
   }
 
-  // extend initial 3 clusters to 5 clusters by averaging clusters
+  /* extend initial 3 clusters to 5 clusters by averaging clusters */
   if (labelto3==1) {
     mu[4] = mu[2];
     mu[2] = mu[1];
@@ -226,7 +225,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     mu[1] = (mu[0]+mu[2])/2;
   }
   
-  // extend initial 3 clusters to 6 clusters by averaging clusters
+  /* extend initial 3 clusters to 6 clusters by averaging clusters */
   if (labelto3==2) {
     mu[5] = mu[2];
     mu[3] = mu[1];
@@ -236,17 +235,17 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     mu[0] = mu[1]/2;
   }
 
-  // find the final clustering and correct for nu
+  /* find the final clustering and correct for nu */
   if (iters_nu > 0) {
     int count_err = 0;
-    // only use values above the mean of the lower two cluster for nu-estimate
+    /* only use values above the mean of the lower two cluster for nu-estimate */
 	th_src = max_src*(double)((mu[0]+mu[1])/2.0)/255.0;
     for (j = 0; j <= iters_nu; j++) {  
       count = 0;
       mean_nu = 0.0;
       for (i = 0; i < vol; i++) {
         nu[i] = 0.0;
-        // only use values above threshold where mask is defined for nu-estimate
+        /* only use values above threshold where mask is defined for nu-estimate */
         if ((src[i] > th_src) && (mask[i] > thresh_kmeans)) {
           val_nu = src[i]/mu[label[i]-BG];
           if ((isfinite(val_nu))) {
@@ -258,35 +257,35 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
 
       }
       
-      // correct nu input to a mean of 1 to remain original intensity range
+      /* correct nu input to a mean of 1 to remain original intensity range */
       mean_nu /= (double)count;
       for (i=0; i<vol; i++)
         nu[i] /= mean_nu;
       
-      // spline estimate: start with distance of 1500 end end up with 500
+      /* spline estimate: start with distance of 1500 end end up with 500 */
       splineSmooth(nu, 0.01, MAX(500,1500.0/(j+1)), 4, separations, dims);
       
-      // apply nu correction to source image
+      /* apply nu correction to source image */
       for (i=0; i<vol; i++) {
         if (nu[i] > 0)
           src[i] /= nu[i];
       }
       
-      // update k-means estimate        
+      /* update k-means estimate */
       e = EstimateKmeans(src, label, mask, nclusters, mu, NI, BG, dims, thresh_mask, thresh_kmeans, max_src);
 
       if (e > last_err)  count_err++;
       else count_err = 0;
 
-      // interrupt if last error was for the last 2 iterations larger
-      // or change is < 0.25%
+      /* interrupt if last error was for the last 2 iterations larger 
+       * or change is < 0.25% */
       if ((count_err > 1) || (((last_err-e)/e < 0.0025) && ((last_err-e)/e > 0))) {
-        // rescue old values from previous iteration
+        /* rescue old values from previous iteration */
         for (i=0; i<vol; i++) src[i] = src_bak[i];
         break;
       }
 
-      // save old values
+      /* save old values */
       for (i=0; i<vol; i++) src_bak[i] = src[i];
 
       last_err = e;
