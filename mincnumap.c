@@ -443,6 +443,7 @@ int main (int argc, char *argv[])
       Pve5(src, prob, label, mean, BG, dims);
       n_classes = 3;
     }
+    set_volume_real_range(label_out, 0, n_classes); 
   }
 
   //  copy values to volume
