@@ -12,7 +12,7 @@ unsigned char * Prob5to3(unsigned char *prob, unsigned char *label0, double *mea
   int area = dims[0]*dims[1];
   int vol = area*dims[2];
   
-  // claculate weights according to differences between means
+  // calculate weights according to differences between means
   w[0] = (mean[2]-mean[1])/(mean[2]-mean[0]);
   w[1] = 1 - w[0];
   w[2] = (mean[4]-mean[3])/(mean[4]-mean[2]);

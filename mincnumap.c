@@ -442,12 +442,12 @@ int main (int argc, char *argv[])
   if (reduceto3) {
     if (n_classes == 6) {
       fprintf(stderr,"Reduce 6 classes to 3.\n");
-      label = (unsigned char *)Prob6to3(prob, label, mean, BG, dims);
+      label = (unsigned char *)Prob6to3(src, prob, label, mean, BG, dims);
       n_classes = 3;
     }
     if (n_classes == 5) {
       fprintf(stderr,"Reduce 5 classes to 3.\n");
-      label = (unsigned char *)Prob5to3(prob, label, mean, BG, dims);
+      label = (unsigned char *)Prob5to3(src, prob, label, mean, BG, dims);
       n_classes = 3;
     }
   }
