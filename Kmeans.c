@@ -217,8 +217,11 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     for (i=0; i<nc; i++) Mu[i] = mu[i];     
   }
 
+  /* only use values above the mean of the lower two cluster for nu-estimate */
+  th_src = max_src*(double)((mu[0]+mu[1])/2.0)/255.0;
+
   /* extend initial 3 clusters to 5 clusters by averaging clusters */
-  if (labelto3==1) {
+  if (labelto3 == 1) {
     mu[4] = mu[2];
     mu[2] = mu[1];
     mu[3] = (mu[4]+mu[2])/2;
@@ -226,7 +229,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   }
   
   /* extend initial 3 clusters to 6 clusters by averaging clusters */
-  if (labelto3==2) {
+  if (labelto3 == 2) {
     mu[5] = mu[2];
     mu[3] = mu[1];
     mu[1] = mu[0];
@@ -238,8 +241,6 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   /* find the final clustering and correct for nu */
   if (iters_nu > 0) {
     int count_err = 0;
-    /* only use values above the mean of the lower two cluster for nu-estimate */
-	th_src = max_src*(double)((mu[0]+mu[1])/2.0)/255.0;
     for (j = 0; j <= iters_nu; j++) {  
       count = 0;
       mean_nu = 0.0;
