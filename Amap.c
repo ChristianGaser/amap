@@ -40,6 +40,7 @@
 #endif
 
 void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int BG, int init, int *dims);
+void MrfPrior5(unsigned char *label, int nc, double *alpha, double *beta, int BG, int init, int *dims);
 
 struct point {
   double mean;
@@ -177,7 +178,8 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   fprintf(stderr,"Number of threads: %d\n",omp_get_num_threads());
 #endif
 
-  MrfPrior(label, nc, alpha, beta, BG, 0, dims);
+  if (nc == 5) MrfPrior5(label, nc, alpha, beta, BG, 0, dims);
+  else MrfPrior(label, nc, alpha, beta, BG, 0, dims);
   
   /* weight MRF prior */
   beta[0] *= weight_MRF;
