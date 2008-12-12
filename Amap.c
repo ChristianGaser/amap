@@ -185,7 +185,7 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   MrfPrior(label, nc, alpha, beta, BG, 0, dims);
   
   /* use pre-defined MRF prior */
-  if (weight_MRF < 1.0) {
+  if (weight_MRF != 1.0) {
 	  beta[0] = weight_MRF;
   	printf("weighted MRF prior beta: %g\n",beta[0]);
   }

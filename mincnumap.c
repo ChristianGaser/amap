@@ -69,12 +69,12 @@ int main (int argc, char *argv[])
   Volume	csf_in, gm_in, wm_in;
   char      *input_filename, *output_filename;
   int       i, j, dims[3], thresh, thresh_kmeans_int;
-  int		x, y, z, z_area, y_dims;
+  int		x, y, z, z_area, y_dims, count_zero;
   long      area, vol;
   char		*axis_order[3] = { MIzspace, MIyspace, MIxspace };
   char		*arg_string, buffer[1024], *str_ptr;
   unsigned char *label, *prob, *mask, *marker, *init_mask, *priors;
-  double	*src, *nu;
+  double	*src, *nu, ratio_zeros;
   double    val, max_src, min_src, separations[3];
 
   /* Get arguments */
@@ -240,9 +240,10 @@ int main (int argc, char *argv[])
         i = z_area + y_dims + x;
         src[i] = get_volume_real_value(volume,x,y,z,0,0);
         // sometimes values are < -FLT_MAX due to overflow???
-        if (src[i] > -FLT_MAX)
+        if (src[i] > -FLT_MAX) {
           min_src = MIN(src[i], min_src);
           max_src = MAX(src[i], max_src);
+        }
         if (n_priors > 0) {
           priors[       i] = get_volume_voxel_value(csf_in,x,y,z,0,0);
           priors[vol  + i] = get_volume_voxel_value(gm_in, x,y,z,0,0);
@@ -268,7 +269,16 @@ int main (int argc, char *argv[])
     for (i=0; i<vol; i++)
       src[i] = src[i] - min_src;
   }
+
+  count_zero = 0;
+  for (i=0; i<vol; i++)
+    if ((mask[i] == 0) && (src[i] == 0))
+      count_zero++;
   
+  ratio_zeros = 100.0*(double)count_zero/(double)(vol);
+  if(ratio_zeros < 5)
+    fprintf(stderr,"Warning: Only %g%s of the voxels outside the mask have zero values. This points to an image, which is not skull-stripped.\n", ratio_zeros,"%");
+    
   // use bayes approach with priors or k-means for starting estimates
   if(n_priors > 0) {
     Bayes( src, label, priors, 100, separations, dims, iters_nu);
@@ -443,7 +453,6 @@ int main (int argc, char *argv[])
       Pve5(src, prob, label, mean, BG, dims);
       n_classes = 3;
     }
-    set_volume_real_range(label_out, 0, n_classes); 
   }
 
   //  copy values to volume
