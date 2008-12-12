@@ -1,4 +1,10 @@
 /*
+ * Christian Gaser
+ * $Id$ 
+ *
+ */
+
+/*
  * Amap.C
  * 
  * author : Jagath C. Rajapakse
@@ -23,7 +29,7 @@
 #define SQR(x) ((x)*(x))
 #endif
 #define SQRT2PI 2.506628
-#define G 30
+#define G 6
 
 #ifndef MAX
 #define MAX(A,B) ((A) > (B) ? (A) : (B))
@@ -38,9 +44,7 @@
 #ifndef ROUND
 #define ROUND( x ) ((int) ((x) + ( ((x) >= 0) ? 0.5 : (-0.5) ) ))
 #endif
-
 void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int BG, int init, int *dims);
-void MrfPrior5(unsigned char *label, int nc, double *alpha, double *beta, int BG, int init, int *dims);
 
 struct point {
   double mean;
@@ -175,15 +179,16 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
 #ifdef _OPENMP
   #pragma omp parallel
   #pragma omp master
-  fprintf(stderr,"Number of threads: %d\n",omp_get_num_threads());
+  printf("Number of threads: %d\n",omp_get_num_threads());
 #endif
 
-  if (nc == 5) MrfPrior5(label, nc, alpha, beta, BG, 0, dims);
-  else MrfPrior(label, nc, alpha, beta, BG, 0, dims);
+  MrfPrior(label, nc, alpha, beta, BG, 0, dims);
   
-  /* weight MRF prior */
-  beta[0] *= weight_MRF;
-  if (weight_MRF < 1.0) fprintf(stderr,"weighted MRF prior beta: %g\n",beta[0]);
+  /* use pre-defined MRF prior */
+  if (weight_MRF < 1.0) {
+	  beta[0] = weight_MRF;
+  	printf("weighted MRF prior beta: %g\n",beta[0]);
+  }
   for (i=0; i<nc; i++)
     log_alpha[i] = log(alpha[i]);
 
@@ -309,14 +314,14 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
      }
    }
     
-    fprintf(stderr,"iters:%3d flips:%6d\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",iters, flips);
+    printf("iters:%3d flips:%6d\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",iters, flips);
     
     if (flips <= nflips) break;    
   }
 
-  fprintf(stderr,"\nFinal Mean*Std: "); 
-  for (i=0; i<nc; i++) fprintf(stderr,"%5.3f*%5.3f  ",mean[i],sqrt(var[i])); 
-  fprintf(stderr,"\n"); 
+  printf("\nFinal Mean*Std: "); 
+  for (i=0; i<nc; i++) printf("%5.3f*%5.3f  ",mean[i],sqrt(var[i])); 
+  printf("\n"); 
 
   free(r);
 

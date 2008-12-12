@@ -125,13 +125,6 @@ int main (int argc, char *argv[])
   if (!correct_nu) write_nu = FALSE;
 
   // correct reduceto3 for 6 classes
-  if (Niters == 0)
-    if (reduceto3) {
-      reduceto3 = 0;
-      fprintf(stderr,"You need at least 1 iteration to reduce 5 or 6 classes.\n");
-    }
-
-  // correct reduceto3 for 6 classes
   if (reduceto3)
     if (n_classes == 6)
       reduceto3 = 2;
@@ -442,12 +435,12 @@ int main (int argc, char *argv[])
   if (reduceto3) {
     if (n_classes == 6) {
       fprintf(stderr,"Reduce 6 classes to 3.\n");
-      label = (unsigned char *)Prob6to3(src, prob, label, mean, BG, dims);
+      Pve6(src, prob, label, mean, BG, dims);
       n_classes = 3;
     }
     if (n_classes == 5) {
       fprintf(stderr,"Reduce 5 classes to 3.\n");
-      label = (unsigned char *)Prob5to3(src, prob, label, mean, BG, dims);
+      Pve5(src, prob, label, mean, BG, dims);
       n_classes = 3;
     }
   }
