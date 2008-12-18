@@ -4,7 +4,7 @@
 #define MAX_NC 5
 #define TH_COLOR 1
 
-void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int init, int *dims)
+void MrfPrior(unsigned char *label, int nc, double *alpha, double beta, int init, int *dims)
 {
   int i, j, k, x, y, z;
   int fi, fj;
@@ -90,8 +90,8 @@ void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int ini
               XX += (fi-fj)*(fi-fj);
               YY += L*(fi-fj);
   }
-  beta[0] = XX/YY;
-  fprintf(stderr,"\t beta %3.3f\n", beta[0]);
+  beta = XX/YY;
+  fprintf(stderr,"\t beta %3.3f\n", beta);
 }
 
 

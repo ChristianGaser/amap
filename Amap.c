@@ -41,7 +41,8 @@
 #ifndef ROUND
 #define ROUND( x ) ((int) ((x) + ( ((x) >= 0) ? 0.5 : (-0.5) ) ))
 #endif
-void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int init, int *dims);
+
+void MrfPrior(unsigned char *label, int nc, double *alpha, double beta, int init, int *dims);
 
 struct point {
   double mean;
@@ -149,7 +150,7 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   int i, index;
   int area, narea, nvol, vol, z_area, y_dims;
   int histo[65536];
-  double sub_1, beta[1], dmin, val;
+  double sub_1, beta, dmin, val;
   double var[MAX_NC], d[MAX_NC], alpha[MAX_NC], log_alpha[MAX_NC], log_var[MAX_NC];
   double pvalue[MAX_NC], psum, error;
   int nix, niy, niz, iters;
@@ -164,8 +165,8 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   
   /* use pre-defined MRF prior */
   if (weight_MRF != 1.0) {
-	  beta[0] = weight_MRF;
-  	printf("weighted MRF prior beta: %g\n",beta[0]);
+	  beta = weight_MRF;
+  	printf("weighted MRF prior beta: %g\n",beta);
   }
   for (i=0; i<nc; i++)
     log_alpha[i] = log(alpha[i]);
@@ -253,7 +254,7 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
               if ((int)label[index-area] == iBG)    first++;
               if ((int)label[index+area] == iBG)    first++;
               
-              d[i] = 0.5*(SQR(val-mean[i])/var[i]+log_var[i])-log_alpha[i]-beta[0]*first;
+              d[i] = 0.5*(SQR(val-mean[i])/var[i]+log_var[i])-log_alpha[i]-beta*first;
               pvalue[i] = exp(-d[i])/SQRT2PI;
               psum += pvalue[i];
             } else d[i] = 1e15;
