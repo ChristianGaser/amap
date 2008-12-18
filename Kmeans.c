@@ -17,7 +17,7 @@
 #define MAX( x, y )  ( ((x) >= (y)) ? (x) : (y) )
 #endif
 
-double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, int nc, double *mean, int ni, int BG, int *dims, int thresh_mask, int thresh_kmeans, double max_src)
+double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, int nc, double *mean, int ni, int *dims, int thresh_mask, int thresh_kmeans, double max_src)
 /* perform k-means algorithm give initial mean estimates */    
 {
   int i, j, j0, x, y, z, v;
@@ -37,7 +37,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
       y_dims = y*dims[0];
       for (x=0;x<dims[0];x++) {
          v = (int)round(255.0*src[z_area + y_dims + x]/max_src);
-         if (v < BG) continue;
+         if (v < 1) continue;
          if ((thresh_mask > 0) && ((int)mask[z_area + y_dims + x] < thresh_kmeans))
            continue;
          if (v < 0) v = 0;
@@ -59,7 +59,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
   while (diff > 1.0 && count < ni) {
 
     /* assign class labels */
-    for (i = BG; i < 256; i++) {
+    for (i = 0; i < 256; i++) {
       dmin = 256.0 * 256.0;
       for (j = 0; j < nc; j++) {
 	    dx = (double) i - mean[j];
@@ -75,7 +75,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
     diff = 0;
     for (i = 0; i < nc; i++) {
       xnorm = 0.0; sum = 0.0;
-      for (j = BG; j < 256; j++)
+      for (j = 0; j < 256; j++)
 	    if (lut[j] == i) {
 	      xnorm += histo[j];
 	      sum +=  j * histo[j];
@@ -90,7 +90,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
   }
 
   /* assign final labels to voxels */
-  for (i=BG; i<256; i++) {
+  for (i=0; i<256; i++) {
     dmin = 1e15;
     j0 = 0;
     for (j = 0; j < nc; j++) {
@@ -102,7 +102,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
     lut[i] = j0;
   }
   
-  if (BG == 1) lut[0] = 0;
+  lut[0] = 0;
 
   /* adjust for the background label */
   diff = 0;
@@ -113,10 +113,10 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
       y_dims = y*dims[0];
       for (x=0;x<dims[0];x++) {
          v = (int)round(255.0*src[z_area + y_dims + x]/max_src);
-         if (v >= BG) {
+         if (v >= 1) {
            if (v < 0) v = 0;
            if (v > 255) v = 255;
-           label[z_area + y_dims + x] = (unsigned char)(lut[v] + BG);	
+           label[z_area + y_dims + x] = (unsigned char)(lut[v] + 1);	
            diff += SQR((double)v - mean[lut[v]]);
            if ((thresh_mask > 0) && ((int)mask[z_area + y_dims + x] < thresh_mask))
                label[z_area + y_dims + x] = 0;	
@@ -130,7 +130,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
   return(diff);
 }
 
-double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, int nclusters, int BG, double *separations, int *dims, int labelto3, int thresh_mask, int thresh_kmeans, int iters_nu)
+double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, int nclusters, double *separations, int *dims, int labelto3, int thresh_mask, int thresh_kmeans, int iters_nu)
 {
   int i, j, l, k, x, y, z;
   double e, emin, eps, *nu, *src_bak, th_src, val_nu;
@@ -178,7 +178,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
           y_dims = y*dims[0];
           for (x=0;x<dims[0];x++) {
             val = (int)round(255.0*src[z_area + y_dims + x]/max_src);
-            if (val < BG) continue;
+            if (val < 1) continue;
             n[0]++;
             mean[0] += (double) val;
             var[0] += (double) val*(double) val;
@@ -206,8 +206,8 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     for (k=0; k<nc-1; k++) {
       for (i=nc-1; i>k+1; i--) mean[i] = Mu[i-1];
       mean[k+1] = Mu[k] + eps;  mean[k] = Mu[k] - eps;
-      for (i=BG; i<k; i++) mean[i] = Mu[i];
-      e = EstimateKmeans(src, label, mask, nc, mean, NI, BG, dims, thresh_mask, thresh_kmeans, max_src);
+      for (i=1; i<k; i++) mean[i] = Mu[i];
+      e = EstimateKmeans(src, label, mask, nc, mean, NI, dims, thresh_mask, thresh_kmeans, max_src);
       if (e < emin) {
         emin = e;
         for (i=0; i<nc; i++) 
@@ -248,7 +248,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
         nu[i] = 0.0;
         /* only use values above threshold where mask is defined for nu-estimate */
         if ((src[i] > th_src) && (mask[i] > thresh_kmeans)) {
-          val_nu = src[i]/mu[label[i]-BG];
+          val_nu = src[i]/mu[label[i]-1];
           if ((isfinite(val_nu))) {
             nu[i] = val_nu;
             mean_nu += val_nu;
@@ -273,7 +273,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       }
       
       /* update k-means estimate */
-      e = EstimateKmeans(src, label, mask, nclusters, mu, NI, BG, dims, thresh_mask, thresh_kmeans, max_src);
+      e = EstimateKmeans(src, label, mask, nclusters, mu, NI, dims, thresh_mask, thresh_kmeans, max_src);
 
       if (e > last_err)  count_err++;
       else count_err = 0;
@@ -295,7 +295,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     
     }
   } else {
-    e = EstimateKmeans(src, label, mask, nclusters, mu, NI, BG, dims, thresh_mask, thresh_kmeans, max_src);
+    e = EstimateKmeans(src, label, mask, nclusters, mu, NI, dims, thresh_mask, thresh_kmeans, max_src);
   }
   
   max_src = -1e10;

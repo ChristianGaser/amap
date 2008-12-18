@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, int BG, int *dims)
+void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, int *dims)
 {
   int x,y,z,i,z_area,y_dims,ind,mxi;
   double w, mx;
@@ -72,7 +72,7 @@ void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, 
               mx = new_val[i];
               mxi = i;
             }
-          label[ind] = mxi+BG;
+          label[ind] = mxi+1;
       }
     }
   }

@@ -12,8 +12,6 @@
 #define MIN(A,B) ((A) > (B) ? (B) : (A))
 #endif
 
-#define BG 1
-
 static ArgvInfo argTable[] = {
   {"-mask", ARGV_STRING, (char *) 1, (char *) &mask_filename, 
        "Prior brainmask."},
@@ -256,23 +254,28 @@ int main (int argc, char *argv[])
         if (mask_filename != NULL){
           mask[i] = get_volume_voxel_value(mask_in,x,y,z,0,0);
           if (correct_nu) nu[i] = 0.0;        
-        } else {
-          if (src[i] == 0) mask[i] = 0;
-          else mask[i] = 255;
         }
       }
     }
   }
 
-  // correct images with values < 0
+  /* correct images with values < 0 */
   if (min_src < 0) {
     for (i=0; i<vol; i++)
       src[i] = src[i] - min_src;
   }
 
+  /* if no mask file is given use minimum value in the image to get mask value */
+  if (mask_filename == NULL) {
+    for (i=0; i<vol; i++) {
+      if (src[i] == min_src) mask[i] = 0;
+      else mask[i] = 255;
+    }  
+  }
+  
   count_zero = 0;
   for (i=0; i<vol; i++)
-    if ((mask[i] == 0) && (src[i] == 0))
+    if ((mask[i] == 0))
       count_zero++;
   
   ratio_zeros = 100.0*(double)count_zero/(double)(vol);
@@ -284,14 +287,14 @@ int main (int argc, char *argv[])
     Bayes( src, label, priors, 100, separations, dims, iters_nu);
   }
   else {
-    max_src = Kmeans( src, label, mask, 25, n_classes, BG, separations, dims, reduceto3, thresh, thresh_kmeans_int, iters_nu);
+    max_src = Kmeans( src, label, mask, 25, n_classes, separations, dims, reduceto3, thresh, thresh_kmeans_int, iters_nu);
   }
     
   if (Niters > 0) {
     if (use_numap)
-      Numap( src, label, prob, mean, n_classes, BG, Niters, Nflips, separations, dims);
+      Numap( src, label, prob, mean, n_classes, 1, Niters, Nflips, separations, dims);
     else
-      Amap( src, label, prob, mean, n_classes, BG, Niters, Nflips, subsample, dims, weight_MRF);
+      Amap( src, label, prob, mean, n_classes, Niters, Nflips, subsample, dims, weight_MRF);
   }
   
   if (warp_priors) {
@@ -445,12 +448,12 @@ int main (int argc, char *argv[])
   if (reduceto3) {
     if (n_classes == 6) {
       fprintf(stderr,"Reduce 6 classes to 3.\n");
-      Pve6(src, prob, label, mean, BG, dims);
+      Pve6(src, prob, label, mean, dims);
       n_classes = 3;
     }
     if (n_classes == 5) {
       fprintf(stderr,"Reduce 5 classes to 3.\n");
-      Pve5(src, prob, label, mean, BG, dims);
+      Pve5(src, prob, label, mean, dims);
       n_classes = 3;
     }
   }

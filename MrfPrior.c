@@ -4,7 +4,7 @@
 #define MAX_NC 5
 #define TH_COLOR 1
 
-void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int BG, int init, int *dims)
+void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int init, int *dims)
 {
   int i, j, k, x, y, z;
   int fi, fj;
@@ -38,13 +38,13 @@ void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int BG,
         plab = (int)label[z_area + y_dims + x];
         
         zero = plab;
-        if (zero < BG) continue;
+        if (zero < 1) continue;
         n++;
-        alpha[zero - BG] += 1.0;
+        alpha[zero - 1] += 1.0;
         
         for (i=1; i<nc; i++) {
           f[i-1] = 0;	  
-          iBG = i+BG;
+          iBG = i+1;
           if ((int)label[z_area + y_dims + x-1] == iBG)        f[i-1]++;
           if ((int)label[z_area + y_dims + x+1] == iBG)        f[i-1]++;
           if ((int)label[z_area + ((y-1)*dims[0]) + x] == iBG) f[i-1]++;
@@ -52,7 +52,7 @@ void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int BG,
           if ((int)label[((z-1)*area) + y_dims + x] == iBG)    f[i-1]++;
           if ((int)label[((z+1)*area) + y_dims + x] == iBG)    f[i-1]++;
         }
-        color[zero-BG][f[0]][f[1]][f[2]][f[3]]++;
+        color[zero-1][f[0]][f[1]][f[2]][f[3]]++;
       }
     }
   }

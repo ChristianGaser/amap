@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-unsigned char * Pve6(double *src, unsigned char *prob, unsigned char *label0, double *mean, int BG, int *dims)
+unsigned char * Pve6(double *src, unsigned char *prob, unsigned char *label0, double *mean, int *dims)
 {
   int x,y,z,i,z_area,y_dims,ind,mxi;
   double w, mx;
@@ -76,7 +76,7 @@ unsigned char * Pve6(double *src, unsigned char *prob, unsigned char *label0, do
               mx = new_val[i];
               mxi = i;
             }
-          label[ind] = mxi+BG;
+          label[ind] = mxi+1;
       }
     }
   }

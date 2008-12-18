@@ -22,8 +22,9 @@
 #include <float.h>
 
 #ifndef SQR
-#define flag ((x)*(x))
+#define SQR(x) ((x)*(x))
 #endif
+
 #define SQRT2PI 2.506628
 #define G 6
 
@@ -40,7 +41,7 @@
 #ifndef ROUND
 #define ROUND( x ) ((int) ((x) + ( ((x) >= 0) ? 0.5 : (-0.5) ) ))
 #endif
-void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int BG, int init, int *dims);
+void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int init, int *dims);
 
 struct point {
   double mean;
@@ -54,7 +55,7 @@ struct ipoint {
 };
 
 /* calculate the mean and variance for every class on a grid size SUBxSUBxSUB */
-static void get_means(double *src, unsigned char *label, int nc, struct point *r, int sub, int BG, int *dims, double mn_thresh, double mx_thresh)
+static void get_means(double *src, unsigned char *label, int nc, struct point *r, int sub, int *dims, double mn_thresh, double mx_thresh)
 {
   int i, j, ind;
   int area, narea, nvol, zsub, ysub, xsub, yoffset, zoffset;
@@ -103,7 +104,7 @@ static void get_means(double *src, unsigned char *label, int nc, struct point *r
                   xsub = x*sub + m;
                   if (xsub>=0 & xsub<dims[0]) {
                     labval = (int)label[zsub2 + ysub2 + xsub];
-                    labval_BG = labval - BG;
+                    labval_BG = labval - 1;
                     if (labval_BG < 0) continue;
                     val = src[zsub2 + ysub2 + xsub];
                     
@@ -143,7 +144,7 @@ static void get_means(double *src, unsigned char *label, int nc, struct point *r
 
 
 /* perform adaptive MAP on given src and initial segmentation label */
-void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, int nc, int BG, int niters, int nflips, int sub, int *dims, double weight_MRF)
+void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, int nc, int niters, int nflips, int sub, int *dims, double weight_MRF)
 {
   int i, index;
   int area, narea, nvol, vol, z_area, y_dims;
@@ -159,7 +160,7 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   int cumsum[65536];
   struct point *r;
       
-  MrfPrior(label, nc, alpha, beta, BG, 0, dims);
+  MrfPrior(label, nc, alpha, beta, 0, dims);
   
   /* use pre-defined MRF prior */
   if (weight_MRF != 1.0) {
@@ -180,7 +181,7 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   /* build histogram */
   for (i = 0; i < 65536; i++) histo[i] = 0;
   for (i=0; i<vol; i++) {
-    if ((int)label[i] < BG) continue;
+    if ((int)label[i] < 1) continue;
     histo[(int)ROUND(65535.0*(src[i]-min_src)/(max_src-min_src))]++;
   }
 
@@ -211,7 +212,7 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
     int flips = 0;
     
     /* get means for grid points */
-    get_means(src, label, nc, r, sub, BG, dims, mn_thresh, mx_thresh);    
+    get_means(src, label, nc, r, sub, dims, mn_thresh, mx_thresh);    
 
     /* loop over image points */
     for (z = 1; z < dims[2]-1; z++) {
@@ -222,7 +223,7 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
 	  
           index = x + y_dims + z_area;
           labval = (int)label[index];
-          if (labval < BG) continue;
+          if (labval < 1) continue;
           val = src[index];
           
           /* find the interpolation factors */
@@ -239,19 +240,19 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
           }
 
           /* compute energy at each point */
-          dmin = 1e15; xBG = BG; 
+          dmin = 1e15; xBG = 1; 
           psum = 0.0;
           for (i=0; i<nc; i++) {
-            first=0.0;
-            iBG = i+BG;
-            if ((int)label[index-1] == iBG)       first++;
-            if ((int)label[index+1] == iBG)       first++;
-            if ((int)label[index-dims[0]] == iBG) first++;
-            if ((int)label[index+dims[0]] == iBG) first++;
-            if ((int)label[index-area] == iBG)    first++;
-            if ((int)label[index+area] == iBG)    first++;
-
             if (fabs(mean[i]) > 1e-15) {
+              first=0.0;
+              iBG = i+1;
+              if ((int)label[index-1] == iBG)       first++;
+              if ((int)label[index+1] == iBG)       first++;
+              if ((int)label[index-dims[0]] == iBG) first++;
+              if ((int)label[index+dims[0]] == iBG) first++;
+              if ((int)label[index-area] == iBG)    first++;
+              if ((int)label[index+area] == iBG)    first++;
+              
               d[i] = 0.5*(SQR(val-mean[i])/var[i]+log_var[i])-log_alpha[i]-beta[0]*first;
               pvalue[i] = exp(-d[i])/SQRT2PI;
               psum += pvalue[i];
@@ -270,7 +271,7 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
            prob[(vol*i) + index] = (unsigned char)ROUND(255*pvalue[i]);
          
          /* if the class has changed increment flips and change the label */
-         if (xBG + BG != labval) {flips++; label[index] = (unsigned char) (xBG + BG); }
+         if (xBG + 1 != labval) {flips++; label[index] = (unsigned char) (xBG + 1); }
          
        }
      }
