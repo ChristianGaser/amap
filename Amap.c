@@ -21,12 +21,8 @@
 #include <math.h>
 #include <float.h>
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 #ifndef SQR
-#define SQR(x) ((x)*(x))
+#define flag ((x)*(x))
 #endif
 #define SQRT2PI 2.506628
 #define G 6
@@ -90,17 +86,9 @@ static void get_means(double *src, unsigned char *label, int nc, struct point *r
   
 
   /* loop over neighborhoods of the grid points */
-#ifdef _OPENMP
-  # pragma omp parallel default(none) \
-  private(k,l,m,z, y, x, zsub, zsub2, ysub, ysub2, xsub, zoffset, yoffset, labval, val, ind, labval_BG) \
-  shared(r,nc,sub, niz, dims, area, narea, nix, label, BG, src, mn_thresh, mx_thresh, nvol, ir, niy)
-#endif
   for (k=-sub; k<=sub; k++) {
     for (l=-sub; l<=sub; l++) {
       for (m=-sub; m<=sub; m++) {
-#ifdef _OPENMP
-  # pragma omp for
-#endif
         for (z = 0; z < niz; z++)  {
           zsub = z*sub + k;
           if (zsub>=0 & zsub<dims[2]) {
@@ -136,13 +124,7 @@ static void get_means(double *src, unsigned char *label, int nc, struct point *r
 
 
   /* find means and standard deviations */
-#ifdef _OPENMP
-  # pragma omp parallel private(i, j, ind) 
-#endif
   for (i=0; i<nc; i++) {
-#ifdef _OPENMP
-  # pragma omp for
-#endif
     for (j=0; j<nvol; j++) {
       ind = (i*nvol)+j;
       if (ir[ind].n > G) {
@@ -159,6 +141,7 @@ static void get_means(double *src, unsigned char *label, int nc, struct point *r
   return;
 }
 
+
 /* perform adaptive MAP on given src and initial segmentation label */
 void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, int nc, int BG, int niters, int nflips, int sub, int *dims, double weight_MRF)
 {
@@ -169,19 +152,13 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   double var[MAX_NC], d[MAX_NC], alpha[MAX_NC], log_alpha[MAX_NC], log_var[MAX_NC];
   double pvalue[MAX_NC], psum, error;
   int nix, niy, niz, iters;
-  int x, y, z, labval, ind, xBG, flag;
+  int x, y, z, labval, ind, xBG;
   int ix, iy, iz, iBG, ind2;
   double first, mn_thresh, mx_thresh;
   double min_src = FLT_MAX, max_src = -FLT_MAX;
   int cumsum[65536];
   struct point *r;
       
-#ifdef _OPENMP
-  #pragma omp parallel
-  #pragma omp master
-  printf("Number of threads: %d\n",omp_get_num_threads());
-#endif
-
   MrfPrior(label, nc, alpha, beta, BG, 0, dims);
   
   /* use pre-defined MRF prior */
@@ -262,7 +239,6 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
           }
 
           /* compute energy at each point */
-          flag = 0;
           dmin = 1e15; xBG = BG; 
           psum = 0.0;
           for (i=0; i<nc; i++) {
@@ -275,30 +251,16 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
             if ((int)label[index-area] == iBG)    first++;
             if ((int)label[index+area] == iBG)    first++;
 
-            if (mean[i] > 0.0) {
-              if (var[i] > 0.0) {
-                d[i] = 0.5*(SQR(val-mean[i])/var[i]+log_var[i])-log_alpha[i]-beta[0]*first;
-                pvalue[i] = exp(-d[i])/SQRT2PI;
-                psum += pvalue[i];
-              } else flag = 1;
+            if (fabs(mean[i]) > 1e-15) {
+              d[i] = 0.5*(SQR(val-mean[i])/var[i]+log_var[i])-log_alpha[i]-beta[0]*first;
+              pvalue[i] = exp(-d[i])/SQRT2PI;
+              psum += pvalue[i];
             } else d[i] = 1e15;
             if ( d[i] < dmin) {
               dmin = d[i]; xBG = i;
             }
           }
-          
-          if (flag == 1) {
-            dmin = 1e15; xBG = BG;
-            for (i=0; i<nc; i++) {
-              if (mean[i] > 0.0) d[i] = SQR(val-mean[i])-log_alpha[i]-beta[0]*first;
-              else d[i] = 1e15;
-              if ( d[i] < dmin) {
-                dmin = d[i];
-                xBG = i;
-              }
-            }
-          }
-	  
+          	  
          /* scale p-values to a sum of 1 */
          if (psum > 0.0) {
            for (i=0; i<nc; i++) pvalue[i] /= psum;
@@ -327,3 +289,4 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
 
   return;    
 }
+
