@@ -215,7 +215,9 @@ char Maxarg(double *pval, char n)
   return(index);
 }
 
-
+/* 
+  Compute initial PVE labeling based on marginalized likelihood
+*/
 void Compute_initial_PVE_label(double *src, unsigned char *label, struct point *r, int nc, int sub, int *dims)
 {
   
@@ -442,6 +444,7 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   printf("\nFinal Mean*Std: "); 
   for (i=0; i<nc; i++) printf("%g*%g  ",mean[i],sqrt(var[i])); 
   printf("\n"); 
+    fflush(stdout);
 
   free(r);
 

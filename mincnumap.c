@@ -93,11 +93,6 @@ int main (int argc, char *argv[])
     iters_nu = -1;
   }
 
-  if ((use_watershed) && (mask_filename == NULL) && (agm_filename == NULL)) {
-    fprintf(stderr,"For watershed masking you have to define mask image.\n");
-    use_watershed = FALSE;
-  }
-
   // do not write nu corrected image if correction is not selected
   if (!correct_nu) write_nu = FALSE;
 
