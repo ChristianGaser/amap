@@ -7,6 +7,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
+
+#define CSFLABEL   0
+#define GMLABEL    1
+#define WMLABEL    2
+#define GMCSFLABEL 3
+#define WMGMLABEL  4
 
 void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, int *dims)
 {
@@ -24,55 +31,58 @@ void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, 
       for (x = 1; x < dims[0]-1; x++) {
         ind = z_area + y_dims + x;
 
-          switch(label[ind]) {
-            case 0: /* BG */
-              new_val[0] = 0;
-              new_val[1] = 0;
-              new_val[2] = 0;
-              break;
-            case 1: /* CSF */
-              new_val[0] = 255;
-              new_val[1] = 0;
-              new_val[2] = 0;
-              break;
-            case 2: /* GMCSF */
-              w = (src[ind] - mean[0])/(mean[2]-mean[0]);
-              if(w > 1.0) w = 1.0; if(w < 0.0) w = 0.0;
-              new_val[0] = (unsigned char) round(255.0*(1-w));
-              new_val[1] = (unsigned char) round(255.0*w);
-              new_val[2] = 0;
-              break;
-            case 3: /* GM */
-              new_val[0] = 0;
-              new_val[1] = 255;
-              new_val[2] = 0;
-              break;
-            case 4: /*WMGM */
-              w = (src[ind] - mean[2])/(mean[4]-mean[2]);
-              if(w > 1.0) w = 1.0; if(w < 0.0) w = 0.0;
-              new_val[0] = 0;
-              new_val[1] = (unsigned char) round(255.0*(1-w));
-              new_val[2] = (unsigned char) round(255.0*w);
-              break;
-            case 5: /* WM */
-              new_val[0] = 0;
-              new_val[1] = 0;
-              new_val[2] = 255;
-              break;
-          }
+        switch(label[ind]) {
+        case 0: /* BG */
+          new_val[CSFLABEL] = 0;
+          new_val[GMLABEL]  = 0;
+          new_val[WMLABEL]  = 0;
+          break;
+        case CSFLABEL+1: /* CSF */
+          new_val[CSFLABEL] = 255;
+          new_val[GMLABEL]  = 0;
+          new_val[WMLABEL]  = 0;
+          break;
+        case GMLABEL+1: /* GM */
+          new_val[CSFLABEL] = 0;
+          new_val[GMLABEL]  = 255;
+          new_val[WMLABEL]  = 0;
+          break;
+        case WMLABEL+1: /* WM */
+          new_val[CSFLABEL] = 0;
+          new_val[GMLABEL]  = 0;
+          new_val[WMLABEL]  = 255;
+          break;
+        case GMCSFLABEL+1: /* GMCSF */
+          w = (src[ind] - mean[CSFLABEL])/(mean[GMLABEL]-mean[CSFLABEL]);
+          if(w > 1.0) w = 1.0; if(w < 0.0) w = 0.0;
+          new_val[CSFLABEL] = (unsigned char) round(255.0*(1-w));
+          new_val[GMLABEL]  = (unsigned char) round(255.0*w);
+          new_val[WMLABEL]  = 0;
+          break;
+        case WMGMLABEL+1: /*WMGM */
+          w = (src[ind] - mean[GMLABEL])/(mean[WMLABEL]-mean[GMLABEL]);
+          if(w > 1.0) w = 1.0; if(w < 0.0) w = 0.0;
+          new_val[CSFLABEL] = 0;
+          new_val[GMLABEL]  = (unsigned char) round(255.0*(1-w));
+          new_val[WMLABEL]  = (unsigned char) round(255.0*w);
+          break;
+        }
 
-          prob[ind] = new_val[0];
-          prob[vol + ind] = new_val[1];
-          prob[(2*vol) + ind] = new_val[2];
+        prob[          ind] = new_val[CSFLABEL];
+        prob[vol +     ind] = new_val[GMLABEL];
+        prob[(2*vol) + ind] = new_val[WMLABEL];
         
-          // get new label
-          mx = -1e15;
-          for (i = 0; i <= 2; i++)
+        // get new label
+        mx = -FLT_MAX;
+        if(label[ind] > 0) {
+          for (i = 0; i < 3; i++) {
             if (new_val[i] > mx) {
               mx = new_val[i];
               mxi = i;
             }
-          label[ind] = mxi+1;
+          }
+          label[ind] = mxi + 1;
+        }
       }
     }
   }

@@ -21,8 +21,6 @@ static ArgvInfo argTable[] = {
        "GM prior."},
   {"-wm", ARGV_STRING, (char *) 1, (char *) &awm_filename, 
        "WM prior."},
-  {"-nc", ARGV_INT, (char *) 1, (char *) &n_classes,
-       "Number of classes."},
   {"-flips", ARGV_INT, (char *) 1, (char *) &Nflips,
        "Number of flips to end."},
   {"-iters", ARGV_INT, (char *) 1, (char *) &Niters,
@@ -33,14 +31,12 @@ static ArgvInfo argTable[] = {
        "Number of iterations for nu correction."},
   {"-no_nucorrect", ARGV_CONSTANT, (char *) FALSE, (char *) &correct_nu,
        "Do not use nu correction."},
-  {"-mrf", ARGV_FLOAT, (char *) 1, (char *) &weight_MRF,
-       "Weight of MRF prior (0..1)."},
   {"-thresh", ARGV_FLOAT, (char *) 1, (char *) &thresh_brainmask,
        "Threshold for prior brainmask (0..1)."},
   {"-thresh_kmeans", ARGV_FLOAT, (char *) 1, (char *) &thresh_kmeans,
        "Threshold for Kmeans algorithm (0..1)."},
-  {"-reduceto3", ARGV_CONSTANT, (char *) TRUE, (char *) &reduceto3,
-       "Reduce 6 or 5 classes to 3."},
+  {"-no_pve", ARGV_CONSTANT, (char *) FALSE, (char *) &pve,
+       "Do not use Partial Volume Estimation."},
   {"-write_fuzzy", ARGV_CONSTANT, (char *) TRUE, (char *) &write_fuzzy,
        "Write fuzzy segmentations."},
   {"-write_nu", ARGV_CONSTANT, (char *) TRUE, (char *) &write_nu,
@@ -49,10 +45,6 @@ static ArgvInfo argTable[] = {
        "Write label image (default)."},
   {"-nowrite_label", ARGV_CONSTANT, (char *) FALSE, (char *) &write_label,
        "Do not write label image."},
-  {"-amap", ARGV_CONSTANT, (char *) TRUE, (char *) &use_amap,
-       "Use Amap approach without nu correction (default)."},
-  {"-numap", ARGV_CONSTANT, (char *) TRUE, (char *) &use_numap,
-       "Use Numap approach with nu correction."},
   {"-watershed", ARGV_CONSTANT, (char *) TRUE, (char *) &use_watershed,
        "Use masking based on watershed."},
   {"-nowarp", ARGV_CONSTANT, (char *) FALSE, (char *) &warp_priors,
@@ -85,17 +77,6 @@ int main (int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
   
-  if (n_classes < 2) {
-    print_error( "Minimum number of classes is 2.\n");		
-    return( 1 );
-  }    
-
-  // if Numap is selected and Amap is default
-  if ((use_numap) && (use_amap)) {
-    use_numap = TRUE;
-    use_amap = FALSE;
-  }
-
   input_filename  = argv[1];
   output_filename = argv[2];
 
@@ -105,8 +86,6 @@ int main (int argc, char *argv[])
   if (Niters == 0)
     write_fuzzy = FALSE;
 
-  if (use_amap)  fprintf(stderr,"Use Amap approach");
-  if (use_numap) fprintf(stderr,"Use Numap approach");
   if (correct_nu)
     fprintf(stderr," with nu correction.\n");
   else {
@@ -121,11 +100,6 @@ int main (int argc, char *argv[])
 
   // do not write nu corrected image if correction is not selected
   if (!correct_nu) write_nu = FALSE;
-
-  // correct reduceto3 for 6 classes
-  if (reduceto3)
-    if (n_classes == 6)
-      reduceto3 = 2;
 
   // read data and scale it to 0..255
   strcpy(buffer, input_filename);
@@ -180,7 +154,6 @@ int main (int argc, char *argv[])
 
   // check that 3 priors were loaded and set number of classes to 3
   if (n_priors > 0) {
-    n_classes = 3;
     if(n_priors != 3) {
       fprintf(stderr,"You need to define 3 prior images.\n");
       return(1);
@@ -193,8 +166,8 @@ int main (int argc, char *argv[])
   }
 
 
-  label_out = copy_volume_definition(volume, NC_BYTE, FALSE, 0, n_classes);
-  set_volume_real_range(label_out, 0, n_classes); 
+  label_out = copy_volume_definition(volume, NC_BYTE, FALSE, 0, n_pure_classes);
+  set_volume_real_range(label_out, 0, n_pure_classes); 
 
   prob_out = copy_volume_definition(volume, NC_BYTE, FALSE, 0, 255.0);
   set_volume_real_range(prob_out, 0, 1.0); 
@@ -208,14 +181,14 @@ int main (int argc, char *argv[])
   label = (unsigned char *)malloc(sizeof(unsigned char)*vol);
   mask  = (unsigned char *)malloc(sizeof(unsigned char)*vol);
   src   = (double *)malloc(sizeof(double)*vol);
-  prob  = (unsigned char *)malloc(sizeof(unsigned char)*vol*n_classes);
+  prob  = (unsigned char *)malloc(sizeof(unsigned char)*vol*n_pure_classes);
   if (n_priors > 0)
-    priors = (unsigned char *)malloc(sizeof(unsigned char)*vol*(n_classes+1));
+    priors = (unsigned char *)malloc(sizeof(unsigned char)*vol*(n_pure_classes+1));
   if (correct_nu)
     nu    = (double *)malloc(sizeof(double)*vol);
 
-  double mean[n_classes], mu[n_classes];
-  for (i = 0; i < n_classes; i++)
+  double mean[n_classes], mu[n_pure_classes];
+  for (i = 0; i < n_pure_classes; i++)
     mu[i] = 0;
     
   // get sure that threshold for brainmask is zero if no mask is defined
@@ -287,14 +260,11 @@ int main (int argc, char *argv[])
     Bayes( src, label, priors, 100, separations, dims, iters_nu);
   }
   else {
-    max_src = Kmeans( src, label, mask, 25, n_classes, separations, dims, reduceto3, thresh, thresh_kmeans_int, iters_nu);
+    max_src = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu);
   }
     
   if (Niters > 0) {
-    if (use_numap)
-      Numap( src, label, prob, mean, n_classes, 1, Niters, Nflips, separations, dims);
-    else
-      Amap( src, label, prob, mean, n_classes, Niters, Nflips, subsample, dims, weight_MRF);
+    Amap( src, label, prob, mean, n_pure_classes, Niters, Nflips, subsample, dims, pve);
   }
   
   if (warp_priors) {
@@ -444,18 +414,10 @@ int main (int argc, char *argv[])
   
   }
 
-  // reduce classes to 3 if neccessary
-  if (reduceto3) {
-    if (n_classes == 6) {
-      fprintf(stderr,"Reduce 6 classes to 3.\n");
-      Pve6(src, prob, label, mean, dims);
-      n_classes = 3;
-    }
-    if (n_classes == 5) {
-      fprintf(stderr,"Reduce 5 classes to 3.\n");
-      Pve5(src, prob, label, mean, dims);
-      n_classes = 3;
-    }
+  // PVE
+  if (pve) {
+    fprintf(stderr,"Calculate Partial Volume Estimate.\n");
+    Pve5(src, prob, label, mean, dims);
   }
 
   //  copy values to volume
@@ -496,7 +458,7 @@ int main (int argc, char *argv[])
   
   // write fuzzy segmentations for each class
   if (write_fuzzy) {
-    for (i = 0; i<n_classes; i++) {
+    for (i = 0; i<n_pure_classes; i++) {
       for (z = 0; z < dims[2]; z++) {
         z_area = z*area;
         for (y = 0; y < dims[1]; y++) {

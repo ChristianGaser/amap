@@ -17,6 +17,8 @@
 #define MAX( x, y )  ( ((x) >= (y)) ? (x) : (y) )
 #endif
 
+#define MAX_NC 10
+
 double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, int nc, double *mean, int ni, int *dims, int thresh_mask, int thresh_kmeans, double max_src)
 /* perform k-means algorithm give initial mean estimates */    
 {
@@ -130,18 +132,18 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
   return(diff);
 }
 
-double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, int nclusters, double *separations, int *dims, int labelto3, int thresh_mask, int thresh_kmeans, int iters_nu)
+double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, int n_clusters, double *separations, int *dims, int thresh_mask, int thresh_kmeans, int iters_nu)
 {
   int i, j, l, k, x, y, z;
   double e, emin, eps, *nu, *src_bak, th_src, val_nu;
   double last_err = 1e10;
   double max_src = -1e10;
   double mean_nu = 0.0;
-  long n[nclusters];
-  double mean[nclusters];
-  double var[nclusters];
-  double mu[nclusters];
-  double Mu[nclusters];
+  long n[MAX_NC];
+  double mean[MAX_NC];
+  double var[MAX_NC];
+  double mu[MAX_NC];
+  double Mu[MAX_NC];
   int val, nc;
   long vol, count, area, z_area, y_dims;
 
@@ -160,13 +162,9 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       max_src = MAX(src[i], max_src);
     }
   }
-  
-  /* for reducing 5 labels to 3 restrict initial segmentation to 3 classes */
-  int nc_initial = nclusters;
-  if (labelto3) nc_initial = 3;
-  
+    
   /* go through all sizes of cluster beginning with two clusters */
-  for (nc=2; nc<=nc_initial; nc++) {
+  for (nc=2; nc<=n_clusters; nc++) {
 
     if (nc == 2) {
       /* initialize for the two cluster case; */
@@ -220,24 +218,6 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   /* only use values above the mean of the lower two cluster for nu-estimate */
   th_src = max_src*(double)((mu[0]+mu[1])/2.0)/255.0;
 
-  /* extend initial 3 clusters to 5 clusters by averaging clusters */
-  if (labelto3 == 1) {
-    mu[4] = mu[2];
-    mu[2] = mu[1];
-    mu[3] = (mu[4]+mu[2])/2;
-    mu[1] = (mu[0]+mu[2])/2;
-  }
-  
-  /* extend initial 3 clusters to 6 clusters by averaging clusters */
-  if (labelto3 == 2) {
-    mu[5] = mu[2];
-    mu[3] = mu[1];
-    mu[1] = mu[0];
-    mu[4] = (mu[3]+mu[5])/2;
-    mu[2] = (mu[1]+mu[3])/2;
-    mu[0] = mu[1]/2;
-  }
-
   /* find the final clustering and correct for nu */
   if (iters_nu > 0) {
     int count_err = 0;
@@ -273,7 +253,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       }
       
       /* update k-means estimate */
-      e = EstimateKmeans(src, label, mask, nclusters, mu, NI, dims, thresh_mask, thresh_kmeans, max_src);
+      e = EstimateKmeans(src, label, mask, n_clusters, mu, NI, dims, thresh_mask, thresh_kmeans, max_src);
 
       if (e > last_err)  count_err++;
       else count_err = 0;
@@ -295,7 +275,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     
     }
   } else {
-    e = EstimateKmeans(src, label, mask, nclusters, mu, NI, dims, thresh_mask, thresh_kmeans, max_src);
+    e = EstimateKmeans(src, label, mask, n_clusters, mu, NI, dims, thresh_mask, thresh_kmeans, max_src);
   }
   
   max_src = -1e10;
@@ -303,7 +283,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     max_src = MAX(src[i], max_src);
 
   fprintf(stderr,"\nK-Means: ");
-  for (i=0; i<nclusters; i++) fprintf(stderr,"%3.3f ",max_src*mu[i]/255.0); 
+  for (i=0; i<n_clusters; i++) fprintf(stderr,"%3.3f ",max_src*mu[i]/255.0); 
   fprintf(stderr,"\terror: %3.3f\n",e/(nc*dims[0]*dims[1]*dims[2]));    
 
   free(src_bak);
