@@ -8,12 +8,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
+#include "Amap.h"
 
-#define CSFLABEL   0
-#define GMLABEL    1
-#define WMLABEL    2
-#define GMCSFLABEL 3
-#define WMGMLABEL  4
 
 void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, int *dims)
 {

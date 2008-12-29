@@ -20,46 +20,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
-
-#ifndef SQR
-#define SQR(x) ((x)*(x))
-#endif
-
-#define SQRT2PI 2.506628
-#define G 6
-
-#ifndef MAX
-#define MAX(A,B) ((A) > (B) ? (A) : (B))
-#endif
-
-#ifndef MIN
-#define MIN(A,B) ((A) < (B) ? (A) : (B))
-#endif
-
-#define MAX_NC 10
-
-#define CSFLABEL   0
-#define GMLABEL    1
-#define WMLABEL    2
-#define GMCSFLABEL 3
-#define WMGMLABEL  4
-
-#ifndef ROUND
-#define ROUND( x ) ((int) ((x) + ( ((x) >= 0) ? 0.5 : (-0.5) ) ))
-#endif
-
-void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int init, int *dims);
-
-struct point {
-  double mean;
-  double var;
-};
-
-struct ipoint {
-  int n;
-  double s;
-  double ss;
-};
+#include "Amap.h"
 
 /* calculate the mean and variance for every class on a grid size SUBxSUBxSUB */
 static void get_means(double *src, unsigned char *label, int nc, struct point *r, int sub, int *dims, double mn_thresh, double mx_thresh)
@@ -197,7 +158,7 @@ double Compute_marginalized_likelihood(double value, double mean1 , double mean2
   return(lh);
  }
 
-/* Finds maximum argument out of the n possibilities */
+/* Find maximum argument out of the n possibilities */
 
 char Maxarg(double *pval, char n)
 {

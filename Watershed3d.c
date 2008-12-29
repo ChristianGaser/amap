@@ -2,14 +2,7 @@
 #include <memory.h>
 #include <stdlib.h>	
 #include <stdio.h>	
-
-#ifndef MIN
-#define MIN(A,B) ((A) > (B) ? (B) : (A))
-#endif
-
-#ifndef MAX
-#define MAX(A,B) ((A) > (B) ? (A) : (B))
-#endif
+#include "Amap.h"
 
 #define CONN 18; //connectivity scheme (6 or 18)
 

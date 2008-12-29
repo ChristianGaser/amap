@@ -3,14 +3,8 @@
 #include <float.h>
 #include "optimizer3d.h"
 #include "diffeo3d.h"
+#include "Amap.h"
 
-#ifndef MAX
-#define MAX(A,B) ((A) > (B) ? (A) : (B))
-#endif
-
-#ifndef MIN
-#define MIN(A,B) ((A) > (B) ? (B) : (A))
-#endif
 
 static ArgvInfo argTable[] = {
   {"-mask", ARGV_STRING, (char *) 1, (char *) &mask_filename, 

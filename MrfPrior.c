@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <math.h>
+#include "Amap.h"
 
-#define MAX_NC 5
-#define TH_COLOR 1
 
 void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int init, int *dims)
 {

@@ -9,15 +9,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "Amap.h"
 
-#ifndef SQR
-#define SQR(x) ((x)*(x))
-#endif
-#ifndef MAX
-#define MAX( x, y )  ( ((x) >= (y)) ? (x) : (y) )
-#endif
-
-#define MAX_NC 10
 
 double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, int nc, double *mean, int ni, int *dims, int thresh_mask, int thresh_kmeans, double max_src)
 /* perform k-means algorithm give initial mean estimates */    
