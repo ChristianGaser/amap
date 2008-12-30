@@ -1,3 +1,9 @@
+/*
+ * Christian Gaser
+ * $Id$ 
+ *
+ */
+
 #include <stdio.h>
 #include <math.h>
 #include "Amap.h"
@@ -58,10 +64,10 @@ void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int ini
   }
 
   /* evaluate alphas */
-  fprintf(stderr,"MRF priors: alpha ");
+  printf("MRF priors: alpha ");
   for (i=0; i<nc; i++) {
     if (init == 0) alpha[i] /= n; else alpha[i] = 1.0;
-    fprintf(stderr,"%3.3f ", alpha[i]);
+    printf("%3.3f ", alpha[i]);
   }
 
   /* compute beta */
@@ -91,8 +97,9 @@ void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int ini
               YY += L*(fi-fj);
   }
   beta[0] = XX/YY;
-//        beta[0] = 0.5*YY/XX;
-  fprintf(stderr,"\t beta %3.3f\n", beta[0]);
+/* beta[0] = 0.5*YY/XX; */
+  printf("\t beta %3.3f\n", beta[0]);
+  fflush(stdout);
 }
 
 

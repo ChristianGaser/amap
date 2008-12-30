@@ -68,7 +68,7 @@ void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, 
         prob[vol +     ind] = new_val[GMLABEL];
         prob[(2*vol) + ind] = new_val[WMLABEL];
         
-        // get new label
+        /* get new label */
         mx = -FLT_MAX;
         if(label[ind] > 0) {
           for (i = 0; i < 3; i++) {

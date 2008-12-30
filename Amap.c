@@ -144,19 +144,22 @@ double Compute_marginalized_likelihood(double value, double mean1 , double mean2
                                        unsigned int nof_intervals)
 
 { 
-  double lh, tmean , tvar, t, interval_len;
+  double lh, tmean, tvar, t, interval_len;
   int i;  
   
-  interval_len = (double) 1 / nof_intervals;
+  interval_len = 1.0 / (double) nof_intervals;
   lh = 0;
+  
   for(i = 0; i < nof_intervals; i++) {
     t = (i + 0.5) * interval_len;
     tmean = t * mean1 + ( 1 - t ) * mean2;
     tvar = SQR(t) * var1 + SQR(1 - t) * var2 + measurement_var;
-    lh = lh + Compute_Gaussian_likelihood(value, tmean,tvar)*interval_len;
+    lh += Compute_Gaussian_likelihood(value, tmean, tvar)*interval_len;
   }
+  
   return(lh);
  }
+
 
 /* Find maximum argument out of the n possibilities */
 
@@ -222,24 +225,24 @@ void Compute_initial_PVE_label(double *src, unsigned char *label, struct point *
           ind2 = (i*nvol) + ind;            
           if (r[ind2].mean > 0.0) {
             mean[i] = r[ind2].mean;
-            var[i]  = sqrt(r[ind2].var);
+            var[i]  = r[ind2].var;
           }
         }
 
         dmin = FLT_MAX;
         for(i = 0; i < nc; i++) {
           if (fabs(mean[i]) > 1e-15) {
-            d_pve[i] = Compute_Gaussian_likelihood(val,mean[i],var[i]);
+            d_pve[i] = Compute_Gaussian_likelihood(val, mean[i], var[i]);
           } else d_pve[i] = FLT_MAX;
         }
             
         if ((fabs(mean[WMLABEL]) > 1e-15) && (fabs(mean[GMLABEL]) > 1e-15)) {
-          d_pve[WMGMLABEL] = Compute_marginalized_likelihood(val,mean[WMLABEL], mean[GMLABEL],
+          d_pve[WMGMLABEL] = Compute_marginalized_likelihood(val, mean[WMLABEL], mean[GMLABEL],
                                         var[WMLABEL], var[GMLABEL], 0, 50 );
         } else d_pve[WMGMLABEL] = FLT_MAX;
             
         if ((fabs(mean[CSFLABEL]) > 1e-15) && (fabs(mean[GMLABEL]) > 1e-15)) {
-          d_pve[GMCSFLABEL] = Compute_marginalized_likelihood(val,mean[GMLABEL], mean[CSFLABEL],
+          d_pve[GMCSFLABEL] = Compute_marginalized_likelihood(val, mean[GMLABEL], mean[CSFLABEL],
                                         var[GMLABEL], var[CSFLABEL], 0, 50 );
         } else d_pve[GMCSFLABEL] = FLT_MAX;
 
@@ -321,9 +324,6 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
       
       Compute_initial_PVE_label(src, label, r, nc, sub, dims);
       nc += 2;
-    } 
-
-    if (iters == 5) {
       MrfPrior(label, nc, alpha, beta, 0, dims);
     
       for (i=0; i<nc; i++) log_alpha[i] = log(alpha[i]);
