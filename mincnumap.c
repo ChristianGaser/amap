@@ -60,7 +60,7 @@ int main (int argc, char *argv[])
   char		*axis_order[3] = { MIzspace, MIyspace, MIxspace };
   char		*arg_string, buffer[1024], *str_ptr;
   unsigned char *label, *prob, *mask, *marker, *init_mask, *priors;
-  double	*src, *nu, ratio_zeros;
+  double	*src, ratio_zeros;
   double    val, max_src, min_src, separations[3];
 
   /* Get arguments */
@@ -175,8 +175,6 @@ int main (int argc, char *argv[])
   prob  = (unsigned char *)malloc(sizeof(unsigned char)*vol*n_pure_classes);
   if (n_priors > 0)
     priors = (unsigned char *)malloc(sizeof(unsigned char)*vol*(n_pure_classes+1));
-  if (correct_nu)
-    nu    = (double *)malloc(sizeof(double)*vol);
 
   double mean[n_classes], mu[n_pure_classes];
   for (i = 0; i < n_pure_classes; i++)
@@ -217,7 +215,6 @@ int main (int argc, char *argv[])
         }
         if (mask_filename != NULL){
           mask[i] = get_volume_voxel_value(mask_in,x,y,z,0,0);
-          if (correct_nu) nu[i] = 0.0;        
         }
       }
     }
