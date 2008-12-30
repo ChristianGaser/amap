@@ -31,6 +31,8 @@ static ArgvInfo argTable[] = {
        "Threshold for Kmeans algorithm (0..1)."},
   {"-no_pve", ARGV_CONSTANT, (char *) FALSE, (char *) &pve,
        "Do not use Partial Volume Estimation."},
+  {"-pve", ARGV_INT, (char *) 1, (char *) &pve,
+       "Use Partial Volume Estimation with marginalized likelihood estimation (1) or Kmeans initialization (2)."},
   {"-write_fuzzy", ARGV_CONSTANT, (char *) TRUE, (char *) &write_fuzzy,
        "Write fuzzy segmentations."},
   {"-write_nu", ARGV_CONSTANT, (char *) TRUE, (char *) &write_nu,
@@ -249,7 +251,7 @@ int main (int argc, char *argv[])
     Bayes( src, label, priors, 100, separations, dims, iters_nu);
   }
   else {
-    max_src = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu);
+    max_src = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, pve);
   }
     
   if (Niters > 0) {
