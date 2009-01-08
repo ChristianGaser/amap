@@ -15,8 +15,6 @@ static ArgvInfo argTable[] = {
        "GM prior."},
   {"-wm", ARGV_STRING, (char *) 1, (char *) &awm_filename, 
        "WM prior."},
-  {"-flips", ARGV_INT, (char *) 1, (char *) &Nflips,
-       "Number of flips to end."},
   {"-iters", ARGV_INT, (char *) 1, (char *) &Niters,
        "Number of iterations to end."},
   {"-sub", ARGV_INT, (char *) 1, (char *) &subsample,
@@ -252,7 +250,7 @@ int main (int argc, char *argv[])
   }
     
   if (Niters > 0) {
-    Amap( src, label, prob, mean, n_pure_classes, Niters, Nflips, subsample, dims, pve);
+    Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve);
   }
   
   if (warp_priors) {

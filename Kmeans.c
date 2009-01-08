@@ -217,15 +217,15 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   }
 
   /* only use values above the mean of the lower two cluster for nu-estimate */
-  th_src = max_src*(double)((mu[0]+mu[1])/2.0)/255.0;
+  th_src = max_src*(double)((Mu[0]+Mu[1])/2.0)/255.0;
 
   /* extend initial 3 clusters to 5 clusters by averaging clusters */
   if (pve == 2) {
     mu[0] = Mu[0];
-    mu[1] = Mu[1];
-    mu[2] = Mu[2];
-    mu[3] = (Mu[0]+Mu[2])/2;
-    mu[4] = (Mu[1]+Mu[2])/2;
+    mu[2] = Mu[1];
+    mu[4] = Mu[2];
+    mu[1] = (Mu[0]+Mu[1])/2;
+    mu[3] = (Mu[1]+Mu[2])/2;
   }
 
   /* find the final clustering and correct for nu */

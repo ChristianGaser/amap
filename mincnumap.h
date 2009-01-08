@@ -16,7 +16,6 @@ char *agm_filename = NULL;
 char *awm_filename = NULL;
 int n_pure_classes = 3;
 int n_classes = 5;
-int Nflips = 50;
 int Niters = 200;
 int subsample = 8;
 int iters_nu = 40;
