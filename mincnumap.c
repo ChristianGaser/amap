@@ -170,7 +170,7 @@ int main (int argc, char *argv[])
   label = (unsigned char *)malloc(sizeof(unsigned char)*vol);
   mask  = (unsigned char *)malloc(sizeof(unsigned char)*vol);
   src   = (double *)malloc(sizeof(double)*vol);
-  prob  = (unsigned char *)malloc(sizeof(unsigned char)*vol*n_pure_classes);
+  prob  = (unsigned char *)malloc(sizeof(unsigned char)*vol*n_classes);
   if (n_priors > 0)
     priors = (unsigned char *)malloc(sizeof(unsigned char)*vol*(n_pure_classes+1));
 
