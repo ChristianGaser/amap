@@ -72,8 +72,8 @@ void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, 
         mx = -FLT_MAX;
         if(label[ind] > 0) {
           for (i = 0; i < 3; i++) {
-            if (new_val[i] > mx) {
-              mx = new_val[i];
+            if (new_val[i*2] > mx) {
+              mx = new_val[i*2];
               mxi = i;
             }
           }
