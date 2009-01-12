@@ -281,7 +281,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
 
       last_err = e;
     
-      printf("iters:%2d error: %6.2f\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",j+1, e/(nc*dims[0]*dims[1]*dims[2]));
+      printf("iters:%2d error: %7.2f\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",j+1, e*n_clusters/(dims[0]*dims[1]*dims[2]));
       fflush(stdout);
     
     }
@@ -295,7 +295,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
 
   printf("\nK-Means: ");
   for (i=0; i<n_clusters; i++) printf("%3.3f ",max_src*mu[i]/255.0); 
-  printf("\terror: %3.3f\n",e/(nc*dims[0]*dims[1]*dims[2]));    
+  printf("\terror: %3.3f\n",e*n_clusters/(dims[0]*dims[1]*dims[2]));    
   fflush(stdout);
 
   free(src_bak);
