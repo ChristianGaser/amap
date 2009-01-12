@@ -246,6 +246,9 @@ int main (int argc, char *argv[])
     Bayes( src, label, priors, 100, separations, dims, iters_nu);
   }
   else {
+    /* nu-correction in Kmeans works best if it is called first with 3 classes */
+    max_src = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, 2);
+    /* followed by a 2nd call with actual parameters */
     max_src = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, pve);
   }
     
