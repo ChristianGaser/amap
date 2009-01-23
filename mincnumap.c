@@ -243,7 +243,7 @@ int main (int argc, char *argv[])
     
   // use bayes approach with priors or k-means for starting estimates
   if(n_priors > 0) {
-    Bayes( src, label, priors, 100, separations, dims, iters_nu);
+    Bayes( src, label, priors, mask, separations, dims, iters_nu);
   }
   else {
     /* nu-correction in Kmeans works best if it is called first with 3 classes */
@@ -406,7 +406,7 @@ int main (int argc, char *argv[])
   // PVE
   if (pve) {
     fprintf(stderr,"Calculate Partial Volume Estimate.\n");
-    Pve5(src, prob, label, mean, dims);
+    Pve5(src, prob, label, mean, dims, 1);
   }
 
   //  copy values to volume

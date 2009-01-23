@@ -11,10 +11,14 @@
 #define TH_COLOR 1
 #define TH_CHANGE 0.00001
 #define TINY 1e-15 
+#ifndef HUGE
+#define HUGE 1e15 
+#endif
 
 #define NOPVE 0
 #define MARGINALIZED 1
 #define KMEANS 2
+#define BAYES 3
 
 #define CSFLABEL   0
 #define GMCSFLABEL 1
@@ -35,8 +39,24 @@
 #endif
 
 #ifndef ROUND
-#define ROUND( x ) ((int) ((x) + ( ((x) >= 0) ? 0.5 : (-0.5) ) ))
+#define ROUND( x ) ((long) ((x) + ( ((x) >= 0) ? 0.5 : (-0.5) ) ))
 #endif
+
+extern double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, int n_clusters, double *separations, int *dims, int thresh_mask, int thresh_kmeans, int iters_nu, int pve);
+
+extern void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned char *mask, double *separations, int *dims, int correct_nu);
+
+extern void WarpPriors(unsigned char *prob, unsigned char *priors, unsigned char *mask, float *flow, int *dims, int loop, int samp);
+
+extern void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, int nc, int niters, int sub, int *dims, int pve);
+
+extern void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, int *dims, int update_label);
+
+extern void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int init, int *dims);
+
+extern void sampn(int dm[], float f[], int n, int mm, double x, double y, double z, double v[]);
+
+extern int splineSmooth( double *src, double lambda, double distance, int subsample, double *separations, int *dims);
 
 struct point {
   double mean;

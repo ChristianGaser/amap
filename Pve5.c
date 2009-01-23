@@ -7,15 +7,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <float.h>
 #include "Amap.h"
-
 
 void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, int *dims, int update_label)
 {
   int x,y,z,i,z_area,y_dims,ind,mxi;
   double w, mx;
-  unsigned char new_val[3];
+  unsigned char new_val[5];
   
   int area = dims[0]*dims[1];
   int vol = area*dims[2];
@@ -51,16 +49,16 @@ void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, 
         case GMCSFLABEL+1: /* GMCSF */
           w = (src[ind] - mean[CSFLABEL])/(mean[GMLABEL]-mean[CSFLABEL]);
           if(w > 1.0) w = 1.0; if(w < 0.0) w = 0.0;
-          new_val[CSFLABEL] = (unsigned char) round(255.0*(1-w));
-          new_val[GMLABEL]  = (unsigned char) round(255.0*w);
+          new_val[CSFLABEL] = (unsigned char) ROUND(255.0*(1-w));
+          new_val[GMLABEL]  = (unsigned char) ROUND(255.0*w);
           new_val[WMLABEL]  = 0;
           break;
         case WMGMLABEL+1: /*WMGM */
           w = (src[ind] - mean[GMLABEL])/(mean[WMLABEL]-mean[GMLABEL]);
           if(w > 1.0) w = 1.0; if(w < 0.0) w = 0.0;
           new_val[CSFLABEL] = 0;
-          new_val[GMLABEL]  = (unsigned char) round(255.0*(1-w));
-          new_val[WMLABEL]  = (unsigned char) round(255.0*w);
+          new_val[GMLABEL]  = (unsigned char) ROUND(255.0*(1-w));
+          new_val[WMLABEL]  = (unsigned char) ROUND(255.0*w);
           break;
         }
 
@@ -68,9 +66,13 @@ void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, 
         prob[vol +     ind] = new_val[GMLABEL];
         prob[(2*vol) + ind] = new_val[WMLABEL];
         
+        /* set old probabilities for mixed classes to zero */
+        prob[(3*vol) + ind] = 0;
+        prob[(4*vol) + ind] = 0;
+        
         /* get new label */
         if(update_label) {
-          mx = -FLT_MAX;
+          mx = -HUGE;
           if(label[ind] > 0) {
             for (i = 0; i < 3; i++) {
               if (new_val[i*2] > mx) {
@@ -83,6 +85,5 @@ void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, 
         }
       }
     }
-  }
-  
+  }  
 }

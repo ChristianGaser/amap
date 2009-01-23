@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <float.h>
 #include "Amap.h"
 
 
@@ -18,7 +17,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
 {
   int i, j, j0, x, y, z, v;
   int count;
-  long histo[256], lut[256], vol, area;
+  long histo[256], lut[256], cumsum[256], vol, area;
   long z_area, y_dims;
   double diff, dmin, dx, xnorm, sum;
 
@@ -32,7 +31,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
     for (y=0;y<dims[1];y++) {
       y_dims = y*dims[0];
       for (x=0;x<dims[0];x++) {
-         v = (int)round(255.0*src[z_area + y_dims + x]/max_src);
+         v = (int)ROUND(255.0*src[z_area + y_dims + x]/max_src);
          if (v < 1) continue;
          if ((thresh_mask > 0) && ((int)mask[z_area + y_dims + x] < thresh_kmeans))
            continue;
@@ -44,14 +43,13 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
   }
 
   /* use only value in histogram where cumsum is between 1..99% */
-  long cumsum[256];
   cumsum[0] = histo[0];
   for (i = 1; i < 256; i++) cumsum[i] = cumsum[i-1] + histo[i];
-  for (i = 0; i < 256; i++) cumsum[i] = (long) round(1000.0*(double)cumsum[i]/(double)cumsum[255]);
+  for (i = 0; i < 256; i++) cumsum[i] = (long) ROUND(1000.0*(double)cumsum[i]/(double)cumsum[255]);
   for (i = 0; i < 256; i++) if ((cumsum[i] <= 10) || (cumsum[i] >= 990)) histo[i] = 0;
 
   /* loop through */
-  diff = FLT_MAX;  count = 0;
+  diff = HUGE;  count = 0;
   while (diff > 1.0 && count < ni) {
 
     /* assign class labels */
@@ -87,7 +85,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
 
   /* assign final labels to voxels */
   for (i=0; i<256; i++) {
-    dmin = FLT_MAX;
+    dmin = HUGE;
     j0 = 0;
     for (j = 0; j < nc; j++) {
       if (fabs((double) i - mean[j]) < dmin) {
@@ -100,7 +98,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
   
   lut[0] = 0;
 
-  /* adjust for the background label */
+  /* adjust for the backgrint label */
   diff = 0;
   
   for (z=0;z<dims[2];z++) {
@@ -108,7 +106,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
     for (y=0;y<dims[1];y++) {
       y_dims = y*dims[0];
       for (x=0;x<dims[0];x++) {
-         v = (int)round(255.0*src[z_area + y_dims + x]/max_src);
+         v = (int)ROUND(255.0*src[z_area + y_dims + x]/max_src);
          if (v >= 1) {
            if (v < 0) v = 0;
            if (v > 255) v = 255;
@@ -130,8 +128,8 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
 {
   int i, j, l, k, x, y, z;
   double e, emin, eps, *nu, *src_bak, th_src, val_nu;
-  double last_err = FLT_MAX;
-  double max_src = -FLT_MAX;
+  double last_err = HUGE;
+  double max_src = -HUGE;
   double mean_nu = 0.0;
   long n[MAX_NC];
   double mean[MAX_NC];
@@ -140,6 +138,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   double Mu[MAX_NC];
   int val, nc;
   long vol, count, area, z_area, y_dims;
+  int nc_initial = n_clusters;
 
   area = dims[0]*dims[1];
   vol  = area*dims[2];
@@ -156,9 +155,9 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       max_src = MAX(src[i], max_src);
     }
   }
-    
+   
+
   /* for reducing 5 labels to 3 restrict initial segmentation to 3 classes */
-  int nc_initial = n_clusters;
   if (pve == KMEANS) {
     nc_initial = 3;
     n_clusters += 2;
@@ -176,7 +175,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
         for (y=0;y<dims[1];y++) {
           y_dims = y*dims[0];
           for (x=0;x<dims[0];x++) {
-            val = (int)round(255.0*src[z_area + y_dims + x]/max_src);
+            val = (int)ROUND(255.0*src[z_area + y_dims + x]/max_src);
             if (val < 1) continue;
             n[0]++;
             mean[0] += (double) val;
@@ -201,7 +200,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     }
 
     /* go through low order clustering */
-    emin = FLT_MAX;
+    emin = HUGE;
     for (k=0; k<nc-1; k++) {
       for (i=nc-1; i>k+1; i--) mean[i] = Mu[i-1];
       mean[k+1] = Mu[k] + eps;  mean[k] = Mu[k] - eps;
@@ -239,7 +238,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
         /* only use values above threshold where mask is defined for nu-estimate */
         if ((src[i] > th_src) && (mask[i] > thresh_kmeans)) {
           val_nu = src[i]/mu[label[i]-1];
-          if ((isfinite(val_nu))) {
+          if ((finite(val_nu))) {
             nu[i] = val_nu;
             mean_nu += val_nu;
             count++;
@@ -289,7 +288,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     e = EstimateKmeans(src, label, mask, n_clusters, mu, NI, dims, thresh_mask, thresh_kmeans, max_src);
   }
   
-  max_src = -FLT_MAX;
+  max_src = -HUGE;
   for (i = 0; i < vol; i++)
     max_src = MAX(src[i], max_src);
 
@@ -305,16 +304,3 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       
   return(max_src);    
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
