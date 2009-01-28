@@ -81,7 +81,7 @@ int main (int argc, char *argv[])
     write_fuzzy = FALSE;
 
   if (correct_nu)
-    fprintf(stderr," with nu correction.\n");
+    fprintf(stderr," Nu correction.\n");
   else {
     fprintf(stderr,".\n");
     iters_nu = -1;
@@ -155,7 +155,7 @@ int main (int argc, char *argv[])
   }
 
 
-  label_out = copy_volume_definition(volume, NC_BYTE, FALSE, 0, n_pure_classes);
+  label_out = copy_volume_definition(volume, NC_FLOAT, FALSE, 0, n_pure_classes);
   set_volume_real_range(label_out, 0, n_pure_classes); 
 
   prob_out = copy_volume_definition(volume, NC_BYTE, FALSE, 0, 255.0);
@@ -241,13 +241,17 @@ int main (int argc, char *argv[])
   if(ratio_zeros < 5)
     fprintf(stderr,"Warning: Only %g%s of the voxels outside the mask have zero values. This points to an image, which is not skull-stripped.\n", ratio_zeros,"%");
     
+  /* initial nu-correction works best with 5 class Kmeans approach followed by a 3 class approach */
+  max_src = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS);
+  max_src = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
+
   // use bayes approach with priors or k-means for starting estimates
   if(n_priors > 0) {
     Bayes( src, label, priors, mask, separations, dims, iters_nu);
   }
   else {
     /* nu-correction in Kmeans works best if it is called first with 3 classes */
-    max_src = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, 2);
+//    max_src = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, 2);
     /* followed by a 2nd call with actual parameters */
     max_src = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, pve);
   }
@@ -406,7 +410,7 @@ int main (int argc, char *argv[])
   // PVE
   if (pve) {
     fprintf(stderr,"Calculate Partial Volume Estimate.\n");
-    Pve5(src, prob, label, mean, dims, 1);
+    Pve5(src, prob, label, mean, dims, PVELABEL);
   }
 
   //  copy values to volume
@@ -416,8 +420,13 @@ int main (int argc, char *argv[])
       for (y = 0; y < dims[1]; y++) {
         y_dims = y*dims[0];
         for (x = 0; x < dims[0]; x++) {
-          if (write_label)
-            set_volume_voxel_value(label_out,x,y,z,0,0,label[z_area + y_dims + x]);
+          /* label should be rescaled from 255 to 3 */
+          if (write_label) {
+            if (pve)
+              set_volume_voxel_value(label_out,x,y,z,0,0,((double)label[z_area + y_dims + x])*3.0/255.0);
+            else
+              set_volume_voxel_value(label_out,x,y,z,0,0,label[z_area + y_dims + x]);
+          }
           if (write_nu)
             set_volume_real_value(volume,x,y,z,0,0,src[z_area + y_dims + x]);
         }
@@ -428,7 +437,7 @@ int main (int argc, char *argv[])
   // write labeled volume
   if (write_label) {
     if (output_volume( output_filename, NC_BYTE,
-           FALSE, 0.0, 255.0, label_out, input_filename,
+           FALSE, 0.0, 0.0, label_out, input_filename,
            (minc_output_options *) NULL ) != OK )
         return( 1 );
   }
