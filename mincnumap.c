@@ -256,6 +256,7 @@ int main (int argc, char *argv[])
   }
 
   if(iters_adf[0] > 0) {
+    fprintf(stderr,"Anisotropic diffusion filtering #1 with %d iterations\n", iters_adf[0]);
     prevsrc   = (double *)malloc(sizeof(double)*vol);
     memcpy(prevsrc, src, sizeof(double)*vol);
     aniso3d(src, dims, 10.0, iters_adf[0], 0.16);
@@ -264,6 +265,7 @@ int main (int argc, char *argv[])
   if (Niters > 0) {
     Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve);
     if((iters_adf[0] > 0) && (iters_adf[1] > 0)){
+      fprintf(stderr,"Anisotropic diffusion filtering #2 with %d iterations\n", iters_adf[1]);
       memcpy(src, prevsrc, sizeof(double)*vol);
       aniso3d(src, dims, 10.0, iters_adf[1], 0.16);
       Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve);
