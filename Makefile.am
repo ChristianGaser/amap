@@ -15,6 +15,7 @@ mincmarchingcubes_SOURCES = \
 	
 mincnumap_SOURCES = \
 	mincnumap.c \
+	aniso3d.c \
 	Amap.c \
 	Numap.c \
 	Bayes.c \

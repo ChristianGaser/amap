@@ -21,6 +21,8 @@ static ArgvInfo argTable[] = {
        "Subsampling for Amap approach."},
   {"-iters_nu", ARGV_INT, (char *) 1, (char *) &iters_nu,
        "Number of iterations for nu correction."},
+  {"-iters_adf", ARGV_INT, (char *) 2, (char *) &iters_adf,
+       "Number of iterations for anisotropic diffucion filter."},
   {"-no_nucorrect", ARGV_CONSTANT, (char *) FALSE, (char *) &correct_nu,
        "Do not use nu correction."},
   {"-thresh", ARGV_FLOAT, (char *) 1, (char *) &thresh_brainmask,
@@ -58,7 +60,7 @@ int main (int argc, char *argv[])
   char		*axis_order[3] = { MIzspace, MIyspace, MIxspace };
   char		*arg_string, buffer[1024], *str_ptr;
   unsigned char *label, *prob, *mask, *marker, *init_mask, *priors;
-  double	*src, ratio_zeros;
+  double	*src, *prevsrc, ratio_zeros;
   double    val, max_src, min_src, separations[3];
 
   /* Get arguments */
@@ -250,15 +252,25 @@ int main (int argc, char *argv[])
     Bayes( src, label, priors, mask, separations, dims, iters_nu);
   }
   else {
-    /* nu-correction in Kmeans works best if it is called first with 3 classes */
-//    max_src = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, 2);
-    /* followed by a 2nd call with actual parameters */
     max_src = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, pve);
   }
-    
+
+  if(iters_adf[0] > 0) {
+    prevsrc   = (double *)malloc(sizeof(double)*vol);
+    memcpy(prevsrc, src, sizeof(double)*vol);
+    aniso3d(src, dims, 10.0, iters_adf[0], 0.16);
+  }
+  
   if (Niters > 0) {
     Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve);
+    if((iters_adf[0] > 0) && (iters_adf[1] > 0)){
+      memcpy(src, prevsrc, sizeof(double)*vol);
+      aniso3d(src, dims, 10.0, iters_adf[1], 0.16);
+      Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve);
+    }
   }
+  
+  if(iters_adf[0] > 0) free(prevsrc);
   
   if (warp_priors) {
     float *f     = (float *)malloc(sizeof(float)*vol3);

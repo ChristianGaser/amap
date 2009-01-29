@@ -19,6 +19,7 @@ int n_classes = 5;
 int Niters = 200;
 int subsample = 8;
 int iters_nu = 40;
+int iters_adf[2] = {0, 0};
 int pve = 2;
 int use_watershed = FALSE;
 int correct_nu = TRUE;
