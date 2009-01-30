@@ -224,6 +224,7 @@ int main (int argc, char *argv[])
   if (min_src < 0) {
     for (i=0; i<vol; i++)
       src[i] = src[i] - min_src;
+    min_src = 0.0;
   }
 
   /* if no mask file is given use minimum value in the image to get mask value */
