@@ -83,9 +83,9 @@ int main (int argc, char *argv[])
     write_fuzzy = FALSE;
 
   if (correct_nu)
-    fprintf(stderr," Nu correction.\n");
+    fprintf(stdout,"Nu correction.\n");
   else {
-    fprintf(stderr,".\n");
+    fprintf(stdout,".\n");
     iters_nu = -1;
   }
 
@@ -256,7 +256,7 @@ int main (int argc, char *argv[])
   }
 
   if(iters_adf[0] > 0) {
-    fprintf(stderr,"Anisotropic diffusion filtering #1 with %d iterations\n", iters_adf[0]);
+    fprintf(stdout,"Anisotropic diffusion filtering #1 with %d iterations\n", iters_adf[0]);
     prevsrc   = (double *)malloc(sizeof(double)*vol);
     memcpy(prevsrc, src, sizeof(double)*vol);
     aniso3d(src, dims, 10.0, iters_adf[0], 0.16);
@@ -264,11 +264,12 @@ int main (int argc, char *argv[])
   
   if (Niters > 0) {
     Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve);
-    if((iters_adf[0] > 0) && (iters_adf[1] > 0)){
-      fprintf(stderr,"Anisotropic diffusion filtering #2 with %d iterations\n", iters_adf[1]);
+    if((iters_adf[0] > 0) && (iters_adf[1] > 0)) {
+      fprintf(stdout,"Anisotropic diffusion filtering #2 with %d iterations\n", iters_adf[1]);
       memcpy(src, prevsrc, sizeof(double)*vol);
       aniso3d(src, dims, 10.0, iters_adf[1], 0.16);
       Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve);
+      memcpy(src, prevsrc, sizeof(double)*vol);
     }
   }
   
@@ -334,7 +335,7 @@ int main (int argc, char *argv[])
         it++;
         iteration(size, prm[it0].k, v, f, g, (float *)0, prm[it0].rform, prm[it0].rparam, prm[it0].lmreg, 
           prm[it0].cycles, prm[it0].its, prm[it0].code, flow, ll, scratch);              
-        fprintf(stderr, "%02d:\t%g\t%g\t%g\t%g\n", it, ll[0], ll[1], ll[0]+ll[1], ll[2]);
+        fprintf(stdout, "%02d:\t%g\t%g\t%g\t%g\n", it, ll[0], ll[1], ll[0]+ll[1], ll[2]);
         for (i = 0; i < vol3; i++) v[i] = flow[i];
       }
       free(scratch);
@@ -365,7 +366,7 @@ int main (int argc, char *argv[])
 
   if (use_watershed) {
 
-    fprintf(stderr,"Watershed masking...\n");
+    fprintf(stdout,"Watershed masking...\n");
   
     marker    = (unsigned char *)malloc(sizeof(unsigned char)*vol);
     init_mask = (unsigned char *)malloc(sizeof(unsigned char)*vol);
@@ -423,7 +424,7 @@ int main (int argc, char *argv[])
 
   // PVE
   if (pve) {
-    fprintf(stderr,"Calculate Partial Volume Estimate.\n");
+    fprintf(stdout,"Calculate Partial Volume Estimate.\n");
     Pve5(src, prob, label, mean, dims, PVELABEL);
   }
 
