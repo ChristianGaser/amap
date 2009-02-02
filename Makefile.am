@@ -20,7 +20,7 @@ mincnumap_SOURCES = \
 	Numap.c \
 	Bayes.c \
 	Kmeans.c \
-	Pve5.c \
+	Pve6.c \
 	MrfPrior.c \
 	Watershed3d.c \
 	optimizer3d.c \

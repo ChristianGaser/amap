@@ -426,7 +426,7 @@ int main (int argc, char *argv[])
   // PVE
   if (pve) {
     fprintf(stdout,"Calculate Partial Volume Estimate.\n");
-    Pve5(src, prob, label, mean, dims, PVELABEL);
+    Pve6(src, prob, label, mean, dims, PVELABEL);
   }
 
   //  copy values to volume
