@@ -2,6 +2,7 @@ AUTOMAKE_OPTIONS = check-news
 ACLOCAL_AMFLAGS = -I m4
 
 bin_PROGRAMS = \
+    niiamap \
 	mincnumap \
 	mincmarchingcubes \
 	mincremovebridges
@@ -25,6 +26,17 @@ mincnumap_SOURCES = \
 	Watershed3d.c \
 	optimizer3d.c \
 	diffeo3d.c \
+	SplineSmooth.cc
+
+niiamap_SOURCES = \
+	niiamap.c \
+	aniso3d.c \
+	Amap.c \
+	Kmeans.c \
+	Pve6.c \
+	MrfPrior.c \
+	nifti1/nifti1_io.c \
+	nifti1/znzlib.c \
 	SplineSmooth.cc
 
 m4_files = m4/mni_REQUIRE_LIB.m4 \
