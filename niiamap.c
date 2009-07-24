@@ -9,7 +9,6 @@
 #include "niiamap.h"
 
 #include "nifti1/nifti1_io.h"
-#include "nifti1/analyze75.h"
 #include "nifti1/nifti1_local.h"
 
 static ArgvInfo argTable[] = {
