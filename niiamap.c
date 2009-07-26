@@ -52,6 +52,7 @@ static int usage(void)
     return (-1);
 }
 
+
 nifti_image
 *read_nifti_float( const char *input_filename, double *image[])
 {
@@ -65,19 +66,19 @@ nifti_image
   for (i = 0; i < src_ptr->nvox; i++) {
       switch (src_ptr->datatype) {
       case DT_INT8:
-        tmp = (double) ((char *)src_ptr->data)[i];
+        tmp = (double) ((signed char *)src_ptr->data)[i];
         break;
       case DT_UINT8:
         tmp = (double) ((unsigned char *)src_ptr->data)[i];
         break;
       case DT_INT16:
-        tmp = (double) ((short *)src_ptr->data)[i];
+        tmp = (double) ((signed short *)src_ptr->data)[i];
         break;
       case DT_UINT16:
         tmp = (double) ((unsigned short *)src_ptr->data)[i];
         break;
       case DT_INT32:
-        tmp = (double) ((int *)src_ptr->data)[i];
+        tmp = (double) ((signed int *)src_ptr->data)[i];
         break;
       case DT_UINT32:
         tmp = (double) ((unsigned int *)src_ptr->data)[i];
@@ -88,8 +89,16 @@ nifti_image
       case DT_FLOAT64:
         tmp = (double) ((double *)src_ptr->data)[i];
         break;
+      default:
+        fprintf(stderr,"Unknown datatype\n");
+        return(NULL);
+        break;
       }
-      (*image)[i] = (src_ptr->scl_slope * tmp) + src_ptr->scl_inter;
+      /* check whether scaling is needed */
+      if (src_ptr->scl_slope == 0)
+        (*image)[i] = tmp;
+      else
+        (*image)[i] = (src_ptr->scl_slope * tmp) + src_ptr->scl_inter;
     }  
     free(src_ptr->data);
     
@@ -129,6 +138,15 @@ main( int argc, char **argv )
   
   input_filename  = argv[1];
   output_filename = argv[2];
+
+  /* deal with extension */
+  extension = nifti_find_file_extension(output_filename);
+  
+  /* if no valid extension was found use .nii */
+  if (extension == NULL) {
+    fprintf(stderr,"No valid extension found for output filename %s.\n",output_filename);
+    return(-1);
+  }
 
   if (iters_nu <= 0)
     correct_nu = 0;
@@ -260,6 +278,19 @@ main( int argc, char **argv )
     Pve6(src, prob, label, mean, dims, PVELABEL);
   }
 
+  /* if no valid extension was found use .nii */
+  if (strcmp(extension,".hdr")==0) {
+    src_ptr->nifti_type = 2;
+    strcpy(extension,".img");
+  }
+
+  /* if no valid extension was found use .nii */
+  if (strcmp(extension,".img")==0) {
+    src_ptr->nifti_type = 2;
+  }
+
+  output_filename = nifti_makebasename(output_filename);
+
 //nifti_image_infodump(src_ptr);
 
   /* write labeled volume */
@@ -277,21 +308,24 @@ main( int argc, char **argv )
     src_ptr->data = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox);
     memcpy(src_ptr->data, label, sizeof(unsigned char)*src_ptr->nvox);
 
-    src_ptr->fname = NULL;
-    src_ptr->fname = malloc(strlen(output_filename));
-    strcpy(src_ptr->fname, output_filename);
+    (void) sprintf( buffer, "%s%s",output_filename,extension);
+
     src_ptr->iname = NULL;
-    src_ptr->iname = malloc(strlen(output_filename));
-    strcpy(src_ptr->iname, output_filename);
+    src_ptr->iname = malloc(strlen(buffer));
+    strcpy(src_ptr->iname, buffer);
+
+    if ((src_ptr->nifti_type == 0) || (src_ptr->nifti_type == 2)) {
+      (void) sprintf( buffer, "%s%s",output_filename,".hdr");
+    }
+    src_ptr->fname = NULL;
+    src_ptr->fname = malloc(strlen(buffer));
+    strcpy(src_ptr->fname, buffer);
 
     nifti_image_write(src_ptr);
 
     free(src_ptr->data);
   }
   
-  /* cut extension */
-  strcpy(output_filename+strlen(output_filename)-4,"");
-
   /* write fuzzy segmentations for each class */
   if (write_fuzzy) {
     src_ptr->datatype = DT_UINT8;
@@ -304,17 +338,21 @@ main( int argc, char **argv )
 
     for (j = 0; j<n_pure_classes; j++) {
     
-      (void) sprintf( buffer, "%s_seg%d.nii",output_filename,j);
+      (void) sprintf( buffer, "%s_seg%d%s",output_filename,j,extension);
       
       for (i = 0; i < src_ptr->nvox; i++)
         ((unsigned char *)src_ptr->data)[i] = prob[i+(j*src_ptr->nvox)];
       
-      src_ptr->fname = NULL;
-      src_ptr->fname = malloc(strlen(buffer));
-      strcpy(src_ptr->fname, buffer);
       src_ptr->iname = NULL;
       src_ptr->iname = malloc(strlen(buffer));
       strcpy(src_ptr->iname, buffer);
+
+      if ((src_ptr->nifti_type == 0) || (src_ptr->nifti_type == 2)) {
+        (void) sprintf( buffer, "%s_seg%d%s",output_filename,j,".hdr");
+      }
+      src_ptr->fname = NULL;
+      src_ptr->fname = malloc(strlen(buffer));
+      strcpy(src_ptr->fname, buffer);
 
       nifti_image_write(src_ptr);
     }
@@ -334,19 +372,27 @@ main( int argc, char **argv )
       for (i = 0; i < src_ptr->nvox; i++)
         ((float *)src_ptr->data)[i] = src[i];
 
-    (void) sprintf( buffer, "%s_nu.nii",output_filename);
-    src_ptr->fname = NULL;
-    src_ptr->fname = malloc(strlen(buffer));
-    strcpy(src_ptr->fname, buffer);
+    (void) sprintf( buffer, "%s_nu%s",output_filename,extension);
+
     src_ptr->iname = NULL;
     src_ptr->iname = malloc(strlen(buffer));
     strcpy(src_ptr->iname, buffer);
+
+    if ((src_ptr->nifti_type == 0) || (src_ptr->nifti_type == 2)) {
+      (void) sprintf( buffer, "%s_nu%s",output_filename,".hdr");
+    }
+    src_ptr->fname = NULL;
+    src_ptr->fname = malloc(strlen(buffer));
+    strcpy(src_ptr->fname, buffer);
 
     nifti_image_write(src_ptr);
 
     free(src_ptr->data);
   }
 
+//  nifti_image_free(mask_ptr);
+//  nifti_image_free(src_ptr);
+  
   free(src);
   free(prob);
   free(label);

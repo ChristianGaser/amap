@@ -38,5 +38,40 @@ AC_FUNC_FORK
 AC_CHECK_HEADERS(values.h malloc.h)
 AC_CHECK_FUNCS(finite isfinite mkstemp)
 
+AC_MSG_CHECKING([gzip compression])
+HAVE_ZLIB="no"
+withval="";
+AC_SUBST(ZLIB) ZLIB=""
+AC_ARG_WITH(libz,[  --with-libz=LIB     Path to the gzip library (required if not in default path)],,)
+
+case "$withval" in
+  yes)
+      ZLIB=""
+	HAVE_ZLIB="no"
+    ;;
+  no)
+      ZLIB=""
+	HAVE_ZLIB="suppressed"
+    ;;
+  *)
+    if test -n "$withval" ; then
+        z_lib="`echo $withval |cut -f2 -d, -s`"
+	ZLIB=$z_lib"/libz."$LLEXT
+	HAVE_ZLIB="yes"
+    else
+      ZLIB=""
+	HAVE_ZLIB="no"
+    fi
+;;
+esac
+if test -n "$ZLIB"; then
+	LIBS="$LIBS $ZLIB"
+	HAVE_ZLIB="yes"
+fi
+AC_MSG_RESULT([$HAVE_ZLIB])
+if test $HAVE_ZLIB = "yes"; then
+    	AC_MSG_RESULT([zlib found: $ZLIB]);
+fi
+
 AC_CHECK_HEADERS()
 AC_OUTPUT( Makefile )
