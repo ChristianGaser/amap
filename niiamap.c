@@ -28,8 +28,8 @@ static ArgvInfo argTable[] = {
        "Threshold for Kmeans algorithm (0..1)."},
   {"-pve", ARGV_INT, (char *) 1, (char *) &pve,
        "Use Partial Volume Estimation with marginalized likelihood estimation (1) or Kmeans initialization (2) or do not use PVE (0)."},
-  {"-write_fuzzy", ARGV_CONSTANT, (char *) 1, (char *) &write_fuzzy,
-       "Write fuzzy segmentations as separate images."},
+  {"-write_seg", ARGV_INT, (char *) 3, (char *) &write_seg,
+       "Write fuzzy segmentations as separate images. Three numbers should be given, while a '1' indicates that this tissue class should be saved. Order is CSF/GM/WM."},
   {"-write_nu", ARGV_CONSTANT, (char *) 1, (char *) &write_nu,
        "Write nu corrected image."},
   {"-write_label", ARGV_CONSTANT, (char *) 1, (char *) &write_label,
@@ -149,8 +149,9 @@ main( int argc, char **argv )
   if (iters_nu <= 0)
     correct_nu = 0;
 
-  if (Niters == 0)
-    write_fuzzy = 0;
+  if (Niters == 0) {
+    for (i = 0; i < 3; i++) write_seg[i] = 0;
+  }
 
   if (correct_nu)
     fprintf(stdout,"Nu correction.\n");
@@ -303,7 +304,7 @@ main( int argc, char **argv )
   }
   
   /* write fuzzy segmentations for each class */
-  if (write_fuzzy) {
+  if (write_seg[0] || write_seg[1] || write_seg[2]) {
     src_ptr->datatype = DT_UINT8;
     src_ptr->nbyper = 1;
     src_ptr->scl_slope = 1.0/255.0;
@@ -313,24 +314,26 @@ main( int argc, char **argv )
     src_ptr->data = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox*n_classes);
 
     for (j = 0; j<n_pure_classes; j++) {
+      if (write_seg[j]) {
     
-      (void) sprintf( buffer, "%s_seg%d%s",output_filename,j,extension);
+        (void) sprintf( buffer, "%s_seg%d%s",output_filename,j,extension);
       
-      for (i = 0; i < src_ptr->nvox; i++)
-        ((unsigned char *)src_ptr->data)[i] = prob[i+(j*src_ptr->nvox)];
+        for (i = 0; i < src_ptr->nvox; i++)
+          ((unsigned char *)src_ptr->data)[i] = prob[i+(j*src_ptr->nvox)];
       
-      src_ptr->iname = NULL;
-      src_ptr->iname = malloc(strlen(buffer));
-      strcpy(src_ptr->iname, buffer);
+        src_ptr->iname = NULL;
+        src_ptr->iname = malloc(strlen(buffer));
+        strcpy(src_ptr->iname, buffer);
 
-      if ((src_ptr->nifti_type == 0) || (src_ptr->nifti_type == 2)) {
-        (void) sprintf( buffer, "%s_seg%d%s",output_filename,j,".hdr");
+        if ((src_ptr->nifti_type == 0) || (src_ptr->nifti_type == 2)) {
+          (void) sprintf( buffer, "%s_seg%d%s",output_filename,j,".hdr");
+        }
+        src_ptr->fname = NULL;
+        src_ptr->fname = malloc(strlen(buffer));
+        strcpy(src_ptr->fname, buffer);
+
+        nifti_image_write(src_ptr);
       }
-      src_ptr->fname = NULL;
-      src_ptr->fname = malloc(strlen(buffer));
-      strcpy(src_ptr->fname, buffer);
-
-      nifti_image_write(src_ptr);
     }
     
     free(src_ptr->data);
