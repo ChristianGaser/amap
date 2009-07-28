@@ -20,8 +20,6 @@ static ArgvInfo argTable[] = {
        "Subsampling for Amap approach."},
   {"-iters_nu", ARGV_INT, (char *) 1, (char *) &iters_nu,
        "Number of iterations for nu correction."},
-  {"-iters_adf", ARGV_INT, (char *) 2, (char *) &iters_adf,
-       "Number of iterations for anisotropic diffusion filter."},
   {"-no_nucorrect", ARGV_CONSTANT, (char *) 0, (char *) &correct_nu,
        "Do not use nu correction."},
   {"-thresh", ARGV_FLOAT, (char *) 1, (char *) &thresh_brainmask,
@@ -251,26 +249,6 @@ main( int argc, char **argv )
 
   /* final Kmeans estimation */
   max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, pve);
-
-  if(iters_adf[0] > 0) {
-    fprintf(stdout,"Anisotropic diffusion filtering #1 with %d iterations\n", iters_adf[0]);
-    prevsrc   = (double *)malloc(sizeof(double)*src_ptr->nvox);
-    memcpy(prevsrc, src, sizeof(double)*src_ptr->nvox);
-    aniso3d(src, dims, 10.0, iters_adf[0], 0.16);
-  }
-  
-  if (Niters > 0) {
-    Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve);
-    if((iters_adf[0] > 0) && (iters_adf[1] > 0)) {
-      fprintf(stdout,"Anisotropic diffusion filtering #2 with %d iterations\n", iters_adf[1]);
-      memcpy(src, prevsrc, sizeof(double)*src_ptr->nvox);
-      aniso3d(src, dims, 10.0, iters_adf[1], 0.16);
-      Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve);
-      memcpy(src, prevsrc, sizeof(double)*src_ptr->nvox);
-    }
-  }
-    
-  if(iters_adf[0] > 0) free(prevsrc);
 
   /* PVE */
   if (pve) {
