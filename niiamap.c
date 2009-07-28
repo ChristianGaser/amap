@@ -255,6 +255,9 @@ main( int argc, char **argv )
   /* final Kmeans estimation */
   max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, pve);
 
+  if (Niters > 0)
+    Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve);
+
   /* PVE */
   if (pve) {
     fprintf(stdout,"Calculate Partial Volume Estimate.\n");
@@ -282,7 +285,7 @@ main( int argc, char **argv )
     /* different ranges for pve */
     if (pve) src_ptr->scl_slope = 3.0/255.0;
     else src_ptr->scl_slope = 1.0;
-    
+
     src_ptr->scl_inter = 0;
 
     src_ptr->data = NULL;
