@@ -277,21 +277,19 @@ main( int argc, char **argv )
     fprintf(stdout,"Calculate Partial Volume Estimate.\n");
     Pve6(src, prob, label, mean, dims, PVELABEL);
   }
-
-  /* if no valid extension was found use .nii */
-  if (strcmp(extension,".hdr")==0) {
+  
+  src_ptr->nifti_type = 1;
+  
+  if (!strcmp(extension,".img") == 1) {
+    src_ptr->nifti_type = 2;
+  }
+  
+  if (!strcmp(extension,".hdr") == 1) {
     src_ptr->nifti_type = 2;
     strcpy(extension,".img");
   }
-
-  /* if no valid extension was found use .nii */
-  if (strcmp(extension,".img")==0) {
-    src_ptr->nifti_type = 2;
-  }
-
+  
   output_filename = nifti_makebasename(output_filename);
-
-//nifti_image_infodump(src_ptr);
 
   /* write labeled volume */
   if (write_label) {
