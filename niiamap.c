@@ -1,9 +1,13 @@
+/*
+ * Christian Gaser
+ * $Id$ 
+ *
+ */
+
 #include <ParseArgv.h>
 #include <limits.h>
 #include <float.h>
 #include <time_stamp.h>
-
-#include <bicpl.h>
 
 #include "Amap.h"
 #include "niiamap.h"

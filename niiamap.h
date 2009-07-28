@@ -1,4 +1,8 @@
-/*#include  <bicpl.h> */
+/*
+ * Christian Gaser
+ * $Id$ 
+ *
+ */
 
 char *mask_filename = NULL;
 int n_pure_classes = 3;
