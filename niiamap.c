@@ -48,7 +48,7 @@ static int usage(void)
 {
     static const char msg[] = {
         "niiamap: Segmentation with adaptive MAP\n"
-        "usage: niiamap ...\n"
+        "usage: niiamap [options] in.nii out.nii\n"
     };
     fprintf(stderr, "%s", msg);
     return (-1);
@@ -63,7 +63,19 @@ nifti_image
   int i;
   
   src_ptr = nifti_image_read(input_filename, 1);
+  if(src_ptr == NULL) {
+    fprintf(stderr,"read_nifti_float: Error reading %s.\n", input_filename);
+    return(NULL);
+  }
+  
+  /* read as double format */
   *image = (double *)malloc(sizeof(double)*src_ptr->nvox);
+  
+  /* check for memory */
+  if(image == NULL) {
+    fprintf(stderr,"read_nifti_float: Memory allocation error\n");
+    return(NULL);
+  }
   
   for (i = 0; i < src_ptr->nvox; i++) {
       switch (src_ptr->datatype) {
@@ -92,7 +104,7 @@ nifti_image
         tmp = (double) ((double *)src_ptr->data)[i];
         break;
       default:
-        fprintf(stderr,"Unknown datatype\n");
+        fprintf(stderr,"read_nifti_float: Unknown datatype\n");
         return(NULL);
         break;
       }
@@ -171,11 +183,20 @@ main( int argc, char **argv )
   strcpy(buffer, input_filename);
   str_ptr = strrchr(buffer, '.');
   src_ptr = read_nifti_float(input_filename, &src);
+  
+  if(src_ptr == NULL) {
+    fprintf(stderr,"Error reading %s.\n",input_filename);
+    return(-1);
+  }
 
   mask  = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox);
   label = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox);
-  mask  = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox);
   prob  = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox*n_classes);
+  
+  if((mask == NULL) || (label == NULL) || (prob == NULL)) {
+    fprintf(stderr,"Memory allocation error\n");
+    return(-1);
+  }
 
   /* read mask and check for same size */
   if (mask_filename != NULL) {
@@ -239,7 +260,7 @@ main( int argc, char **argv )
   
   ratio_zeros = 100.0*(double)count_zero/(double)(src_ptr->nvox);
   if(ratio_zeros < 5)
-    fprintf(stderr,"Warning: Only %g%s of the voxels outside the mask have zero values. This points to an image, which is not skull-stripped.\n", ratio_zeros,"%");
+    fprintf(stdout,"Warning: Only %g%s of the voxels outside the mask have zero values. This points to an image, which is not skull-stripped.\n", ratio_zeros,"%");
      
   separations[0] = src_ptr->dx;
   separations[1] = src_ptr->dy;
@@ -290,6 +311,13 @@ main( int argc, char **argv )
 
     src_ptr->data = NULL;
     src_ptr->data = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox);
+
+    /* check for memory */
+    if(src_ptr->data == NULL) {
+      fprintf(stderr,"Memory allocation error\n");
+      return(-1);
+    }
+
     memcpy(src_ptr->data, label, sizeof(unsigned char)*src_ptr->nvox);
 
     (void) sprintf( buffer, "%s%s",output_filename,extension);
@@ -319,6 +347,12 @@ main( int argc, char **argv )
 
     src_ptr->data = NULL;
     src_ptr->data = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox*n_classes);
+
+    /* check for memory */
+    if(src_ptr->data == NULL) {
+      fprintf(stderr,"Memory allocation error\n");
+      return(-1);
+    }
 
     for (j = 0; j<n_pure_classes; j++) {
       if (write_seg[j]) {
@@ -355,8 +389,15 @@ main( int argc, char **argv )
 
     src_ptr->data = NULL;
     src_ptr->data = (float *)malloc(sizeof(float)*src_ptr->nvox);
-      for (i = 0; i < src_ptr->nvox; i++)
-        ((float *)src_ptr->data)[i] = src[i];
+
+    /* check for memory */
+    if(src_ptr->data == NULL) {
+      fprintf(stderr,"Memory allocation error\n");
+      return(-1);
+    }
+
+    for (i = 0; i < src_ptr->nvox; i++)
+      ((float *)src_ptr->data)[i] = src[i];
 
     (void) sprintf( buffer, "%s_nu%s",output_filename,extension);
 

@@ -19,8 +19,6 @@ if test "$enable_openmp" = "yes"; then
 	AC_DEFINE(OPENMP,1,[Define to enable OpenMP.])
     [CFLAGS="$CFLAGS -fopenmp"] 
     [CXXFLAGS="$CXXFLAGS -fopenmp"] 
-    [CC="gcc-4"] 
-    [CXX="g++-4"] 
 fi
 
 dnl Build only static libs by default
