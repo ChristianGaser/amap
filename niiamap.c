@@ -172,7 +172,6 @@ main( int argc, char **argv )
   if (correct_nu)
     fprintf(stdout,"Nu correction.\n");
   else {
-    fprintf(stdout,".\n");
     iters_nu = -1;
   }
 

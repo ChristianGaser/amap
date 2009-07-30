@@ -57,7 +57,6 @@ void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int ini
           if ((int)label[((z-1)*area) + y_dims + x] == iBG)    f[i-1]++;
           if ((int)label[((z+1)*area) + y_dims + x] == iBG)    f[i-1]++;
         }
-//        for (i=nc; i<=nc+1; i++) f[i-1] = 0;
         color[zero-1][f[0]][f[1]][f[2]][f[3]]++;
       }
     }
@@ -96,8 +95,10 @@ void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int ini
               XX += (fi-fj)*(fi-fj);
               YY += L*(fi-fj);
   }
-  beta[0] = XX/YY;
-/* beta[0] = 0.5*YY/XX; */
+  
+  /* weighting of beta was empirically estimated using brainweb data with different noise levels
+     because old beta estimation was not working */
+  beta[0] = 0.25*pow(XX,3)/pow(YY,3);
   printf("\t beta %3.3f\n", beta[0]);
   fflush(stdout);
 }

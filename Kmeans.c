@@ -231,7 +231,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   /* find the final clustering and correct for nu */
   if (iters_nu > 0) {
     int count_err = 0;
-    for (j = 0; j <= iters_nu; j++) {  
+    for (j = 0; j < iters_nu; j++) {  
       count = 0;
       mean_nu = 0.0;
       for (i = 0; i < vol; i++) {
