@@ -293,7 +293,8 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   for (i = 0; i < vol; i++)
     max_src = MAX(src[i], max_src);
 
-  printf("\nK-Means: ");
+  if (iters_nu > 0) printf("\n");
+  printf("K-Means: ");
   for (i=0; i<n_clusters; i++) printf("%3.3f ",max_src*mu[i]/255.0); 
   printf("\terror: %3.3f\n",e*n_clusters/(dims[0]*dims[1]*dims[2]));    
   fflush(stdout);

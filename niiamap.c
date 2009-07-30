@@ -272,8 +272,9 @@ main( int argc, char **argv )
   max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS);
   max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
 
-  /* final Kmeans estimation */
-  max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, pve);
+  /* final Kmeans estimation if nu-correction was selected */
+  if (correct_nu)
+    max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, pve);
 
   if (Niters > 0)
     Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve);
