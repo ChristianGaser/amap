@@ -263,4 +263,6 @@ main( int argc, char **argv )
   free(prob);
   free(label);
   free(mask);
+  
+  return(EXIT_SUCCESS);
 }

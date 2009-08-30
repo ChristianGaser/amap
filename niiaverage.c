@@ -80,5 +80,7 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
 
   free(avg);
+  
+  return(EXIT_SUCCESS);
 
 }
