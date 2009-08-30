@@ -224,7 +224,9 @@ main( int argc, char **argv )
   if (write_nu) {
      (void) sprintf( buffer, "%s_nu%s",basename,extension); 
 
-    write_nifti( buffer, src, DT_FLOAT32, 1.0, dims, separations, src_ptr);
+    if(!write_nifti( buffer, src, DT_FLOAT32, 1.0, dims, 
+            separations, src_ptr))
+      exit(EXIT_FAILURE);
   }
   
   /* write labeled volume */
@@ -237,7 +239,9 @@ main( int argc, char **argv )
     for (i = 0; i < src_ptr->nvox; i++)
       src[i] = (double)label[i];
 
-    write_nifti(output_filename, src, DT_UINT8, slope, dims, separations, src_ptr);
+    if(!write_nifti(output_filename, src, DT_UINT8, slope, 
+            dims, separations, src_ptr))
+      exit(EXIT_FAILURE);
     
   }
   
@@ -253,7 +257,9 @@ main( int argc, char **argv )
         for (i = 0; i < src_ptr->nvox; i++)
           src[i] = prob[i+(j*src_ptr->nvox)];
         
-        write_nifti( buffer, src, DT_UINT8, slope, dims, separations, src_ptr);
+        if(!write_nifti( buffer, src, DT_UINT8, slope, 
+                dims, separations, src_ptr))
+          exit(EXIT_FAILURE);
       
       }
     }    
