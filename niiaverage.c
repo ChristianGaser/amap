@@ -12,6 +12,8 @@
 #include "nifti1/nifti1_local.h"
 
 extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
+extern check_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
+extern write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 
 /* Main program */
 
@@ -38,12 +40,13 @@ int main(int argc, char *argv[])
 
   /* Make sure that we have something to process */
   if (nfiles == 0) {
-   (void) fprintf(stderr, "No input files specified\n");
+   (void) fprintf(stderr, "Error: No input files specified\n");
    exit(EXIT_FAILURE);
   }
-
+  
+  /* read first image to get image parameters */
   nii_ptr = read_nifti_float(infiles[0], &input);
-  fprintf(stderr,"%3d: %s\n",0, infiles[0]);
+  fprintf(stdout,"%3d: %s\n",0, infiles[0]);
 
   separations[0] = nii_ptr->dx;
   separations[1] = nii_ptr->dy;
@@ -52,24 +55,30 @@ int main(int argc, char *argv[])
   dims[1] = nii_ptr->ny;
   dims[2] = nii_ptr->nz;
 
+  /* prepare average image */
   avg  = (double *)malloc(sizeof(double)*nii_ptr->nvox);
   for (i=0; i<nii_ptr->nvox; i++) 
     avg[i] = input[i]/(double)nfiles;
+  free(input);
   
+  /* read remaining images and check for image parameters */
   for (i=1; i<nfiles; i++) {
-    fprintf(stderr,"%3d: %s\n",i, infiles[i]);
+    fprintf(stdout,"%3d: %s\n",i, infiles[i]);
     nii_ptr2 = read_nifti_float(infiles[i], &input);
+    
     /* check for dimensions */
+    if(!check_image_dimensions(nii_ptr,nii_ptr2))
+      return(0);
+    
+    /* calculate average */
     for (j=0; j<nii_ptr->nvox; j++) 
       avg[j] = avg[j] + (input[j]/(double)nfiles);
     free(input);
   }
 
-  if (!write_nifti( outfile, avg, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) {
-      fprintf(stderr,"Writing error\n");
-      return(-1);
-  }
-  
+  if (!write_nifti( outfile, avg, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
+    exit(EXIT_FAILURE);
+
   free(avg);
 
 }

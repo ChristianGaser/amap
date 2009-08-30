@@ -10,6 +10,21 @@
 #include "nifti1/nifti1_io.h"
 #include "nifti1/nifti1_local.h"
 
+int
+check_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2) {
+
+  if((nii_ptr->dx != nii_ptr2->dx) ||
+     (nii_ptr->dy != nii_ptr2->dy) ||
+     (nii_ptr->dz != nii_ptr2->dz) ||
+     (nii_ptr->nx != nii_ptr2->nx) ||
+     (nii_ptr->ny != nii_ptr2->ny) ||
+     (nii_ptr->nz != nii_ptr2->nz)) {
+    fprintf(stderr,"Error: Image %s and image %s differ.\n",nii_ptr->fname, nii_ptr2->fname);
+    return(0);    
+  }
+  return(1);
+}
+
 void
 init_nifti_header(nifti_image *nii_ptr)
 {
@@ -103,7 +118,7 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
   
   if((data_type != DT_UINT8) && (data_type != DT_FLOAT32)) {
     fprintf(stderr,"Only float and uin8 are supported to write data.\n");
-    return(-1);
+    return(0);
   }
   
   if(in_ptr == NULL) {
@@ -116,7 +131,7 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
   /* if no valid extension was found use .nii */
   if (extension == NULL) {
     fprintf(stderr,"No valid extension found for output filename %s.\n",output_filename);
-    return(-1);
+    return(0);
   }
 
   nii_ptr->nifti_type = 1;
@@ -157,7 +172,7 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
     /* check for memory */
     if(nii_ptr->data == NULL) {
       fprintf(stderr,"Memory allocation error\n");
-      return(-1);
+      return(0);
     }
     for (i = 0; i < nii_ptr->nvox; i++)
       ((unsigned char *)nii_ptr->data)[i] = image[i];
@@ -168,7 +183,7 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
     /* check for memory */
     if(nii_ptr->data == NULL) {
       fprintf(stderr,"Memory allocation error\n");
-      return(-1);
+      return(0);
     }
     for (i = 0; i < nii_ptr->nvox; i++)
       ((float *)nii_ptr->data)[i] = image[i];
