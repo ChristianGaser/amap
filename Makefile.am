@@ -5,6 +5,7 @@ bin_PROGRAMS = \
     niiamap \
 	mincnumap \
 	mincmarchingcubes \
+	niiaverage \
 	mincremovebridges
 	
 mincremovebridges_SOURCES = \
@@ -28,6 +29,12 @@ mincnumap_SOURCES = \
 	diffeo3d.c \
 	SplineSmooth.cc
 
+niiaverage_SOURCES = \
+	niiaverage.c \
+	nifti1/nifti1_io.c \
+	nifti1/znzlib.c \
+	niilib.c
+
 niiamap_SOURCES = \
 	niiamap.c \
 	aniso3d.c \
@@ -37,6 +44,7 @@ niiamap_SOURCES = \
 	MrfPrior.c \
 	nifti1/nifti1_io.c \
 	nifti1/znzlib.c \
+	niilib.c \
 	SplineSmooth.cc
 
 m4_files = m4/mni_REQUIRE_LIB.m4 \

@@ -5,15 +5,15 @@
  */
 
 #include <ParseArgv.h>
-#include <limits.h>
 #include <float.h>
-#include <time_stamp.h>
 
 #include "Amap.h"
 #include "niiamap.h"
 
 #include "nifti1/nifti1_io.h"
 #include "nifti1/nifti1_local.h"
+
+extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
 
 static ArgvInfo argTable[] = {
   {"-mask", ARGV_STRING, (char *) 1, (char *) &mask_filename, 
@@ -54,72 +54,6 @@ static int usage(void)
     return (-1);
 }
 
-
-nifti_image
-*read_nifti_float( const char *input_filename, double *image[])
-{
-  nifti_image *src_ptr;
-  double tmp;
-  int i;
-  
-  src_ptr = nifti_image_read(input_filename, 1);
-  if(src_ptr == NULL) {
-    fprintf(stderr,"read_nifti_float: Error reading %s.\n", input_filename);
-    return(NULL);
-  }
-  
-  /* read as double format */
-  *image = (double *)malloc(sizeof(double)*src_ptr->nvox);
-  
-  /* check for memory */
-  if(image == NULL) {
-    fprintf(stderr,"read_nifti_float: Memory allocation error\n");
-    return(NULL);
-  }
-  
-  for (i = 0; i < src_ptr->nvox; i++) {
-      switch (src_ptr->datatype) {
-      case DT_INT8:
-        tmp = (double) ((signed char *)src_ptr->data)[i];
-        break;
-      case DT_UINT8:
-        tmp = (double) ((unsigned char *)src_ptr->data)[i];
-        break;
-      case DT_INT16:
-        tmp = (double) ((signed short *)src_ptr->data)[i];
-        break;
-      case DT_UINT16:
-        tmp = (double) ((unsigned short *)src_ptr->data)[i];
-        break;
-      case DT_INT32:
-        tmp = (double) ((signed int *)src_ptr->data)[i];
-        break;
-      case DT_UINT32:
-        tmp = (double) ((unsigned int *)src_ptr->data)[i];
-        break;
-      case DT_FLOAT32:
-        tmp = (double) ((float *)src_ptr->data)[i];
-        break;
-      case DT_FLOAT64:
-        tmp = (double) ((double *)src_ptr->data)[i];
-        break;
-      default:
-        fprintf(stderr,"read_nifti_float: Unknown datatype\n");
-        return(NULL);
-        break;
-      }
-      /* check whether scaling is needed */
-      if (src_ptr->scl_slope == 0)
-        (*image)[i] = tmp;
-      else
-        (*image)[i] = (src_ptr->scl_slope * tmp) + src_ptr->scl_inter;
-    }  
-    free(src_ptr->data);
-    
-    return(src_ptr);
-}
-
-
 int
 main( int argc, char **argv )
 {
@@ -131,13 +65,13 @@ main( int argc, char **argv )
   unsigned long nii_lens[MAX_NII_DIMS];
   int       nii_ndims;
   int       nifti_file_type;
-  char      *input_filename, *output_filename, *extension;
+  char      *input_filename, *output_filename, *basename, *extension;
   int       i, j, dims[3], thresh, thresh_kmeans_int;
   int		x, y, z, z_area, y_dims, count_zero;
   char		*axis_order[3] = { MIzspace, MIyspace, MIxspace };
   char		*arg_string, buffer[1024], *str_ptr;
   unsigned char *label, *prob, *mask, *marker, *init_mask, *priors;
-  double	*src, *prevsrc, *tmp_vol, ratio_zeros;
+  double	*src, *vol_double, *buffer_vol, ratio_zeros, slope;
   double    val, max_vol, min_vol, separations[3];
 
   /* Get arguments */
@@ -201,7 +135,7 @@ main( int argc, char **argv )
   if (mask_filename != NULL) {
       
     /* read volume */
-    mask_ptr = read_nifti_float(mask_filename, &tmp_vol);
+    mask_ptr = read_nifti_float(mask_filename, &buffer_vol);
     
     /* check size */    
     if ((mask_ptr->nx != src_ptr->nx) || (mask_ptr->ny != src_ptr->ny) || (mask_ptr->nz != src_ptr->nz) ||
@@ -213,12 +147,12 @@ main( int argc, char **argv )
     /* get min/max */  
     min_vol =  FLT_MAX; max_vol = -FLT_MAX;
     for (i = 0; i < mask_ptr->nvox; i++) {
-      min_vol = MIN(tmp_vol[i], min_vol);
-      max_vol = MAX(tmp_vol[i], max_vol);
+      min_vol = MIN(buffer_vol[i], min_vol);
+      max_vol = MAX(buffer_vol[i], max_vol);
     }
     /* scale mask image to a range 0..255 */
     for (i = 0; i < mask_ptr->nvox; i++) 
-      mask[i] = (unsigned char) round(255*(tmp_vol[i] - min_vol)/(max_vol - min_vol));
+      mask[i] = (unsigned char) round(255*(buffer_vol[i] - min_vol)/(max_vol - min_vol));
   }
 
   /* get sure that threshold for brainmask is zero if no mask is defined */
@@ -285,144 +219,49 @@ main( int argc, char **argv )
     Pve6(src, prob, label, mean, dims, PVELABEL);
   }
   
-  src_ptr->nifti_type = 1;
-  
-  if (!strcmp(extension,".img") == 1) {
-    src_ptr->nifti_type = 2;
-  }
-  
-  if (!strcmp(extension,".hdr") == 1) {
-    src_ptr->nifti_type = 2;
-    strcpy(extension,".img");
-  }
-  
-  output_filename = nifti_makebasename(output_filename);
+  basename = nifti_makebasename(output_filename);
 
+  /* write nu corrected image */
+  if (write_nu) {
+     (void) sprintf( buffer, "%s_nu%s",basename,extension); 
+
+    write_nifti( buffer, src, DT_FLOAT32, 1.0, dims, separations, src_ptr);
+  }
+  
   /* write labeled volume */
   if (write_label) {
-    src_ptr->datatype = DT_UINT8;
-    src_ptr->nbyper = 1;
-    
+
     /* different ranges for pve */
-    if (pve) src_ptr->scl_slope = 3.0/255.0;
-    else src_ptr->scl_slope = 1.0;
+    if (pve) slope = 3.0/255.0;
+    else slope = 1.0;
 
-    src_ptr->scl_inter = 0;
+    for (i = 0; i < src_ptr->nvox; i++)
+      src[i] = (double)label[i];
 
-    src_ptr->data = NULL;
-    src_ptr->data = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox);
-
-    /* check for memory */
-    if(src_ptr->data == NULL) {
-      fprintf(stderr,"Memory allocation error\n");
-      return(-1);
-    }
-
-    memcpy(src_ptr->data, label, sizeof(unsigned char)*src_ptr->nvox);
-
-    (void) sprintf( buffer, "%s%s",output_filename,extension);
-
-    src_ptr->iname = NULL;
-    src_ptr->iname = malloc(strlen(buffer));
-    strcpy(src_ptr->iname, buffer);
-
-    if ((src_ptr->nifti_type == 0) || (src_ptr->nifti_type == 2)) {
-      (void) sprintf( buffer, "%s%s",output_filename,".hdr");
-    }
-    src_ptr->fname = NULL;
-    src_ptr->fname = malloc(strlen(buffer));
-    strcpy(src_ptr->fname, buffer);
-
-    nifti_image_write(src_ptr);
-
-    free(src_ptr->data);
+    write_nifti(output_filename, src, DT_UINT8, slope, dims, separations, src_ptr);
+    
   }
   
   /* write fuzzy segmentations for each class */
   if (write_seg[0] || write_seg[1] || write_seg[2]) {
-    src_ptr->datatype = DT_UINT8;
-    src_ptr->nbyper = 1;
-    src_ptr->scl_slope = 1.0/255.0;
-    src_ptr->scl_inter = 0;
-
-    src_ptr->data = NULL;
-    src_ptr->data = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox*n_classes);
-
-    /* check for memory */
-    if(src_ptr->data == NULL) {
-      fprintf(stderr,"Memory allocation error\n");
-      return(-1);
-    }
+    
+    slope = 1.0/255.0;
 
     for (j = 0; j<n_pure_classes; j++) {
       if (write_seg[j]) {
-    
-        (void) sprintf( buffer, "%s_seg%d%s",output_filename,j,extension);
-      
+        (void) sprintf( buffer, "%s_seg%d%s",basename,j,extension); 
+        
         for (i = 0; i < src_ptr->nvox; i++)
-          ((unsigned char *)src_ptr->data)[i] = prob[i+(j*src_ptr->nvox)];
+          src[i] = prob[i+(j*src_ptr->nvox)];
+        
+        write_nifti( buffer, src, DT_UINT8, slope, dims, separations, src_ptr);
       
-        src_ptr->iname = NULL;
-        src_ptr->iname = malloc(strlen(buffer));
-        strcpy(src_ptr->iname, buffer);
-
-        if ((src_ptr->nifti_type == 0) || (src_ptr->nifti_type == 2)) {
-          (void) sprintf( buffer, "%s_seg%d%s",output_filename,j,".hdr");
-        }
-        src_ptr->fname = NULL;
-        src_ptr->fname = malloc(strlen(buffer));
-        strcpy(src_ptr->fname, buffer);
-
-        nifti_image_write(src_ptr);
       }
-    }
-    
-    free(src_ptr->data);
+    }    
   }
-
-  /* write nu corrected image */
-  if (write_nu) {
-    src_ptr->datatype = DT_FLOAT32;
-    src_ptr->nbyper = 4;
-    src_ptr->scl_slope = 1;
-    src_ptr->scl_inter = 0;
-
-    src_ptr->data = NULL;
-    src_ptr->data = (float *)malloc(sizeof(float)*src_ptr->nvox);
-
-    /* check for memory */
-    if(src_ptr->data == NULL) {
-      fprintf(stderr,"Memory allocation error\n");
-      return(-1);
-    }
-
-    for (i = 0; i < src_ptr->nvox; i++)
-      ((float *)src_ptr->data)[i] = src[i];
-
-    (void) sprintf( buffer, "%s_nu%s",output_filename,extension);
-
-    src_ptr->iname = NULL;
-    src_ptr->iname = malloc(strlen(buffer));
-    strcpy(src_ptr->iname, buffer);
-
-    if ((src_ptr->nifti_type == 0) || (src_ptr->nifti_type == 2)) {
-      (void) sprintf( buffer, "%s_nu%s",output_filename,".hdr");
-    }
-    src_ptr->fname = NULL;
-    src_ptr->fname = malloc(strlen(buffer));
-    strcpy(src_ptr->fname, buffer);
-
-    nifti_image_write(src_ptr);
-
-    free(src_ptr->data);
-  }
-
-//  nifti_image_free(mask_ptr);
-//  nifti_image_free(src_ptr);
   
   free(src);
   free(prob);
   free(label);
   free(mask);
-
 }
