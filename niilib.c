@@ -5,6 +5,7 @@
  */
 
 #include <time_stamp.h>
+#include <stdlib.h>
 
 #include "nifti1/nifti1_io.h"
 #include "nifti1/nifti1_local.h"

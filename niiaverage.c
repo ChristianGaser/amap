@@ -6,9 +6,12 @@
 
 #include <ParseArgv.h>
 #include <float.h>
+#include <stdlib.h>
 
 #include "nifti1/nifti1_io.h"
 #include "nifti1/nifti1_local.h"
+
+extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
 
 /* Main program */
 
@@ -40,6 +43,7 @@ int main(int argc, char *argv[])
   }
 
   nii_ptr = read_nifti_float(infiles[0], &input);
+  fprintf(stderr,"%3d: %s\n",0, infiles[0]);
 
   separations[0] = nii_ptr->dx;
   separations[1] = nii_ptr->dy;
@@ -53,13 +57,19 @@ int main(int argc, char *argv[])
     avg[i] = input[i]/(double)nfiles;
   
   for (i=1; i<nfiles; i++) {
-fprintf(stderr,"%s\n",infiles[i]);
+    fprintf(stderr,"%3d: %s\n",i, infiles[i]);
     nii_ptr2 = read_nifti_float(infiles[i], &input);
     /* check for dimensions */
     for (j=0; j<nii_ptr->nvox; j++) 
       avg[j] = avg[j] + (input[j]/(double)nfiles);
+    free(input);
   }
 
-  write_nifti( outfile, avg, DT_FLOAT32, 1.0, dims, separations, nii_ptr);
+  if (!write_nifti( outfile, avg, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) {
+      fprintf(stderr,"Writing error\n");
+      return(-1);
+  }
+  
+  free(avg);
 
 }
