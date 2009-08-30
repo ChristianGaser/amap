@@ -12,7 +12,7 @@
 #include "nifti1/nifti1_local.h"
 
 extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
-extern check_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
+extern equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
 extern write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 
 /* Main program */
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     nii_ptr2 = read_nifti_float(infiles[i], &input);
     
     /* check for dimensions */
-    if(!check_image_dimensions(nii_ptr,nii_ptr2))
+    if(!equal_image_dimensions(nii_ptr,nii_ptr2))
       return(0);
     
     /* calculate average */

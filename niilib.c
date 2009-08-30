@@ -11,7 +11,7 @@
 #include "nifti1/nifti1_local.h"
 
 int
-check_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2) {
+equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2) {
 
   if((nii_ptr->dx != nii_ptr2->dx) ||
      (nii_ptr->dy != nii_ptr2->dy) ||

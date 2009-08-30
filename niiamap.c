@@ -51,7 +51,7 @@ static int usage(void)
         "usage: niiamap [options] in.nii out.nii\n"
     };
     fprintf(stderr, "%s", msg);
-    return (-1);
+    exit(EXIT_FAILURE);
 }
 
 int
@@ -93,7 +93,7 @@ main( int argc, char **argv )
   /* if no valid extension was found use .nii */
   if (extension == NULL) {
     fprintf(stderr,"No valid extension found for output filename %s.\n",output_filename);
-    return(-1);
+    exit(EXIT_FAILURE);
   }
 
   if (iters_nu <= 0)
@@ -119,7 +119,7 @@ main( int argc, char **argv )
   
   if(src_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n",input_filename);
-    return(-1);
+    exit(EXIT_FAILURE);
   }
 
   mask  = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox);
@@ -128,7 +128,7 @@ main( int argc, char **argv )
   
   if((mask == NULL) || (label == NULL) || (prob == NULL)) {
     fprintf(stderr,"Memory allocation error\n");
-    return(-1);
+    exit(EXIT_FAILURE);
   }
 
   /* read mask and check for same size */
@@ -137,11 +137,10 @@ main( int argc, char **argv )
     /* read volume */
     mask_ptr = read_nifti_float(mask_filename, &buffer_vol);
     
-    /* check size */    
-    if ((mask_ptr->nx != src_ptr->nx) || (mask_ptr->ny != src_ptr->ny) || (mask_ptr->nz != src_ptr->nz) ||
-        (mask_ptr->dx != src_ptr->dx) || (mask_ptr->dy != src_ptr->dy) || (mask_ptr->dz != src_ptr->dz)) {
+    /* check size */ 
+    if (!equal_image_dimensions(src_ptr,mask_ptr)) {   
       fprintf(stderr,"Mask and source image have different size\n");
-      return(-1);
+      exit(EXIT_FAILURE);
     }
     
     /* get min/max */  
