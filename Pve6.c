@@ -1,7 +1,15 @@
 /*
  * Christian Gaser
- * $Id: Pve6.c 91 2009-01-29 14:11:03Z gaser $ 
+ * $Id: Pve6.c 131 2009-07-24 20:59:26Z gaser $ 
  *
+ */
+
+/* This PVE calculation is a modified version from
+ * the PVE software bundle:
+ * Copyright (C) Jussi Tohka, Institute of Signal Processing, Tampere University of
+ * Technology, 2002 - 2004.
+ * P.O. Box 553, FIN-33101, Finland
+ * E-mail: jussi.tohka@tut.fi
  */
 
 #include <stdio.h>
