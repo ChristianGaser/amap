@@ -13,13 +13,15 @@
 int
 equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2) {
 
-  if((nii_ptr->dx != nii_ptr2->dx) ||
-     (nii_ptr->dy != nii_ptr2->dy) ||
-     (nii_ptr->dz != nii_ptr2->dz) ||
-     (nii_ptr->nx != nii_ptr2->nx) ||
+  if((nii_ptr->nx != nii_ptr2->nx) ||
      (nii_ptr->ny != nii_ptr2->ny) ||
-     (nii_ptr->nz != nii_ptr2->nz)) {
+     (nii_ptr->nz != nii_ptr2->nz) ||
+     (nii_ptr->dx != nii_ptr2->dx) ||
+     (nii_ptr->dy != nii_ptr2->dy) ||
+     (nii_ptr->dz != nii_ptr2->dz)) {
     fprintf(stderr,"Error: Image %s and image %s differ.\n",nii_ptr->fname, nii_ptr2->fname);
+    nifti_image_infodump(nii_ptr);
+    nifti_image_infodump(nii_ptr2);
     return(0);    
   }
   return(1);
