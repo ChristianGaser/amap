@@ -20,8 +20,6 @@ equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2) {
      (nii_ptr->dy != nii_ptr2->dy) ||
      (nii_ptr->dz != nii_ptr2->dz)) {
     fprintf(stderr,"Error: Image %s and image %s differ.\n",nii_ptr->fname, nii_ptr2->fname);
-    nifti_image_infodump(nii_ptr);
-    nifti_image_infodump(nii_ptr2);
     return(0);    
   }
   return(1);
