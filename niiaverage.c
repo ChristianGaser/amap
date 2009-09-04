@@ -46,6 +46,10 @@ int main(int argc, char *argv[])
   
   /* read first image to get image parameters */
   nii_ptr = read_nifti_float(infiles[0], &input);
+  if(nii_ptr == NULL) {
+    fprintf(stderr,"Error reading %s.\n", infiles[0]);
+    return(NULL);
+  }
   fprintf(stdout,"%3d: %s\n",0, infiles[0]);
 
   separations[0] = nii_ptr->dx;
@@ -64,6 +68,10 @@ int main(int argc, char *argv[])
   /* read remaining images and check for image parameters */
   for (i=1; i<nfiles; i++) {
     fprintf(stdout,"%3d: %s\n",i, infiles[i]);
+    if(nii_ptr2 == NULL) {
+      fprintf(stderr,"Error reading %s.\n", infiles[i]);
+      return(NULL);
+    }
     nii_ptr2 = read_nifti_float(infiles[i], &input);
     
     /* check for dimensions */

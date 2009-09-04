@@ -116,6 +116,10 @@ main( int argc, char **argv )
   strcpy(buffer, input_filename);
   str_ptr = strrchr(buffer, '.');
   src_ptr = read_nifti_float(input_filename, &src);
+  if(src_ptr == NULL) {
+    fprintf(stderr,"Error reading %s.\n", input_filename);
+    return(NULL);
+  }
   
   if(src_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n",input_filename);
@@ -136,6 +140,10 @@ main( int argc, char **argv )
       
     /* read volume */
     mask_ptr = read_nifti_float(mask_filename, &buffer_vol);
+    if(mask_ptr == NULL) {
+      fprintf(stderr,"Error reading %s.\n", mask_filename);
+      return(NULL);
+    }
     
     /* check size */ 
     if (!equal_image_dimensions(src_ptr,mask_ptr)) {   
