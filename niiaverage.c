@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
   nii_ptr = read_nifti_float(infiles[0], &input);
   if(nii_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", infiles[0]);
-    return(NULL);
+    return(EXIT_FAILURE);
   }
   fprintf(stdout,"%3d: %s\n",0, infiles[0]);
 
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     fprintf(stdout,"%3d: %s\n",i, infiles[i]);
     if(nii_ptr2 == NULL) {
       fprintf(stderr,"Error reading %s.\n", infiles[i]);
-      return(NULL);
+      return(EXIT_FAILURE);
     }
     nii_ptr2 = read_nifti_float(infiles[i], &input);
     

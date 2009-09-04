@@ -118,7 +118,7 @@ main( int argc, char **argv )
   src_ptr = read_nifti_float(input_filename, &src);
   if(src_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", input_filename);
-    return(NULL);
+    return(EXIT_FAILURE);
   }
   
   if(src_ptr == NULL) {
@@ -142,7 +142,7 @@ main( int argc, char **argv )
     mask_ptr = read_nifti_float(mask_filename, &buffer_vol);
     if(mask_ptr == NULL) {
       fprintf(stderr,"Error reading %s.\n", mask_filename);
-      return(NULL);
+      return(EXIT_FAILURE);
     }
     
     /* check size */ 
