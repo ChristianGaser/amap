@@ -101,6 +101,7 @@ main( int argc, char **argv )
 
   if (Niters == 0) {
     for (i = 0; i < 3; i++) write_seg[i] = 0;
+    fprintf(stdout,"To write segmentation you need al least one iteration.\n");
   }
 
   if (correct_nu)
