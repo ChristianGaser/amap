@@ -15,19 +15,27 @@ extern nifti_image *read_nifti_float( const char *input_filename, double *image[
 extern equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
 extern write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 
+char *std_filename = NULL;
+
+static ArgvInfo argTable[] = {
+  {"-std", ARGV_STRING, (char *) 1, (char *) &std_filename, 
+       "Write standard deviation."},
+   {NULL, ARGV_END, NULL, NULL, NULL}
+};
+
 /* Main program */
 
 int main(int argc, char *argv[])
 {
   char **infiles, *outfile;
   int i, j, nfiles, dims[3];
-  double *avg, *input, separations[3];
+  double *avg, *sum_squares, *input, separations[3];
   nifti_image *nii_ptr, *nii_ptr2;
 
   /* Get arguments */
-  if (argc < 2) {
+  if  (ParseArgv(&argc, argv, argTable, 0) ||(argc < 2)) {
    (void) fprintf(stderr, 
-   "\nUsage: %s [options] [<in1.nii> ...] <out.nii>\n",
+   "\nUsage: %s [-std std-out.nii] [<in1.nii> ...] <out.nii>\n",
         argv[0]);
    (void) fprintf(stderr, 
    "    %s -help\n\n", argv[0]);
@@ -61,8 +69,14 @@ int main(int argc, char *argv[])
 
   /* prepare average image */
   avg  = (double *)malloc(sizeof(double)*nii_ptr->nvox);
-  for (i=0; i<nii_ptr->nvox; i++) 
-    avg[i] = input[i]/(double)nfiles;
+  for (j=0; j<nii_ptr->nvox; j++) 
+    avg[j] = input[j]/(double)nfiles;
+  /* prepare sum of squares image */
+  if(std_filename != NULL) {
+    sum_squares  = (double *)malloc(sizeof(double)*nii_ptr->nvox);
+    for (j=0; j<nii_ptr->nvox; j++) 
+      sum_squares[j] = input[j]*input[j];
+  }    
   free(input);
   
   /* read remaining images and check for image parameters */
@@ -80,8 +94,22 @@ int main(int argc, char *argv[])
     
     /* calculate average */
     for (j=0; j<nii_ptr->nvox; j++) 
-      avg[j] = avg[j] + (input[j]/(double)nfiles);
+      avg[j] += (input[j]/(double)nfiles);
+
+    /* calculate sum of squares */
+    if(std_filename != NULL) {
+      for (j=0; j<nii_ptr->nvox; j++) 
+        sum_squares[j] += input[j]*input[j];
+    }
     free(input);
+  }
+
+  if(std_filename != NULL) {
+    for (j=0; j<nii_ptr->nvox; j++) 
+      sum_squares[j] = sqrt(1.0/((double)nfiles-1.0)*(sum_squares[j] - (double)nfiles*avg[j]*avg[j]));
+    if (!write_nifti( std_filename, sum_squares, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
+      exit(EXIT_FAILURE);
+    free(sum_squares);
   }
 
   if (!write_nifti( outfile, avg, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
