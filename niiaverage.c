@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     fprintf(stderr,"Error reading %s.\n", infiles[0]);
     return(EXIT_FAILURE);
   }
-  fprintf(stdout,"%3d: %s\n",0, infiles[0]);
+  fprintf(stdout,"%3d: %s\n",1, infiles[0]);
 
   separations[0] = nii_ptr->dx;
   separations[1] = nii_ptr->dy;
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
   
   /* read remaining images and check for image parameters */
   for (i=1; i<nfiles; i++) {
-    fprintf(stdout,"%3d: %s\n",i, infiles[i]);
+    fprintf(stdout,"%3d: %s\n",i+1, infiles[i]);
     if(nii_ptr2 == NULL) {
       fprintf(stderr,"Error reading %s.\n", infiles[i]);
       return(EXIT_FAILURE);
