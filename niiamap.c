@@ -14,7 +14,8 @@
 #include "nifti1/nifti1_local.h"
 
 extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
-
+extern int convxyz(double *iVol, double filtx[], double filty[], double filtz[],int fxdim, int fydim, int fzdim, int xoff, int yoff, int zoff,double *oVol, int dims[3], int dtype);
+	
 static ArgvInfo argTable[] = {
   {"-mask", ARGV_STRING, (char *) 1, (char *) &mask_filename, 
        "Prior brainmask."},
@@ -70,8 +71,8 @@ main( int argc, char **argv )
   int		x, y, z, z_area, y_dims, count_zero;
   char		*axis_order[3] = { MIzspace, MIyspace, MIxspace };
   char		*arg_string, buffer[1024], *str_ptr;
-  unsigned char *label, *prob, *mask, *marker, *init_mask, *priors;
-  double	*src, *vol_double, *buffer_vol, ratio_zeros, slope;
+  unsigned char *label, *prob, *mask, *marker, *init_mask, *priors, *src2;
+  double	*src, *buffer_vol, ratio_zeros, slope;
   double    val, max_vol, min_vol, separations[3];
 
   /* Get arguments */
@@ -227,6 +228,12 @@ main( int argc, char **argv )
     Pve6(src, prob, label, mean, dims, PVELABEL);
   }
   
+  src2  = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox);
+  
+  morph_open_uint8(label, dims, 2, 128);
+//  morph_dilate_uint8(label, dims, 1, 0);
+  morph_close_uint8(label, dims, 10, 0);
+
   basename = nifti_makebasename(output_filename);
 
   /* write nu corrected image */

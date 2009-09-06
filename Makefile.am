@@ -37,7 +37,6 @@ niiaverage_SOURCES = \
 
 niiamap_SOURCES = \
 	niiamap.c \
-	aniso3d.c \
 	Amap.c \
 	Kmeans.c \
 	Pve6.c \
@@ -45,6 +44,7 @@ niiamap_SOURCES = \
 	nifti1/nifti1_io.c \
 	nifti1/znzlib.c \
 	niilib.c \
+	vollib.c \
 	SplineSmooth.cc
 
 m4_files = m4/mni_REQUIRE_LIB.m4 \
