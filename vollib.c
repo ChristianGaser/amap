@@ -363,6 +363,7 @@ morph_erode_uint8(unsigned char *vol, int dims[3], int niter, int th)
   }
 }
 
+
 void
 morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, int th)
 {
@@ -372,13 +373,15 @@ morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, int th)
 
   /* add band with zeros to image to avoid clipping */  
   band = niter;
-  band = 0;
+//  band = 0;
   for (i=0;i<3;i++) dims2[i] = dims[i] + 2*band;
+  
   buffer = (unsigned char *)malloc(sizeof(unsigned char)*dims2[0]*dims2[1]*dims2[2]);
   memset(buffer,0,sizeof(unsigned char)*dims2[0]*dims2[1]*dims2[2]);
+  
   /* threshold input */
   for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
-    buffer[((z+band)*dims[0]*dims[1])+((y+band)*dims[0])+x+band] = (vol[(z*dims[0]*dims[1])+(y*dims[0])+x]>th);
+    buffer[((z+band)*dims2[0]*dims2[1])+((y+band)*dims2[0])+x+band] = (vol[(z*dims[0]*dims[1])+(y*dims[0])+x]>th);
 
   for (i=0;i<niter;i++) {
     convxyz_uint8(buffer,filt,filt,filt,3,3,3,-1,-1,-1,buffer,dims);
@@ -396,13 +399,49 @@ morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, int th)
 void
 morph_close_uint8(unsigned char *vol, int dims[3], int niter, int th)
 {
-  morph_dilate_uint8(vol, dims, niter,th);
-  morph_erode_uint8(vol, dims, niter,0);  
+  morph_dilate_uint8(vol, dims, niter, th);
+  morph_erode_uint8(vol, dims, niter, 0);  
 }
 
 void
 morph_open_uint8(unsigned char *vol, int dims[3], int niter, int th)
 {
-  morph_erode_uint8(vol, dims, niter,th);
-  morph_dilate_uint8(vol, dims, niter,0);
+  morph_erode_uint8(vol, dims, niter, th);
+  morph_dilate_uint8(vol, dims, niter, 0);
+}
+
+void
+morph_close_double(double *vol, int dims[3], int niter, double th)
+{
+  unsigned char *buffer;
+  int i;
+
+  buffer = (unsigned char *)malloc(sizeof(unsigned char)*dims[0]*dims[1]*dims[2]);
+
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    buffer[i] = (unsigned char) (vol[i] > th);
+        
+  morph_dilate_uint8(buffer, dims, niter, 0);
+  morph_erode_uint8(buffer, dims, niter, 0);
+
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    vol[i] = (double)buffer[i];
+}
+
+void
+morph_open_double(double *vol, int dims[3], int niter, double th)
+{
+  unsigned char *buffer;
+  int i;
+
+  buffer = (unsigned char *)malloc(sizeof(unsigned char)*dims[0]*dims[1]*dims[2]);
+
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    buffer[i] = (unsigned char) (vol[i] > th);
+        
+  morph_erode_uint8(buffer, dims, niter, 0);
+  morph_dilate_uint8(buffer, dims, niter, 0);
+
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    vol[i] = (double)buffer[i];
 }

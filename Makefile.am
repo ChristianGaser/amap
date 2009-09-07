@@ -6,6 +6,7 @@ bin_PROGRAMS = \
 	mincnumap \
 	mincmarchingcubes \
 	niiaverage \
+	niismooth \
 	mincremovebridges
 	
 mincremovebridges_SOURCES = \
@@ -33,6 +34,13 @@ niiaverage_SOURCES = \
 	niiaverage.c \
 	nifti1/nifti1_io.c \
 	nifti1/znzlib.c \
+	niilib.c
+
+niismooth_SOURCES = \
+	niismooth.c \
+	nifti1/nifti1_io.c \
+	nifti1/znzlib.c \
+	vollib.c \
 	niilib.c
 
 niiamap_SOURCES = \
