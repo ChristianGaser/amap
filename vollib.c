@@ -200,6 +200,152 @@ int convxyz_uint8(unsigned char *iVol, double filtx[], double filty[], double fi
   return(0);
 }
 
+int convxyz_int16(short *iVol, double filtx[], double filty[], double filtz[],
+  int fxdim, int fydim, int fzdim, int xoff, int yoff, int zoff,
+  short *oVol, int dims[3])
+{
+  double *tmp, *buff, **sortedv;
+  int xy, z, y, x, k, fstart, fend, startz, endz;
+  int xdim, ydim, zdim;
+
+  xdim = dims[0];
+  ydim = dims[1];
+  zdim = dims[2];
+
+  tmp = (double *)malloc(sizeof(double)*xdim*ydim*fzdim);
+  buff = (double *)malloc(sizeof(double)*((ydim>xdim) ? ydim : xdim));
+  sortedv = (double **)malloc(sizeof(double *)*fzdim);
+
+
+  startz = ((fzdim+zoff-1<0) ? fzdim+zoff-1 : 0);
+  endz   = zdim+fzdim+zoff-1;
+
+  for (z=startz; z<endz; z++)
+  {
+    double sum2 = 0.0;
+
+    if (z >= 0 && z<zdim)
+    {
+      for (y=0;y<ydim;y++) for (x=0;x<xdim;x++)
+        tmp[((z%fzdim)*xdim*ydim)+(y*xdim)+x] = (double)iVol[(z*xdim*ydim)+(y*xdim)+x];   
+      convxy(tmp+((z%fzdim)*xdim*ydim),xdim, ydim,
+        filtx, filty, fxdim, fydim, xoff, yoff, buff);
+    }
+    if (z-fzdim-zoff+1>=0 && z-fzdim-zoff+1<zdim)
+    {
+      fstart = ((z >= zdim) ? z-zdim+1 : 0);
+      fend = ((z-fzdim < 0) ? z+1 : fzdim);
+
+      for(k=0; k<fzdim; k++)
+      {
+        int z1 = (((z-k)%fzdim)+fzdim)%fzdim;
+        sortedv[k] = &(tmp[z1*xdim*ydim]);
+      }
+
+      for(k=fstart, sum2=0.0; k<fend; k++)
+        sum2 += filtz[k];
+
+      double tmp;
+      short *obuf;
+      obuf = oVol;
+      obuf = &obuf[(z-fzdim-zoff+1)*ydim*xdim];
+      if (sum2)
+      {
+        for(xy=0; xy<xdim*ydim; xy++)
+        {
+          double sum1=0.0;
+          for(k=fstart; k<fend; k++)
+            sum1 += filtz[k]*sortedv[k][xy];
+          tmp = sum1/sum2;
+          if (tmp<-32768) tmp = -32768;
+          else if (tmp>32767) tmp = 32767;
+          obuf[xy] = RINT(tmp);
+        }
+      }
+      else
+        for(xy=0; xy<xdim*ydim; xy++)
+          obuf[xy] = 0;
+    }
+  }
+  free(tmp);
+  free(buff);
+  free(sortedv);
+  return(0);
+}
+
+int convxyz_int32(int *iVol, double filtx[], double filty[], double filtz[],
+  int fxdim, int fydim, int fzdim, int xoff, int yoff, int zoff,
+  int *oVol, int dims[3])
+{
+  double *tmp, *buff, **sortedv;
+  int xy, z, y, x, k, fstart, fend, startz, endz;
+  int xdim, ydim, zdim;
+
+  xdim = dims[0];
+  ydim = dims[1];
+  zdim = dims[2];
+
+  tmp = (double *)malloc(sizeof(double)*xdim*ydim*fzdim);
+  buff = (double *)malloc(sizeof(double)*((ydim>xdim) ? ydim : xdim));
+  sortedv = (double **)malloc(sizeof(double *)*fzdim);
+
+
+  startz = ((fzdim+zoff-1<0) ? fzdim+zoff-1 : 0);
+  endz   = zdim+fzdim+zoff-1;
+
+  for (z=startz; z<endz; z++)
+  {
+    double sum2 = 0.0;
+
+    if (z >= 0 && z<zdim)
+    {
+      for (y=0;y<ydim;y++) for (x=0;x<xdim;x++)
+        tmp[((z%fzdim)*xdim*ydim)+(y*xdim)+x] = (double)iVol[(z*xdim*ydim)+(y*xdim)+x];   
+      convxy(tmp+((z%fzdim)*xdim*ydim),xdim, ydim,
+        filtx, filty, fxdim, fydim, xoff, yoff, buff);
+    }
+    if (z-fzdim-zoff+1>=0 && z-fzdim-zoff+1<zdim)
+    {
+      fstart = ((z >= zdim) ? z-zdim+1 : 0);
+      fend = ((z-fzdim < 0) ? z+1 : fzdim);
+
+      for(k=0; k<fzdim; k++)
+      {
+        int z1 = (((z-k)%fzdim)+fzdim)%fzdim;
+        sortedv[k] = &(tmp[z1*xdim*ydim]);
+      }
+
+      for(k=fstart, sum2=0.0; k<fend; k++)
+        sum2 += filtz[k];
+
+      double tmp;
+      int *obuf;
+      obuf = oVol;
+      obuf = &obuf[(z-fzdim-zoff+1)*ydim*xdim];
+      if (sum2)
+      {
+        for(xy=0; xy<xdim*ydim; xy++)
+        {
+          double sum1=0.0;
+          for(k=fstart; k<fend; k++)
+            sum1 += filtz[k]*sortedv[k][xy];
+          tmp = sum1/sum2;
+          if (tmp<-2147483648.0) tmp = -2147483648.0;
+          else if (tmp>2147483647.0) tmp = 2147483647.0;
+          obuf[xy] = RINT(tmp);
+        }
+      }
+      else
+        for(xy=0; xy<xdim*ydim; xy++)
+          obuf[xy] = 0;
+    }
+  }
+  free(tmp);
+  free(buff);
+  free(sortedv);
+  return(0);
+}
+
 void
 morph_erode_uint8(unsigned char *vol, int dims[3], int niter, int th)
 {
