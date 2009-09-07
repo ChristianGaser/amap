@@ -195,36 +195,36 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
     break;
   case DT_INT16:
     nii_ptr->nbyper = 2;
-    nii_ptr->data = (short *)malloc(sizeof(short)*nii_ptr->nvox);
+    nii_ptr->data = (signed short *)malloc(sizeof(signed short)*nii_ptr->nvox);
     /* check for memory */
     if(nii_ptr->data == NULL) {
       fprintf(stderr,"Memory allocation error\n");
       return(0);
     }
     for (i = 0; i < nii_ptr->nvox; i++)
-      ((short *)nii_ptr->data)[i] = image[i];
+      ((signed short *)nii_ptr->data)[i] = image[i];
     break;
   case DT_INT32:
     nii_ptr->nbyper = 4;
-    nii_ptr->data = (int *)malloc(sizeof(int)*nii_ptr->nvox);
+    nii_ptr->data = (signed int *)malloc(sizeof(signed int)*nii_ptr->nvox);
     /* check for memory */
     if(nii_ptr->data == NULL) {
       fprintf(stderr,"Memory allocation error\n");
       return(0);
     }
     for (i = 0; i < nii_ptr->nvox; i++)
-      ((int *)nii_ptr->data)[i] = image[i];
+      ((signed int *)nii_ptr->data)[i] = image[i];
     break;
   case DT_INT64:
     nii_ptr->nbyper = 8;
-    nii_ptr->data = (long *)malloc(sizeof(long)*nii_ptr->nvox);
+    nii_ptr->data = (long long *)malloc(sizeof(long long)*nii_ptr->nvox);
     /* check for memory */
     if(nii_ptr->data == NULL) {
       fprintf(stderr,"Memory allocation error\n");
       return(0);
     }
     for (i = 0; i < nii_ptr->nvox; i++)
-      ((long *)nii_ptr->data)[i] = image[i];
+      ((long long *)nii_ptr->data)[i] = image[i];
     break;
   case DT_FLOAT32:
     nii_ptr->nbyper = 4;

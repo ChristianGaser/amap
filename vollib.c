@@ -200,9 +200,9 @@ int convxyz_uint8(unsigned char *iVol, double filtx[], double filty[], double fi
   return(0);
 }
 
-int convxyz_int16(short *iVol, double filtx[], double filty[], double filtz[],
+int convxyz_int16(signed short *iVol, double filtx[], double filty[], double filtz[],
   int fxdim, int fydim, int fzdim, int xoff, int yoff, int zoff,
-  short *oVol, int dims[3])
+  signed short *oVol, int dims[3])
 {
   double *tmp, *buff, **sortedv;
   int xy, z, y, x, k, fstart, fend, startz, endz;
@@ -246,7 +246,7 @@ int convxyz_int16(short *iVol, double filtx[], double filty[], double filtz[],
         sum2 += filtz[k];
 
       double tmp;
-      short *obuf;
+      signed short *obuf;
       obuf = oVol;
       obuf = &obuf[(z-fzdim-zoff+1)*ydim*xdim];
       if (sum2)
@@ -273,9 +273,9 @@ int convxyz_int16(short *iVol, double filtx[], double filty[], double filtz[],
   return(0);
 }
 
-int convxyz_int32(int *iVol, double filtx[], double filty[], double filtz[],
+int convxyz_int32(signed int *iVol, double filtx[], double filty[], double filtz[],
   int fxdim, int fydim, int fzdim, int xoff, int yoff, int zoff,
-  int *oVol, int dims[3])
+  signed int *oVol, int dims[3])
 {
   double *tmp, *buff, **sortedv;
   int xy, z, y, x, k, fstart, fend, startz, endz;
@@ -319,7 +319,7 @@ int convxyz_int32(int *iVol, double filtx[], double filty[], double filtz[],
         sum2 += filtz[k];
 
       double tmp;
-      int *obuf;
+      signed int *obuf;
       obuf = oVol;
       obuf = &obuf[(z-fzdim-zoff+1)*ydim*xdim];
       if (sum2)
