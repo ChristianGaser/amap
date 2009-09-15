@@ -373,7 +373,7 @@ morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, int th)
 
   /* add band with zeros to image to avoid clipping */  
   band = niter;
-//  band = 0;
+  band = 0;
   for (i=0;i<3;i++) dims2[i] = dims[i] + 2*band;
   
   buffer = (unsigned char *)malloc(sizeof(unsigned char)*dims2[0]*dims2[1]*dims2[2]);

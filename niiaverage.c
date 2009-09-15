@@ -82,11 +82,11 @@ int main(int argc, char *argv[])
   /* read remaining images and check for image parameters */
   for (i=1; i<nfiles; i++) {
     fprintf(stdout,"%3d: %s\n",i+1, infiles[i]);
+    nii_ptr2 = read_nifti_float(infiles[i], &input);
     if(nii_ptr2 == NULL) {
       fprintf(stderr,"Error reading %s.\n", infiles[i]);
       return(EXIT_FAILURE);
     }
-    nii_ptr2 = read_nifti_float(infiles[i], &input);
     
     /* check for dimensions */
     if(!equal_image_dimensions(nii_ptr,nii_ptr2))

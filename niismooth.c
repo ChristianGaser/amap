@@ -60,7 +60,9 @@ int main(int argc, char *argv[])
   dims[1] = nii_ptr->ny;
   dims[2] = nii_ptr->nz;
   
-  morph_close_double(input, dims, 10, 0.098436);
+  morph_open_double(input, dims, 1, 0.098436);
+//  morph_dilate_double(input, dims, 2, 0.5);
+  morph_close_double(input, dims, 10, 0.5);
 
   if (!write_nifti( outfile, input, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
     exit(EXIT_FAILURE);
