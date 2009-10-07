@@ -27,6 +27,8 @@ static ArgvInfo argTable[] = {
        "Number of iterations for nu correction."},
   {"-no_nucorrect", ARGV_CONSTANT, (char *) 0, (char *) &correct_nu,
        "Do not use nu correction."},
+  {"-mrf", ARGV_FLOAT, (char *) 1, (char *) &weight_MRF,
+       "Weight of MRF prior (0..1)."},
   {"-thresh", ARGV_FLOAT, (char *) 1, (char *) &thresh_brainmask,
        "Threshold for prior brainmask (0..1)."},
   {"-thresh_kmeans", ARGV_FLOAT, (char *) 1, (char *) &thresh_kmeans,
@@ -220,7 +222,7 @@ main( int argc, char **argv )
     max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, pve);
 
   if (Niters > 0)
-    Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve);
+    Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve, weight_MRF);
 
   /* PVE */
   if (pve) {

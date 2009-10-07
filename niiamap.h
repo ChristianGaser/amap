@@ -17,3 +17,4 @@ int write_nu = 0;
 int write_label = 1;
 double thresh_brainmask = 0.05;
 double thresh_kmeans = 0.5;
+double weight_MRF = 1.0;

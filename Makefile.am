@@ -3,10 +3,10 @@ ACLOCAL_AMFLAGS = -I m4
 
 bin_PROGRAMS = \
     niiamap \
-	mincnumap \
 	mincmarchingcubes \
 	niiaverage \
 	niismooth \
+	niitest \
 	mincremovebridges
 	
 mincremovebridges_SOURCES = \
@@ -29,6 +29,13 @@ mincnumap_SOURCES = \
 	optimizer3d.c \
 	diffeo3d.c \
 	SplineSmooth.cc
+
+niitest_SOURCES = \
+	niitest.c \
+	input_nifti.c \
+	nifti1/nifti1_io.c \
+	nifti1/znzlib.c \
+	niilib.c
 
 niiaverage_SOURCES = \
 	niiaverage.c \
