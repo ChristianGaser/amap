@@ -214,23 +214,6 @@ main( int argc, char **argv )
   dims[2] = src_ptr->nz;
     
   max_vol = Kmeans( src, label, mask, 25, 4, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
-
-  /* initial nu-correction works best with 5 class Kmeans approach followed by a 3 class approach */
-  max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS);
-  max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
-
-  /* final Kmeans estimation if nu-correction was selected */
-  if (correct_nu)
-    max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, pve);
-
-  if (Niters > 0)
-    Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve, weight_MRF);
-
-  /* PVE */
-  if (pve) {
-    fprintf(stdout,"Calculate Partial Volume Estimate.\n");
-    Pve6(src, prob, label, mean, dims, PVELABEL);
-  }
   
   basename = nifti_makebasename(output_filename);
 
@@ -246,9 +229,11 @@ main( int argc, char **argv )
   /* write labeled volume */
   if (write_label) {
 
-    /* different ranges for pve */
-    if (pve) slope = 3.0/255.0;
-    else slope = 1.0;
+  morph_open_uint8(label, dims, 2, 2.0);
+//  morph_dilate_uint8(label, dims, 1, 0);
+//  morph_close_uint8(label, dims, 10, 0);
+
+ slope = 255.0/340;
 
     for (i = 0; i < src_ptr->nvox; i++)
       src[i] = (double)label[i];

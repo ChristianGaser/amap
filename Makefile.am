@@ -32,10 +32,15 @@ mincnumap_SOURCES = \
 
 niitest_SOURCES = \
 	niitest.c \
-	input_nifti.c \
+	Amap.c \
+	Kmeans.c \
+	Pve6.c \
+	MrfPrior.c \
 	nifti1/nifti1_io.c \
 	nifti1/znzlib.c \
-	niilib.c
+	niilib.c \
+	vollib.c \
+	SplineSmooth.cc
 
 niiaverage_SOURCES = \
 	niiaverage.c \
