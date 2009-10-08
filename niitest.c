@@ -213,8 +213,26 @@ main( int argc, char **argv )
   dims[1] = src_ptr->ny;
   dims[2] = src_ptr->nz;
     
+  /* use 4 classes to consider background */
   max_vol = Kmeans( src, label, mask, 25, 4, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
+
+  /* first rough skull-stripping */  
+  morph_open_uint8(label, dims, 2, 2);
+  get_largest_cluster(label, dims);
+  morph_dilate_uint8(label, dims, 5, 0);
+  morph_close_uint8(label, dims, 10, 0);
   
+  /* update mask */
+  for (i = 0; i < src_ptr->nvox; i++) mask[i] = 255*label[i];
+
+  max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, 128, thresh_kmeans_int, iters_nu, KMEANS);
+
+  /* final skull-stripping */  
+  morph_open_uint8(label, dims, 1, 2);
+  get_largest_cluster(label, dims);
+  morph_dilate_uint8(label, dims, 1, 0);
+  morph_close_uint8(label, dims, 10, 0);
+
   basename = nifti_makebasename(output_filename);
 
   /* write nu corrected image */
@@ -229,11 +247,7 @@ main( int argc, char **argv )
   /* write labeled volume */
   if (write_label) {
 
-  morph_open_uint8(label, dims, 2, 2.0);
-//  morph_dilate_uint8(label, dims, 1, 0);
-//  morph_close_uint8(label, dims, 10, 0);
-
- slope = 255.0/340;
+    slope = 1.0;
 
     for (i = 0; i < src_ptr->nvox; i++)
       src[i] = (double)label[i];

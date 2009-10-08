@@ -32,6 +32,7 @@ mincnumap_SOURCES = \
 
 niitest_SOURCES = \
 	niitest.c \
+	bwlabel.c \
 	Amap.c \
 	Kmeans.c \
 	Pve6.c \

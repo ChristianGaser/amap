@@ -213,8 +213,6 @@ main( int argc, char **argv )
   dims[1] = src_ptr->ny;
   dims[2] = src_ptr->nz;
     
-  max_vol = Kmeans( src, label, mask, 25, 4, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
-
   /* initial nu-correction works best with 5 class Kmeans approach followed by a 3 class approach */
   max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS);
   max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
