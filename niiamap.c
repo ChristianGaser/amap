@@ -14,7 +14,6 @@
 #include "nifti1/nifti1_local.h"
 
 extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
-extern int convxyz(double *iVol, double filtx[], double filty[], double filtz[],int fxdim, int fydim, int fzdim, int xoff, int yoff, int zoff,double *oVol, int dims[3], int dtype);
 	
 static ArgvInfo argTable[] = {
   {"-mask", ARGV_STRING, (char *) 1, (char *) &mask_filename, 

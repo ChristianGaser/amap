@@ -284,26 +284,24 @@ int translate_labels(unsigned int    *il,     /* Map of initial labels. */
 
 void get_largest_cluster(unsigned char *bw, int dim[3])
 {
-   int            n, i, j, count[1000], max_count = 1e-10, ind_max = 0, nl = 0;
+   int            n, i, j, count[1000], max_count = 1e-10, nl = 0;
    unsigned int   conn = 26;
    unsigned int   ttn = 0;
    unsigned int   *il = NULL;
    unsigned int   *tt = NULL;
+   unsigned char  ind_max = 0;
    double         *l = NULL;
 
    n = dim[0]*dim[1]*dim[2];
 
    /* Allocate memory for initial labelling map. */
-
    l  = (double *) malloc(n*sizeof(double));
    il = (unsigned int *) malloc(n*sizeof(unsigned int));
 
    /* Do initial labelling and create translation table. */
-
    ttn = do_initial_labelling(bw,dim,conn,il,&tt);
 
    /* Translate labels to terminal numbers. */
-
    nl = translate_labels(il,dim,tt,ttn,l);
 
    for (j=0; j<nl; j++) count[j] = 0;
@@ -316,15 +314,16 @@ void get_largest_cluster(unsigned char *bw, int dim[3])
    {
      if (count[j] > max_count)
      {
-       ind_max = j;
+       ind_max = (unsigned char)j;
        max_count = count[j];
      }
    }
    
-   for (i=0; i<n; i++)  bw[i] = (((unsigned char)l[i] == ind_max) ? 1 : 0);
+   for (i=0; i<n; i++)  if((unsigned char)l[i] != ind_max) bw[i] = 0;
 
    free(il);
    free(tt);
+   free(l);
    
    return;
 }

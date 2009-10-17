@@ -6,7 +6,7 @@ bin_PROGRAMS = \
 	mincmarchingcubes \
 	niiaverage \
 	niismooth \
-	niitest \
+	niibrainmask \
 	mincremovebridges
 	
 mincremovebridges_SOURCES = \
@@ -30,8 +30,8 @@ mincnumap_SOURCES = \
 	diffeo3d.c \
 	SplineSmooth.cc
 
-niitest_SOURCES = \
-	niitest.c \
+niibrainmask_SOURCES = \
+	niibrainmask.c \
 	bwlabel.c \
 	Amap.c \
 	Kmeans.c \
