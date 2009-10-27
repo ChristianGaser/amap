@@ -16,20 +16,6 @@ mincremovebridges_SOURCES = \
 mincmarchingcubes_SOURCES = \
 	mincmarchingcubes.c
 	
-mincnumap_SOURCES = \
-	mincnumap.c \
-	aniso3d.c \
-	Amap.c \
-	Numap.c \
-	Bayes.c \
-	Kmeans.c \
-	Pve6.c \
-	MrfPrior.c \
-	Watershed3d.c \
-	optimizer3d.c \
-	diffeo3d.c \
-	SplineSmooth.cc
-
 niibrainmask_SOURCES = \
 	niibrainmask.c \
 	bwlabel.c \

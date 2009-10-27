@@ -4,6 +4,7 @@
  *
  */
 
+#define SPLINESMOOTH 1
 #define SQRT2PI 2.506628
 #define G 6
 

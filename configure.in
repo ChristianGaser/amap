@@ -1,10 +1,10 @@
 dnl $Id: configure.in,v 1.7 2003/06/12 15:54:01 spotspot Exp $
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(mincamap,0.1,Christian Gaser <christian.gaser@uni-jena.de>)
+AC_INIT(amap,0.1,Christian Gaser <christian.gaser@uni-jena.de>)
 AC_REVISION($Revision: 0.99 $)
 
-AM_INIT_AUTOMAKE(mincamap,0.1,Christian Gaser <christian.gaser@uni-jena.de>)
+AM_INIT_AUTOMAKE(amap,0.1,Christian Gaser <christian.gaser@uni-jena.de>)
 AM_CONFIG_HEADER([config.h])
 
 AC_PROG_CC
