@@ -182,19 +182,18 @@ main( int argc, char **argv )
     max_vol = MAX(src[i], max_vol);
   }
 
+  /* if no mask file is given use minimum value or zeros in the image to get mask value */
+  if (mask_filename == NULL) {
+    for (i = 0; i < src_ptr->nvox; i++) {
+      if ((src[i] == min_vol) || (src[i] == 0.0)) mask[i] = 0;
+      else mask[i] = 255;
+    }  
+  }
+
   /* correct images with values < 0 */
   if (min_vol < 0) {
     for (i = 0; i < src_ptr->nvox; i++)
       src[i] = src[i] - min_vol;
-    min_vol = 0.0;
-  }
-
-  /* if no mask file is given use minimum value in the image to get mask value */
-  if (mask_filename == NULL) {
-    for (i = 0; i < src_ptr->nvox; i++) {
-      if (src[i] == min_vol) mask[i] = 0;
-      else mask[i] = 255;
-    }  
   }
 
   count_zero = 0;

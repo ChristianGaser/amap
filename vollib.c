@@ -10,9 +10,7 @@
 #define RINT(A) floor((A)+0.5)
 
 static void 
-convxy(out, xdim, ydim, filtx, filty, fxdim, fydim, xoff, yoff, buff)
-int xdim, ydim, fxdim, fydim, xoff, yoff;
-double out[], filtx[], filty[], buff[];
+convxy(double out[], int xdim, int ydim, double filtx[], double filty[], int fxdim, int fydim, int xoff, int yoff, double buff[])
 {
   int x,y,k;
   for(y=0; y<ydim; y++)
