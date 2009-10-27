@@ -283,13 +283,6 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   area = dims[0]*dims[1];
   vol = area*dims[2];
  
-  double amz  = 1.0/dims[2];
-  double amy  = 1.0/dims[1];
-  double amzy = 1.0/sqrt(dims[2]*dims[2]+dims[1]*dims[1]);
-  double amx  = 1.0/dims[0];
-  double amzx = 1.0/sqrt(dims[2]*dims[2]+dims[0]*dims[0]);
-  double amxy = 1.0/sqrt(dims[0]*dims[0]+dims[1]*dims[1]);
-
   for (i=0; i<vol; i++) {
     min_src = MIN(src[i], min_src);
     max_src = MAX(src[i], max_src);
@@ -337,7 +330,7 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   MrfPrior(label, nc, alpha, beta, 0, dims);    
 
   /* weight MRF prior */
-  beta[0] = weight_MRF;
+  beta[0] *= weight_MRF;
   if (weight_MRF < 1.0) fprintf(stderr,"weighted MRF prior beta: %g\n",beta[0]);
 
   for (i=0; i<nc; i++) log_alpha[i] = log(alpha[i]);
@@ -386,37 +379,13 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
             if (fabs(mean[i]) > TINY) {
               first=0.0;
               iBG = i+1;
-              if ((int)label[index-1      ] == iBG) first += 1.0;
-              if ((int)label[index+1      ] == iBG) first += 1.0;
-              if ((int)label[index-dims[0]] == iBG) first += 1.0;
-              if ((int)label[index+dims[0]] == iBG) first += 1.0;
-              if ((int)label[index-area   ] == iBG) first += 1.0;
-              if ((int)label[index+area   ] == iBG) first += 1.0;
+              if ((int)label[index-1      ] == iBG) first++;
+              if ((int)label[index+1      ] == iBG) first++;
+              if ((int)label[index-dims[0]] == iBG) first++;
+              if ((int)label[index+dims[0]] == iBG) first++;
+              if ((int)label[index-area   ] == iBG) first++;
+              if ((int)label[index+area   ] == iBG) first++;
               
-              if ((int)label[index-1+dims[0]] == iBG) first += 0.71;
-              if ((int)label[index+1+dims[0]] == iBG) first += 0.71;
-              if ((int)label[index-1-dims[0]] == iBG) first += 0.71;
-              if ((int)label[index+1-dims[0]] == iBG) first += 0.71;
-
-              if ((int)label[index-1+area] == iBG) first += 0.71;
-              if ((int)label[index+1+area] == iBG) first += 0.71;
-              if ((int)label[index-1-area] == iBG) first += 0.71;
-              if ((int)label[index+1-area] == iBG) first += 0.71;
-
-              if ((int)label[index-area+dims[0]] == iBG) first += 0.71;
-              if ((int)label[index+area+dims[0]] == iBG) first += 0.71;
-              if ((int)label[index-area-dims[0]] == iBG) first += 0.71;
-              if ((int)label[index+area-dims[0]] == iBG) first += 0.71;
-
-              if ((int)label[index+1-area+dims[0]] == iBG) first += 0.57;
-              if ((int)label[index+1+area+dims[0]] == iBG) first += 0.57;
-              if ((int)label[index+1-area-dims[0]] == iBG) first += 0.57;
-              if ((int)label[index+1+area-dims[0]] == iBG) first += 0.57;
-              if ((int)label[index-1-area+dims[0]] == iBG) first += 0.57;
-              if ((int)label[index-1+area+dims[0]] == iBG) first += 0.57;
-              if ((int)label[index-1-area-dims[0]] == iBG) first += 0.57;
-              if ((int)label[index-1+area-dims[0]] == iBG) first += 0.57;
-
               d[i] = 0.5*(SQR(val-mean[i])/var[i]+log_var[i])-log_alpha[i]-beta[0]*first;
               pvalue[i] = exp(-d[i])/SQRT2PI;
               psum += pvalue[i];
