@@ -168,7 +168,7 @@ main( int argc, char **argv )
   /* get sure that threshold for brainmask is zero if no mask is defined */
   if (mask_filename == NULL) thresh_brainmask = 0.0;
 
-  double mean[n_classes], mu[n_pure_classes];
+  double mean[n_classes], mu[n_pure_classes], var[n_pure_classes];
   for (i = 0; i < n_pure_classes; i++)
     mu[i] = 0;
 
@@ -220,12 +220,12 @@ main( int argc, char **argv )
     max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, pve);
 
   if (Niters > 0)
-    Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve, weight_MRF);
+    Amap( src, label, prob, mean, var, n_pure_classes, Niters, subsample, dims, pve, weight_MRF);
 
   /* PVE */
   if (pve) {
     fprintf(stdout,"Calculate Partial Volume Estimate.\n");
-    Pve6(src, prob, label, mean, dims, PVELABEL);
+    Pve6(src, prob, label, mean, var, dims, PVELABEL);
   }
   
   basename = nifti_makebasename(output_filename);

@@ -142,21 +142,19 @@ function is primitive , but so is the mankind...
 
 double ComputeMarginalizedLikelihood(double value, double mean1 , double mean2, 
                                        double var1, double var2, 
-                                       double measurement_var, 
                                        unsigned int nof_intervals)
 
 { 
-  double lh, tmean, tvar, t, interval_len;
+  double lh, tmean, tvar, t, delta, step;
   int i;  
   
-  interval_len = 1.0 / (double) nof_intervals;
+  step = 1.0 / (double) nof_intervals;
   lh = 0;
   
-  for(i = 0; i < nof_intervals; i++) {
-    t = (i + 0.5) * interval_len;
-    tmean = t * mean1 + ( 1 - t ) * mean2;
-    tvar = SQR(t) * var1 + SQR(1 - t) * var2 + measurement_var;
-    lh += ComputeGaussianLikelihood(value, tmean, tvar)*interval_len;
+  for(delta = 0.0; delta <= 1.0; delta += step) {
+    tmean = delta * mean1 + ( 1 - delta ) * mean2;
+    tvar = SQR(delta) * var1 + SQR(1 - delta) * var2;
+    lh += ComputeGaussianLikelihood(value, tmean, tvar)*step;
   }
   
   return(lh);
@@ -185,10 +183,10 @@ unsigned char MaxArg(double *pval, unsigned char n)
 void ComputeInitialPveLabel(double *src, unsigned char *label, struct point *r, int nc, int sub, int *dims)
 {
   
-  int x, y, z, z_area, y_dims, index, label_value, xBG;
+  int x, y, z, z_area, y_dims, index, label_value;
   int i, ix, iy, iz, ind, ind2, nix, niy, niz, narea, nvol;
   long area, vol;
-  double val, dmin, sub_1, mean[MAX_NC], var[MAX_NC], d_pve[MAX_NC];
+  double val, sub_1, mean[MAX_NC], var[MAX_NC], d_pve[MAX_NC];
   
   area = dims[0]*dims[1];
   vol = area*dims[2];
@@ -243,17 +241,17 @@ void ComputeInitialPveLabel(double *src, unsigned char *label, struct point *r, 
 
         if (fabs(mean[CSFLABEL]) > TINY) {
           d_pve[BKGCSFLABEL] = ComputeMarginalizedLikelihood(val, 0.0, mean[CSFLABEL],
-                                        0.1*MIN3(var[CSFLABEL],var[GMLABEL],var[WMLABEL]), var[CSFLABEL], 0, 50 );
+                                        0.1*MIN3(var[CSFLABEL],var[GMLABEL],var[WMLABEL]), var[CSFLABEL], 50 );
         } else d_pve[BKGCSFLABEL] = HUGE;
 
         if ((fabs(mean[WMLABEL]) > TINY) && (fabs(mean[GMLABEL]) > TINY)) {
           d_pve[WMGMLABEL] = ComputeMarginalizedLikelihood(val, mean[WMLABEL], mean[GMLABEL],
-                                        var[WMLABEL], var[GMLABEL], 0, 50 );
+                                        var[WMLABEL], var[GMLABEL], 50 );
         } else d_pve[WMGMLABEL] = HUGE;
             
         if ((fabs(mean[CSFLABEL]) > TINY) && (fabs(mean[GMLABEL]) > TINY)) {
           d_pve[GMCSFLABEL] = ComputeMarginalizedLikelihood(val, mean[GMLABEL], mean[CSFLABEL],
-                                        var[GMLABEL], var[CSFLABEL], 0, 50 );
+                                        var[GMLABEL], var[CSFLABEL], 50 );
         } else d_pve[GMCSFLABEL] = HUGE;
 
         label[index] = (unsigned char) MaxArg(d_pve, MAX_NC);
@@ -262,15 +260,165 @@ void ComputeInitialPveLabel(double *src, unsigned char *label, struct point *r, 
   }   
 } 
 
+void Normalize(double* pval, char n)
+{
+  double sca = 0.0;
+  int i;
+
+  for(i = 0;i < n;i++) 
+    sca += pval[i];
+ 
+  if(fabs(sca) >  TINY) {       /* To avoid divisions by zero */
+    for(i = 0;i < n;i++) {
+      pval[i] /= sca;
+    }
+  }
+}
+
+void ComputeMrfProbability(double *mrf_probability, double *exponent, unsigned char *label, int x, int y , int z, int *dims,
+                             int nc, double beta)
+{
+  int i,j,k;
+  unsigned char label1, label2;  
+  double distance;
+  double slice_width_sq[3] = {1.0, 1.0, 1.0};
+  int similarity_value;
+  int same = -2;
+  int similar = -1;
+  int different = 1; 
+  
+  /* To determine if it's possible to get out of image limits. 
+     If not true (as it usually is) this saves the trouble calculating this 27 times */
+  for(label1 = 1;label1 < nc + 1;label1++)
+    exponent[label1 - 1] = 0;
+  
+  for(i = -1; i < 2; i++) {
+    for(j = -1; j < 2; j++) {
+      for(k = -1; k < 2; k++) {
+	      if( i != 0 || j != 0 || k != 0 ) {
+           
+         label2 = label[(x+i)+dims[0]*(y+j)+dims[0]*dims[1]*(z+k)];
+               
+         for(label1 = 1;label1 < nc + 1;label1++) {
+ 
+           if(label1 == label2) similarity_value = same;
+           else if(abs(label1 - label2)<2) similarity_value = similar;
+           else similarity_value = different;
+
+//similarity_value = -6 + abs(label1-label2);
+           distance = sqrt(slice_width_sq[0] * abs(i) +
+                           slice_width_sq[1] * abs(j) +
+                           slice_width_sq[2] * abs(k));
+
+           exponent[label1 - 1] += similarity_value/distance;
+             
+         }
+       }   
+     }
+   }
+ }
+
+  for(label1 = 1;label1 < nc + 1;label1++)
+    mrf_probability[label1 - 1] = exp(- ( beta* exponent[label1 - 1])); 
+  
+
+} 
+
+/* Compute PVE labeling based on marginalized likelihood */
+void ComputePveLabel(double *src, unsigned char *label, double *mean, double *var, int nc, int *dims, double beta, int iterations)
+{
+  
+  int i, iter, x, y, z, z_area, y_dims, index, label_value;
+  long area, vol;
+  double val, d_pve[MAX_NC], mrf_probability[MAX_NC], sum_exp;
+  double mean2[MAX_NC], var2[MAX_NC], exponent[MAX_NC];
+  unsigned char *prob, new_label;
+    
+  area = dims[0]*dims[1];
+  vol = area*dims[2];
+  
+  for(i=0; i<3; i++) {
+    mean2[1+i*2] = mean[i];
+    var2[1+i*2]  = var[i];
+  }
+  
+  prob = (unsigned char*)malloc(sizeof(unsigned char)*vol*MAX_NC);
+
+  /* loop over image points */
+  for (z = 1; z < dims[2]-1; z++) {
+    z_area=z*area;
+    for (y = 1; y < dims[1]-1; y++) {
+      y_dims=y*dims[0];
+      for (x = 1; x < dims[0]-1; x++)  {
+	  
+        index = x + y_dims + z_area;
+        label_value = (int)label[index];
+        if (label_value < 1) continue;
+        val = src[index];
+          
+        d_pve[CSFLABEL] = ComputeGaussianLikelihood(val, mean2[CSFLABEL], var2[CSFLABEL]);
+        d_pve[GMLABEL]  = ComputeGaussianLikelihood(val, mean2[GMLABEL], var2[GMLABEL]);
+        d_pve[WMLABEL]  = ComputeGaussianLikelihood(val, mean2[WMLABEL], var2[WMLABEL]);
+        d_pve[BKGCSFLABEL] = ComputeMarginalizedLikelihood(val, 0.0, mean2[CSFLABEL],
+                                        0.1*MIN3(var2[CSFLABEL],var2[GMLABEL],var2[WMLABEL]), var2[CSFLABEL], 100 );
+        d_pve[WMGMLABEL]   = ComputeMarginalizedLikelihood(val, mean2[WMLABEL], mean2[GMLABEL],
+                                        var2[WMLABEL], var2[GMLABEL], 100 );
+        d_pve[GMCSFLABEL]  = ComputeMarginalizedLikelihood(val, mean2[GMLABEL], mean2[CSFLABEL],
+                                        var2[GMLABEL], var2[CSFLABEL], 100 );
+        
+        Normalize(d_pve, MAX_NC);
+        for (i=0; i<MAX_NC; i++)
+          prob[index+i*vol] = (unsigned char)round(255.0*d_pve[i]);
+          
+        label[index] = (unsigned char) MaxArg(d_pve, MAX_NC);
+      }
+    }
+  }   
+
+  for(iter=0; iter < iterations; iter++) {
+    int sum_changed = 0;
+    sum_exp = 0.0;
+    printf("ICM step\n");
+    /* loop over image points */
+    for (z = 1; z < dims[2]-1; z++) {
+      z_area=z*area;
+      for (y = 1; y < dims[1]-1; y++) {
+        y_dims=y*dims[0];
+        for (x = 1; x < dims[0]-1; x++)  {
+	  
+          index = x + y_dims + z_area;
+          if(label[index]>0) {
+            ComputeMrfProbability(mrf_probability, exponent, label, x, y, z, dims, MAX_NC, beta);
+          
+            for (i=0; i<MAX_NC; i++) {
+              sum_exp += exponent[i];
+              mrf_probability[i] *= (double)prob[index+i*vol];
+            }
+            Normalize(mrf_probability, MAX_NC);
+            new_label = (unsigned char) MaxArg(mrf_probability, MAX_NC);
+            if (new_label != label[index]) {
+              sum_changed++;
+              label[index] = new_label;
+            }
+          }
+        }
+      }
+    }
+    printf("%d %f\n",sum_changed, sum_exp);
+    if(sum_changed < 100) break;
+  }   
+  free(prob);
+} 
+
 
 /* perform adaptive MAP on given src and initial segmentation label */
-void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, int nc, int niters, int sub, int *dims, int pve, double weight_MRF)
+void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, double *var, int nc, int niters, int sub, int *dims, int pve, double weight_MRF)
 {
   int i;
   int area, narea, nvol, vol, z_area, y_dims, index, ind;
   int histo[65536];
   double sub_1, beta[1], dmin, val;
-  double var[MAX_NC], d[MAX_NC], alpha[MAX_NC], log_alpha[MAX_NC], log_var[MAX_NC];
+  double d[MAX_NC], alpha[MAX_NC], log_alpha[MAX_NC], log_var[MAX_NC];
   double pvalue[MAX_NC], psum;
   int nix, niy, niz, iters, count_change;
   int x, y, z, label_value, xBG;
@@ -316,16 +464,6 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   nvol = nix*niy*niz;
 
   r = (struct point*)malloc(sizeof(struct point)*(nc+3)*nvol);
-
-  if (pve == MARGINALIZED) {
-  /* Use marginalized likelihood to estimate initial 6 classes */
-    GetMeansVariances(src, label, nc, r, sub, dims, mn_thresh, mx_thresh);    
-    ComputeInitialPveLabel(src, label, r, nc, sub, dims);
-    nc += 3;
-  } else if (pve == KMEANS) {
-  /* use Kmeans to estimate 5 classes */
-    nc += 3;  
-  }
   
   MrfPrior(label, nc, alpha, beta, 0, dims);    
 
@@ -429,6 +567,8 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   fflush(stdout);
 
   free(r);
+
+  if(pve) ComputePveLabel(src, label, mean, var, MAX_NC, dims, 0.1, 0);
 
   return;    
 }
