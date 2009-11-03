@@ -201,7 +201,6 @@ void ComputeInitialPveLabel(double *src, unsigned char *label, struct point *r, 
 
   narea = nix*niy;
   nvol = nix*niy*niz;
-
   
   /* loop over image points */
   for (z = 1; z < dims[2]-1; z++) {
@@ -305,7 +304,6 @@ void ComputeMrfProbability(double *mrf_probability, double *exponent, unsigned c
            else if(abs(label1 - label2)<2) similarity_value = similar;
            else similarity_value = different;
 
-//similarity_value = -6 + abs(label1-label2);
            distance = sqrt(slice_width_sq[0] * abs(i) +
                            slice_width_sq[1] * abs(j) +
                            slice_width_sq[2] * abs(k));
@@ -465,6 +463,16 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
 
   r = (struct point*)malloc(sizeof(struct point)*(nc+3)*nvol);
   
+  if (pve == MARGINALIZED) {
+  /* Use marginalized likelihood to estimate initial 6 classes */
+    GetMeansVariances(src, label, nc, r, sub, dims, mn_thresh, mx_thresh);    
+    ComputeInitialPveLabel(src, label, r, nc, sub, dims);
+    nc += 3;
+  } else if (pve == KMEANS) {
+  /* use Kmeans to estimate 5 classes */
+    nc += 3;  
+  }
+
   MrfPrior(label, nc, alpha, beta, 0, dims);    
 
   /* weight MRF prior */
@@ -567,8 +575,6 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   fflush(stdout);
 
   free(r);
-
-  if(pve) ComputePveLabel(src, label, mean, var, MAX_NC, dims, 0.1, 0);
 
   return;    
 }

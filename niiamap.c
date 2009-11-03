@@ -33,7 +33,7 @@ static ArgvInfo argTable[] = {
   {"-thresh_kmeans", ARGV_FLOAT, (char *) 1, (char *) &thresh_kmeans,
        "Threshold for Kmeans algorithm (0..1)."},
   {"-pve", ARGV_INT, (char *) 1, (char *) &pve,
-       "Use Partial Volume Estimation with marginalized likelihood estimation (1) or Kmeans initialization (2) or do not use PVE (0)."},
+       "Use Partial Volume Estimation with marginalized likelihood estimation (1) or do not use PVE (0)."},
   {"-write_seg", ARGV_INT, (char *) 3, (char *) &write_seg,
        "Write fuzzy segmentations as separate images. Three numbers should be given, while a '1' indicates that this tissue class should be saved. Order is CSF/GM/WM."},
   {"-write_nu", ARGV_CONSTANT, (char *) 1, (char *) &write_nu,
@@ -211,7 +211,7 @@ main( int argc, char **argv )
   dims[1] = src_ptr->ny;
   dims[2] = src_ptr->nz;
     
-  /* initial nu-correction works best with 5 class Kmeans approach followed by a 3 class approach */
+  /* initial nu-correction works best with 6 class Kmeans approach followed by a 3 class approach */
   max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS);
   max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
 
@@ -225,7 +225,7 @@ main( int argc, char **argv )
   /* PVE */
   if (pve) {
     fprintf(stdout,"Calculate Partial Volume Estimate.\n");
-    Pve6(src, prob, label, mean, var, dims, PVELABEL);
+    Pve6(src, prob, label, mean, dims, PVELABEL);
   }
   
   basename = nifti_makebasename(output_filename);
