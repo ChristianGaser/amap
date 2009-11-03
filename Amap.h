@@ -59,7 +59,7 @@ extern void WarpPriors(unsigned char *prob, unsigned char *priors, unsigned char
 
 extern void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, double *var, int nc, int niters, int sub, int *dims, int pve, double weight_MRF);
 
-extern void Pve6(double *src, unsigned char *prob, unsigned char *label, double *mean, double *var, int *dims, int update_label);
+extern void Pve6(double *src, unsigned char *prob, unsigned char *label, double *mean, int *dims, int update_label);
 
 extern void MrfPrior(unsigned char *label, int nc, double *alpha, double *beta, int init, int *dims);
 
