@@ -61,6 +61,10 @@ void aniso3d(double *vol, int *dims, double sigma, int Niter, double lambda)
 	Xmax = dims[1] - 1;
 	Zmax = dims[2] - 1;
 	prevvol = (double *)malloc(Nbytes);
+  if(prevvol == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+  }
 
   lambda = lambda/6.0; /* to do exactly the same as the m-file */
   std = stddev(vol, dims);
