@@ -143,7 +143,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   double e, emin, eps, *nu, *src_bak, th_src, val_nu;
   double last_err = HUGE;
   double max_src = -HUGE;
-  double mean_nu = 0.0;
+  double mean_nu = 0.0, fwhm[3];
   long n[MAX_NC];
   double mean[MAX_NC];
   double var[MAX_NC];
@@ -274,10 +274,12 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       /* correct nu input to a mean of 1 to remain original intensity range */
       mean_nu /= (double)count;
       for (i=0; i<vol; i++)
-        if (nu[i] > 0.0) nu[i] /= mean_nu; 
+        if (nu[i] > 0.0) nu[i] /= mean_nu; else nu[i] = 1.0;
       
+      for(i=0; i<3; i++) fwhm[i] = MAX(50.0,100.0/(j+1.0));
+       smooth_double(nu, dims, separations, fwhm);
       /* spline estimate: start with distance of 1500 end end up with 500 */
-      splineSmooth(nu, 0.01, MAX(500,1500.0/(j+1)), 4, separations, dims);
+//      splineSmooth(nu, 0.01, MAX(500,1500.0/(j+1)), 4, separations, dims);
       
       /* apply nu correction to source image */
       for (i=0; i<vol; i++) {
