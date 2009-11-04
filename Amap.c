@@ -545,12 +545,12 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   for (i = 65535; i > 0; i--) if (cumsum[i] <= 990) break;
   thresh[1] = (double)i/65535.0*(max_src-min_src);
  
-  r = (struct point*)malloc(sizeof(struct point)*(nc+3)*nvol);
+  r = (struct point*)malloc(sizeof(struct point)*MAX_NC*nvol);
   
   EstimateSegmentation(src, label, prob, r, mean, var, nc, niters, sub, dims, thresh);
 
-  if (pve) {
   /* Use marginalized likelihood to estimate initial 6 classes */
+  if (pve) {
     GetMeansVariances(src, label, nc, r, sub, dims, thresh);    
     ComputeInitialPveLabel(src, label, r, nc, sub, dims);
     nc += 3;
