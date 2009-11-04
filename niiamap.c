@@ -219,7 +219,7 @@ main( int argc, char **argv )
   if (correct_nu)
     max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, pve);
 
-  Amap( src, label, prob, mean, var, n_pure_classes, Niters, subsample, dims, pve, weight_MRF);
+  Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve, weight_MRF);
 
   /* PVE */
   if (pve) {

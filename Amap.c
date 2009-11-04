@@ -510,11 +510,12 @@ void EstimateSegmentation(double *src, unsigned char *label, unsigned char *prob
 
 
 /* perform adaptive MAP on given src and initial segmentation label */
-void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, double *var, int nc, int niters, int sub, int *dims, int pve, double weight_MRF)
+void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, int nc, int niters, int sub, int *dims, int pve, double weight_MRF)
 {
   int i;
   int area, nvol, vol;
   int histo[65536];
+  double var[MAX_NC];
   double thresh[2];
   double min_src = HUGE, max_src = -HUGE;
   int cumsum[65536];
