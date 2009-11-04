@@ -130,7 +130,8 @@ convxyz_double(double *iVol, double filtx[], double filty[], double filtz[],
 
 
 
-int convxyz_uint8(unsigned char *iVol, double filtx[], double filty[], double filtz[],
+int
+convxyz_uint8(unsigned char *iVol, double filtx[], double filty[], double filtz[],
   int fxdim, int fydim, int fzdim, int xoff, int yoff, int zoff,
   unsigned char *oVol, int dims[3])
 {
@@ -207,7 +208,8 @@ int convxyz_uint8(unsigned char *iVol, double filtx[], double filty[], double fi
   return(0);
 }
 
-int convxyz_int16(signed short *iVol, double filtx[], double filty[], double filtz[],
+int 
+convxyz_int16(signed short *iVol, double filtx[], double filty[], double filtz[],
   int fxdim, int fydim, int fzdim, int xoff, int yoff, int zoff,
   signed short *oVol, int dims[3])
 {
@@ -284,7 +286,8 @@ int convxyz_int16(signed short *iVol, double filtx[], double filty[], double fil
   return(0);
 }
 
-int convxyz_int32(signed int *iVol, double filtx[], double filty[], double filtz[],
+int 
+convxyz_int32(signed int *iVol, double filtx[], double filty[], double filtz[],
   int fxdim, int fydim, int fzdim, int xoff, int yoff, int zoff,
   signed int *oVol, int dims[3])
 {
@@ -474,4 +477,51 @@ morph_open_double(double *vol, int dims[3], int niter, double th)
 
   for (i=0;i<dims[2]*dims[1]*dims[0];i++)
     vol[i] = (double)buffer[i];
+}
+
+void
+smooth_double(double *vol, int dims[3], double separations[3], double s[3])
+{
+  int i;
+  double xsum, ysum, zsum, *x, *y, *z;
+  int xyz[3];
+
+  for(i=0; i<3; i++) {
+    s[i] /= separations[i];
+    if(s[i] < 1.0) s[i] = 1.0;
+    s[i] /= sqrt(8.0*log(2.0));
+    xyz[i] = (int) round(6.0*s[i]);
+  }
+  
+  x = (double *) malloc(sizeof(double)*((2*xyz[0])+1));
+  y = (double *) malloc(sizeof(double)*((2*xyz[1])+1));
+  z = (double *) malloc(sizeof(double)*((2*xyz[2])+1));
+  
+  for(i=-xyz[0]; i <= xyz[0]; i++) x[i+xyz[0]] = (double)i;
+  for(i=-xyz[1]; i <= xyz[1]; i++) y[i+xyz[1]] = (double)i;
+  for(i=-xyz[2]; i <= xyz[2]; i++) z[i+xyz[2]] = (double)i;
+  
+  xsum = 0.0; ysum = 0.0; zsum = 0.0;
+  for(i=0; i < ((2*xyz[0])+1); i++) {
+    x[i] = exp(-pow(x[i],2) / (2.0*pow(s[0],2)));
+    xsum += x[i];
+  }
+  for(i=0; i < ((2*xyz[1])+1); i++) {
+    y[i] = exp(-pow(y[i],2) / (2.0*pow(s[1],2)));
+    ysum += y[i];
+  }
+  for(i=0; i < ((2*xyz[2])+1); i++) {
+    z[i] = exp(-pow(z[i],2) / (2.0*pow(s[2],2)));
+    zsum += z[i];
+  }
+  
+  for(i=0; i < ((2*xyz[0])+1); i++) x[i] /= xsum;
+  for(i=0; i < ((2*xyz[1])+1); i++) y[i] /= ysum;
+  for(i=0; i < ((2*xyz[2])+1); i++) z[i] /= zsum;
+  
+  convxyz_double(vol,x,y,z,((2*xyz[0])+1),((2*xyz[1])+1),((2*xyz[2])+1),-xyz[0],-xyz[1],-xyz[2],vol,dims);
+
+  free(x);
+  free(y);
+  free(z);
 }

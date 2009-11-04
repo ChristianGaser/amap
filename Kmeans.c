@@ -274,14 +274,14 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       /* correct nu input to a mean of 1 to remain original intensity range */
       mean_nu /= (double)count;
       for (i=0; i<vol; i++)
-        nu[i] /= mean_nu;
+        if (nu[i] > 0.0) nu[i] /= mean_nu; 
       
       /* spline estimate: start with distance of 1500 end end up with 500 */
       splineSmooth(nu, 0.01, MAX(500,1500.0/(j+1)), 4, separations, dims);
       
       /* apply nu correction to source image */
       for (i=0; i<vol; i++) {
-        if (nu[i] > 0)
+        if (nu[i] > 0.0) 
           src[i] /= nu[i];
       }
       

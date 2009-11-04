@@ -12,10 +12,9 @@
 #include "nifti1/nifti1_local.h"
 
 extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
-extern equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
 extern write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 
-double fwhm = 8;
+double fwhm = 8.0;
 
 static ArgvInfo argTable[] = {
   {"-fwhm", ARGV_FLOAT, (char *) 1, (char *) &fwhm, 
@@ -29,7 +28,7 @@ int main(int argc, char *argv[])
 {
   char *infile, *outfile;
   int i, j, dims[3];
-  double *input, separations[3];
+  double *input, separations[3], s[3];
   nifti_image *nii_ptr;
   double filt[3]={1,1,1};
 
@@ -53,6 +52,9 @@ int main(int argc, char *argv[])
     return(EXIT_FAILURE);
   }
 
+  /* only allow isotropic filtering */
+  for(i=0; i<3; i++) s[i] = fwhm;
+  
   separations[0] = nii_ptr->dx;
   separations[1] = nii_ptr->dy;
   separations[2] = nii_ptr->dz;
@@ -60,9 +62,7 @@ int main(int argc, char *argv[])
   dims[1] = nii_ptr->ny;
   dims[2] = nii_ptr->nz;
   
-  morph_open_double(input, dims, 1, 0.098436);
-//  morph_dilate_double(input, dims, 2, 0.5);
-  morph_close_double(input, dims, 10, 0.5);
+  smooth_double(input, dims, separations, s);
 
   if (!write_nifti( outfile, input, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
     exit(EXIT_FAILURE);
