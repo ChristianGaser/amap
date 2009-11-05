@@ -585,7 +585,9 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   /* use much smaller beta for if no pve is selected */
   if(!pve) beta[0] /= 20.0;
   
-  ICM(src, label, mean, var, nc, dims, beta[0], 50);
+//  ICM(src, label, mean, var, nc, dims, beta[0], 50);
+printf("ICM limited to 1\n");
+  ICM(src, label, mean, var, nc, dims, beta[0], 1);
 
   free(r);
 

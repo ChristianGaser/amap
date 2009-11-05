@@ -15,10 +15,13 @@ extern nifti_image *read_nifti_float( const char *input_filename, double *image[
 extern write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 
 double fwhm = 8.0;
+int use_mask = 0;
 
 static ArgvInfo argTable[] = {
   {"-fwhm", ARGV_FLOAT, (char *) 1, (char *) &fwhm, 
-       "FWHM."},
+       "FWHM in mm."},
+  {"-mask", ARGV_CONSTANT, (char *) 1, (char *) &use_mask,
+       "Use masked smoothing (default no masking)."},
    {NULL, ARGV_END, NULL, NULL, NULL}
 };
 
@@ -62,7 +65,7 @@ int main(int argc, char *argv[])
   dims[1] = nii_ptr->ny;
   dims[2] = nii_ptr->nz;
   
-  smooth_double(input, dims, separations, s);
+  smooth_double(input, dims, separations, s, use_mask);
 
   if (!write_nifti( outfile, input, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
     exit(EXIT_FAILURE);

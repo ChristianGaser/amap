@@ -111,7 +111,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
   
   lut[0] = 0;
 
-  /* adjust for the backgrint label */
+  /* adjust for the background label */
   diff = 0;
   
   for (z=0;z<dims[2];z++) {
@@ -239,6 +239,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
 
   /* only use values above the mean of the lower two cluster for nu-estimate */
   th_src = max_src*(double)((Mu[0]+Mu[1])/2.0)/255.0;
+  th_src = 0.0;
 
   /* extend initial 3 clusters to 6 clusters by averaging clusters */
   if (pve == KMEANS) {
@@ -276,11 +277,13 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       for (i=0; i<vol; i++)
         if (nu[i] > 0.0) nu[i] /= mean_nu; else nu[i] = 1.0;
       
-      for(i=0; i<3; i++) fwhm[i] = MAX(50.0,100.0/(j+1.0));
-       smooth_double(nu, dims, separations, fwhm);
+if (1==1) {
+      for(i=0; i<3; i++) fwhm[i] = MAX(50.0,80.0/(j+1.0));
+       smooth_subsample_double(nu, dims, separations, fwhm, 0, 4);
+} else {
       /* spline estimate: start with distance of 1500 end end up with 500 */
-//      splineSmooth(nu, 0.01, MAX(500,1500.0/(j+1)), 4, separations, dims);
-      
+      splineSmooth(nu, 0.01, MAX(500,1500.0/(j+1)), 4, separations, dims);
+}      
       /* apply nu correction to source image */
       for (i=0; i<vol; i++) {
         if (nu[i] > 0.0) 
@@ -306,7 +309,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
 
       last_err = e;
     
-      printf("iters:%2d error: %7.2f\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",j+1, e*n_clusters/(dims[0]*dims[1]*dims[2]));
+      printf("iters: %2d error: %7.2f\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",j+1, e*n_clusters/(dims[0]*dims[1]*dims[2]));
       fflush(stdout);
     
     }

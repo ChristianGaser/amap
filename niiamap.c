@@ -50,7 +50,7 @@ static int usage(void)
 {
     static const char msg[] = {
         "niiamap: Segmentation with adaptive MAP\n"
-        "usage: niiamap [options] in.nii out.nii\n"
+        "usage: niiamap [options] in.nii [out.nii]\n"
     };
     fprintf(stderr, "%s", msg);
     exit(EXIT_FAILURE);
@@ -77,9 +77,9 @@ main( int argc, char **argv )
   double    val, max_vol, min_vol, separations[3];
 
   /* Get arguments */
-  if (ParseArgv(&argc, argv, argTable, 0) || (argc < 3)) {
+  if (ParseArgv(&argc, argv, argTable, 0) || (argc < 2)) {
     (void) fprintf(stderr, 
-    "\nUsage: %s [options] in.nii out.nii\n",
+    "\nUsage: %s [options] in.nii [out.nii]\n",
                      argv[0]);
     (void) fprintf(stderr, 
       "       %s -help\n\n", argv[0]);
@@ -87,15 +87,20 @@ main( int argc, char **argv )
   }
   
   input_filename  = argv[1];
-  output_filename = argv[2];
-
+  
+  /* if not defined use original name as basename for output */
+  if(argc==3)
+    output_filename = argv[2];
+  else
+    output_filename = argv[1];
+  
   /* deal with extension */
   extension = nifti_find_file_extension(output_filename);
   
   /* if no valid extension was found use .nii */
   if (extension == NULL) {
-    fprintf(stderr,"No valid extension found for output filename %s.\n",output_filename);
-    exit(EXIT_FAILURE);
+    fprintf(stdout,"Use .nii as extension for %s.\n",output_filename);
+    (void) sprintf( extension, ".nii");;
   }
 
   if (iters_nu <= 0)
@@ -215,7 +220,7 @@ main( int argc, char **argv )
   if (correct_nu)
     max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS);
   
-  max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
+//  max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
 
   /* final Kmeans estimation if nu-correction was selected */
   if (correct_nu)
@@ -250,7 +255,9 @@ main( int argc, char **argv )
     for (i = 0; i < src_ptr->nvox; i++)
       src[i] = (double)label[i];
 
-    if(!write_nifti(output_filename, src, DT_UINT8, slope, 
+    (void) sprintf( buffer, "%s_seg%s",basename,extension); 
+
+    if(!write_nifti(buffer, src, DT_UINT8, slope, 
             dims, separations, src_ptr))
       exit(EXIT_FAILURE);
     
@@ -263,7 +270,7 @@ main( int argc, char **argv )
 
     for (j = 0; j<n_pure_classes; j++) {
       if (write_seg[j]) {
-        (void) sprintf( buffer, "%s_seg%d%s",basename,j,extension); 
+        (void) sprintf( buffer, "%s_prob%d%s",basename,j,extension); 
         
         for (i = 0; i < src_ptr->nvox; i++)
           src[i] = prob[i+(j*src_ptr->nvox)];

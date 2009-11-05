@@ -69,6 +69,10 @@ extern void sampn(int dm[], float f[], int n, int mm, double x, double y, double
 
 extern int splineSmooth( double *src, double lambda, double distance, int subsample, double *separations, int *dims);
 
+extern void smooth_double(double *vol, int dims[3], double separations[3], double s[3], int use_mask);
+
+extern void smooth_subsample_double(double *vol, int dims[3], double separations[3], double s[3], int use_mask, int samp);
+
 struct point {
   double mean;
   double var;
