@@ -217,10 +217,10 @@ main( int argc, char **argv )
   dims[2] = src_ptr->nz;
     
   /* initial nu-correction works best with 6 class Kmeans approach followed by a 3 class approach */
-  if (correct_nu)
-    max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS);
+//  if (correct_nu)
+//    max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS);
   
-//  max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
+  max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
 
   /* final Kmeans estimation if nu-correction was selected */
   if (correct_nu)
