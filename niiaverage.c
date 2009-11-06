@@ -14,6 +14,7 @@
 extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
 extern equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
 extern write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
+extern int ParseArgv(int *argcPtr, char **argv, ArgvInfo *argTable, int flags);
 
 char *std_filename = NULL;
 

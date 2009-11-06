@@ -2,12 +2,10 @@ AUTOMAKE_OPTIONS = check-news
 ACLOCAL_AMFLAGS = -I m4
 
 bin_PROGRAMS = \
-    niiamap \
-	mincmarchingcubes \
+  niiamap \
 	niiaverage \
 	niismooth \
-	niibrainmask \
-	mincremovebridges
+	niibrainmask 
 	
 mincremovebridges_SOURCES = \
 	CRemoveBridges.cpp \
@@ -26,13 +24,14 @@ niibrainmask_SOURCES = \
 	nifti1/nifti1_io.c \
 	nifti1/znzlib.c \
 	niilib.c \
-	vollib.c \
-	SplineSmooth.cc
+	ParseArgv.c \
+	vollib.c 
 
 niiaverage_SOURCES = \
 	niiaverage.c \
 	nifti1/nifti1_io.c \
 	nifti1/znzlib.c \
+	ParseArgv.c \
 	niilib.c
 
 niismooth_SOURCES = \
@@ -40,6 +39,7 @@ niismooth_SOURCES = \
 	nifti1/nifti1_io.c \
 	nifti1/znzlib.c \
 	vollib.c \
+	ParseArgv.c \
 	niilib.c
 
 niiamap_SOURCES = \
@@ -52,7 +52,7 @@ niiamap_SOURCES = \
 	nifti1/znzlib.c \
 	niilib.c \
 	vollib.c \
-	SplineSmooth.cc
+	ParseArgv.c
 
 m4_files = m4/mni_REQUIRE_LIB.m4 \
 	m4/mni_REQUIRE_MNILIBS.m4 \

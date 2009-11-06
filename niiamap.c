@@ -32,6 +32,8 @@ static ArgvInfo argTable[] = {
        "Threshold for prior brainmask (0..1)."},
   {"-thresh_kmeans", ARGV_FLOAT, (char *) 1, (char *) &thresh_kmeans,
        "Threshold for Kmeans algorithm (0..1)."},
+  {"-bias", ARGV_FLOAT, (char *) 1, (char *) &bias_fwhm,
+       "Bias field smoothing (FWHM) in mm."},
   {"-pve", ARGV_INT, (char *) 1, (char *) &pve,
        "Use Partial Volume Estimation with marginalized likelihood estimation (1) or do not use PVE (0)."},
   {"-write_seg", ARGV_INT, (char *) 3, (char *) &write_seg,
@@ -70,7 +72,6 @@ main( int argc, char **argv )
   char      *input_filename, *output_filename, *basename, *extension;
   int       i, j, dims[3], thresh, thresh_kmeans_int;
   int		x, y, z, z_area, y_dims, count_zero;
-  char		*axis_order[3] = { MIzspace, MIyspace, MIxspace };
   char		*arg_string, buffer[1024], *str_ptr;
   unsigned char *label, *prob, *mask, *marker, *init_mask, *priors;
   double	*src, *buffer_vol, ratio_zeros, slope;
@@ -215,16 +216,13 @@ main( int argc, char **argv )
   dims[0] = src_ptr->nx;
   dims[1] = src_ptr->ny;
   dims[2] = src_ptr->nz;
-    
-  /* initial nu-correction works best with 6 class Kmeans approach followed by a 3 class approach */
-//  if (correct_nu)
-//    max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS);
-  
-  max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
 
-  /* final Kmeans estimation if nu-correction was selected */
+  /* initial nu-correction works best with 6 class Kmeans approach followed by a 3 class approach */
   if (correct_nu)
-    max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, pve);
+    max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS, bias_fwhm);
+  
+  /* final Kmeans estimation */
+  max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE, bias_fwhm);
 
   Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve, weight_MRF);
 

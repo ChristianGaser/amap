@@ -124,7 +124,7 @@ main( int argc, char **argv )
   
   /* initially use 4 classes to consider background */
   n_classes = 4;
-  max_vol = Kmeans( src, label, mask, 25, n_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE);
+  max_vol = Kmeans( src, label, mask, 25, n_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE, 50.0);
 
   double mu[2];
   int n_voxel[2];
@@ -151,7 +151,7 @@ main( int argc, char **argv )
   
   /* second Kmeans with 3 classes */
   n_classes = 3;
-  max_vol = Kmeans( src, label, mask, 25, n_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS);
+  max_vol = Kmeans( src, label, mask, 25, n_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS, 50.0);
 
   /* first rough skull-stripping */  
   morph_open_uint8(label, dims, strip_param[0], 3);
@@ -168,7 +168,7 @@ main( int argc, char **argv )
   prob  = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox*n_classes);
 
   /* use Kmeans with 6 classes */
-  max_vol = Kmeans( src, label, mask, 25, 3, separations, dims, thresh, thresh_kmeans_int, iters_nu, 1);
+  max_vol = Kmeans( src, label, mask, 25, 3, separations, dims, thresh, thresh_kmeans_int, iters_nu, 1, 50.0);
 
   /* use amap approach with PVE */
   Amap( src, label, prob, mean, 3, 10, 16, dims, 1, 0.5);

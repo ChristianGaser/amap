@@ -1,7 +1,7 @@
 dnl $Id: configure.in,v 1.7 2003/06/12 15:54:01 spotspot Exp $
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(amap,0.1,Christian Gaser <christian.gaser@uni-jena.de>)
+AC_INIT
 AC_REVISION($Revision: 0.99 $)
 
 AM_INIT_AUTOMAKE(amap,0.1,Christian Gaser <christian.gaser@uni-jena.de>)
@@ -26,11 +26,6 @@ AM_DISABLE_SHARED
 AC_PROG_LIBTOOL
 
 smr_WITH_BUILD_PATH
-
-mni_REQUIRE_VOLUMEIO
-mni_REQUIRE_EBTKS
-mni_REQUIRE_BICPL
-mni_REQUIRE_MINC
 
 AC_FUNC_FORK
 AC_CHECK_HEADERS(values.h malloc.h)
