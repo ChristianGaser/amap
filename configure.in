@@ -27,6 +27,8 @@ AC_PROG_LIBTOOL
 
 smr_WITH_BUILD_PATH
 
+mni_REQUIRE_EBTKS
+
 AC_FUNC_FORK
 AC_CHECK_HEADERS(values.h malloc.h)
 AC_CHECK_FUNCS(finite isfinite mkstemp)

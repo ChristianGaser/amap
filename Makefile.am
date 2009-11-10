@@ -25,6 +25,7 @@ niibrainmask_SOURCES = \
 	nifti1/znzlib.c \
 	niilib.c \
 	ParseArgv.c \
+	SplineSmooth.cc \
 	vollib.c 
 
 niiaverage_SOURCES = \
@@ -52,6 +53,7 @@ niiamap_SOURCES = \
 	nifti1/znzlib.c \
 	niilib.c \
 	vollib.c \
+	SplineSmooth.cc \
 	ParseArgv.c
 
 m4_files = m4/mni_REQUIRE_LIB.m4 \
