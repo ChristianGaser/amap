@@ -135,7 +135,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   double var[MAX_NC];
   double mu[MAX_NC];
   double Mu[MAX_NC];
-  int nc;
+  int nc, count_err;
   long vol;
   int nc_initial = n_clusters;
 
@@ -231,7 +231,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   /* find the final clustering and correct for nu */
   if (iters_nu > 0) {
     e = EstimateKmeans(src, label, mask, n_clusters, mu, NI, dims, thresh_mask, thresh_kmeans, max_src);
-    int count_err = 0;
+    count_err = 0;
     for (j = 0; j < iters_nu; j++) {  
       for (i = 0; i < vol; i++) {
         nu[i] = 0.0;
