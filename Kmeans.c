@@ -244,11 +244,10 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
         }
       }
             
-if(1==0) {
+#ifdef SPLINESMOOTH
       /* spline estimate */
       splineSmooth(nu, 0.01, bias_fwhm, 4, separations, dims);
-} else
-{
+#else
       /* nu-correction by using the smoothed residuals */      
       for (i=0; i<vol; i++) {
         if (nu[i] == 0.0)
@@ -257,8 +256,8 @@ if(1==0) {
 
       for(i=0; i<3; i++) fwhm[i] = bias_fwhm;
        smooth_double(nu, dims, separations, fwhm, 0);
+#endif
 
-}
       /* apply nu correction to source image */
       for (i=0; i<vol; i++) {
         if (nu[i] > 0.0)
