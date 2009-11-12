@@ -19,7 +19,7 @@ niibrainmask_SOURCES = \
 	bwlabel.c \
 	Amap.c \
 	Kmeans.c \
-	Pve6.c \
+	Pve.c \
 	MrfPrior.c \
 	nifti1/nifti1_io.c \
 	nifti1/znzlib.c \
@@ -47,7 +47,7 @@ niiamap_SOURCES = \
 	niiamap.c \
 	Amap.c \
 	Kmeans.c \
-	Pve6.c \
+	Pve.c \
 	MrfPrior.c \
 	nifti1/nifti1_io.c \
 	nifti1/znzlib.c \
