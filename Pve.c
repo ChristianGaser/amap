@@ -88,8 +88,8 @@ void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, 
           mx = -HUGE;
           if(label[ind] > 0) {
             for (i = 0; i < 3; i++) {
-              if (new_val[i*2] > mx) {
-                mx = new_val[i*2];
+              if (new_val[1+i*2] > mx) {
+                mx = new_val[1+i*2];
                 mxi = i;
               }
             }

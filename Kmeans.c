@@ -72,13 +72,14 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
     /* find the new cluster centers */
     diff = 0;
     for (i = 0; i < nc; i++) {
-      xnorm = 0.0; sum = 0.0;
+      xnorm = 0.0;
+      sum = 0.0;
       for (j = 0; j < 256; j++)
 	    if (lut[j] == i) {
 	      xnorm += histo[j];
 	      sum +=  j * histo[j];
 	    }
-      sum = xnorm > 0 ? sum /= xnorm: 0.0;
+      sum = xnorm > 0 ? sum /= xnorm : 0.0;
       dx = sum - mean[i];
       mean[i] = sum;
       dx *= dx;
@@ -128,7 +129,6 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   double e, emin, eps, *nu, *src_bak, th_src, val, val_nu;
   double last_err = HUGE;
   double max_src = -HUGE;
-  double fwhm[3];
   long n[MAX_NC];
   double mean[MAX_NC];
   double var[MAX_NC];
