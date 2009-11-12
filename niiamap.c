@@ -33,7 +33,7 @@ static ArgvInfo argTable[] = {
   {"-thresh_kmeans", ARGV_FLOAT, (char *) 1, (char *) &thresh_kmeans,
        "Threshold for Kmeans algorithm (0..1)."},
   {"-bias", ARGV_FLOAT, (char *) 1, (char *) &bias_fwhm,
-       "Bias field smoothing (FWHM) in mm."},
+       "Bias field spline smoothing (FWHM) in mm."},
   {"-pve", ARGV_INT, (char *) 1, (char *) &pve,
        "Use Partial Volume Estimation with marginalized likelihood estimation (1) or do not use PVE (0)."},
   {"-write_seg", ARGV_INT, (char *) 3, (char *) &write_seg,
@@ -112,15 +112,12 @@ main( int argc, char **argv )
     fprintf(stdout,"To write segmentation you need al least one iteration.\n");
   }
 
-  if (correct_nu)
-    fprintf(stdout,"Nu correction.\n");
-  else {
-    iters_nu = -1;
-  }
-
   /* do not write nu corrected image if correction is not selected */
-  if (!correct_nu) write_nu = 0;
-
+  if (!correct_nu) {
+    iters_nu = -1;
+    write_nu = 0;
+  }
+  
   /* read data and scale it to 0..255 */
   strcpy(buffer, input_filename);
   str_ptr = strrchr(buffer, '.');

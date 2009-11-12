@@ -24,7 +24,6 @@
 #include <math.h>
 #include "Amap.h"
 
-
 double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, int nc, double *mean, int ni, int *dims, int thresh_mask, int thresh_kmeans, double max_src)
 /* perform k-means algorithm give initial mean estimates */    
 {
@@ -230,6 +229,8 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
 
   /* find the final clustering and correct for nu */
   if (iters_nu > 0) {
+#ifdef SPLINESMOOTH
+    fprintf(stdout,"Nu correction.\n");
     e = EstimateKmeans(src, label, mask, n_clusters, mu, NI, dims, thresh_mask, thresh_kmeans, max_src);
     count_err = 0;
     for (j = 0; j < iters_nu; j++) {  
@@ -244,20 +245,9 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
         }
       }
             
-#ifdef SPLINESMOOTH
       /* spline estimate */
       splineSmooth(nu, 0.01, bias_fwhm, 4, separations, dims);
-#else
-      /* nu-correction by using the smoothed residuals */      
-      for (i=0; i<vol; i++) {
-        if (nu[i] == 0.0)
-          nu[i] = 1.0;
-      }
-
-      for(i=0; i<3; i++) fwhm[i] = bias_fwhm;
-       smooth_double(nu, dims, separations, fwhm, 0);
-#endif
-
+      
       /* apply nu correction to source image */
       for (i=0; i<vol; i++) {
         if (nu[i] > 0.0)
@@ -287,6 +277,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       fflush(stdout);
     
     }
+#endif
   } else {
     e = EstimateKmeans(src, label, mask, n_clusters, mu, NI, dims, thresh_mask, thresh_kmeans, max_src);
   }
