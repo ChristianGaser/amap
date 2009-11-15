@@ -35,7 +35,7 @@ static ArgvInfo argTable[] = {
   {"-bias", ARGV_FLOAT, (char *) 1, (char *) &bias_fwhm,
        "Bias field spline smoothing (FWHM) in mm."},
   {"-pve", ARGV_INT, (char *) 1, (char *) &pve,
-       "Use Partial Volume Estimation with marginalized likelihood estimation (1) or do not use PVE (0)."},
+       "Use Partial Volume Estimation with 5 classes (5), 6 classes (6) or do not use PVE (0)."},
   {"-write_seg", ARGV_INT, (char *) 3, (char *) &write_seg,
        "Write fuzzy segmentations as separate images. Three numbers should be given, while a '1' indicates that this tissue class should be saved. Order is CSF/GM/WM."},
   {"-write_nu", ARGV_CONSTANT, (char *) 1, (char *) &write_nu,
@@ -67,7 +67,7 @@ main( int argc, char **argv )
   int       nii_dir[MAX_NII_DIMS];
   int       nii_map[MAX_NII_DIMS];
   unsigned long nii_lens[MAX_NII_DIMS];
-  int       nii_ndims;
+  int       nii_ndims, n_classes;
   int       nifti_file_type;
   char      *input_filename, *output_filename, *basename, *extension;
   int       i, j, dims[3], thresh, thresh_kmeans_int;
@@ -109,13 +109,30 @@ main( int argc, char **argv )
 
   if (Niters == 0) {
     for (i = 0; i < 3; i++) write_seg[i] = 0;
-    fprintf(stdout,"To write segmentation you need al least one iteration.\n");
+    fprintf(stdout,"To write segmentation you need at least one iteration.\n");
   }
 
   /* do not write nu corrected image if correction is not selected */
   if (!correct_nu) {
     iters_nu = -1;
     write_nu = 0;
+  }
+  
+  if((pve != 0) && (pve != 5) && (pve != 6)) {
+    fprintf(stderr,"Value for pve can be either 0 (no PVE), 5 or 6 (5 or 6 classes).\n");
+    exit(EXIT_FAILURE);
+  }
+
+  switch(pve) {
+  case 0:
+    n_classes = 3;
+    break;
+  case 5:
+    n_classes = 5;
+    break;
+  case 6:
+    n_classes = 6;
+    break;
   }
   
   /* read data and scale it to 0..255 */
@@ -226,7 +243,10 @@ main( int argc, char **argv )
   /* PVE */
   if (pve) {
     fprintf(stdout,"Calculate Partial Volume Estimate.\n");
-    Pve6(src, prob, label, mean, dims, PVELABEL);
+    if(pve==6)
+      Pve6(src, prob, label, mean, dims, PVELABEL);
+    else
+      Pve5(src, prob, label, mean, dims, PVELABEL);
   }
   
   basename = nifti_makebasename(output_filename);

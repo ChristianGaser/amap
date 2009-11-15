@@ -175,13 +175,12 @@ unsigned char MaxArg(double *pval, unsigned char n)
 }
 
 /* Compute initial PVE labeling based on marginalized likelihood */
-void ComputeInitialPveLabel(double *src, unsigned char *label, struct point *r, int nc, int sub, int *dims)
+void ComputeInitialPveLabel(double *src, unsigned char *label, struct point *r, int n_pure_classes, int sub, int *dims, int pve)
 {
-  
-  int x, y, z, z_area, y_dims, index, label_value;
+  int x, y, z, z_area, y_dims, index, label_value, off;
   int i, ix, iy, iz, ind, ind2, nix, niy, niz, narea, nvol;
   long area, vol;
-  double val, sub_1, mean[nc], var[nc], d_pve[nc];
+  double val, sub_1, mean[n_pure_classes], var[n_pure_classes], d_pve[n_pure_classes];
   
   area = dims[0]*dims[1];
   vol = area*dims[2];
@@ -196,6 +195,10 @@ void ComputeInitialPveLabel(double *src, unsigned char *label, struct point *r, 
 
   narea = nix*niy;
   nvol = nix*niy*niz;
+  
+  /* use 5 or 6 classes */
+  if(pve==6) off = 1;
+  else     off = 0;
   
   /* loop over image points */
   for(z = 1; z < dims[2]-1; z++) {
@@ -213,42 +216,45 @@ void ComputeInitialPveLabel(double *src, unsigned char *label, struct point *r, 
         ix = (int)(sub_1*x), iy = (int)(sub_1*y), iz = (int)(sub_1*z);
         ind = iz*narea + iy*nix + ix;
           
-        for(i=0; i<nc; i++) {
+        for(i=0; i<n_pure_classes; i++) {
           ind2 = (i*nvol) + ind;            
           if (r[ind2].mean > 0.0) {
-            mean[1+i*2] = r[ind2].mean;
-            var[1+i*2]  = r[ind2].var;
+            mean[off+i*2] = r[ind2].mean;
+            var[off+i*2]  = r[ind2].var;
           }
         }
 
-        if (fabs(mean[CSFLABEL]) > TINY) {
-          d_pve[CSFLABEL] = ComputeGaussianLikelihood(val, mean[CSFLABEL], var[CSFLABEL]);
-        } else d_pve[CSFLABEL] = HUGE;
+        if (fabs(mean[CSFLABEL+off-1]) > TINY) {
+          d_pve[CSFLABEL+off-1] = ComputeGaussianLikelihood(val, mean[CSFLABEL+off-1], var[CSFLABEL+off-1]);
+        } else d_pve[CSFLABEL+off-1] = HUGE;
 
-        if (fabs(mean[GMLABEL]) > TINY) {
-          d_pve[GMLABEL] = ComputeGaussianLikelihood(val, mean[GMLABEL], var[GMLABEL]);
-        } else d_pve[GMLABEL] = HUGE;
+        if (fabs(mean[GMLABEL+off-1]) > TINY) {
+          d_pve[GMLABEL+off-1] = ComputeGaussianLikelihood(val, mean[GMLABEL+off-1], var[GMLABEL+off-1]);
+        } else d_pve[GMLABEL+off-1] = HUGE;
 
-        if (fabs(mean[WMLABEL]) > TINY) {
-          d_pve[WMLABEL] = ComputeGaussianLikelihood(val, mean[WMLABEL], var[WMLABEL]);
-        } else d_pve[WMLABEL] = HUGE;
+        if (fabs(mean[WMLABEL+off-1]) > TINY) {
+          d_pve[WMLABEL+off-1] = ComputeGaussianLikelihood(val, mean[WMLABEL+off-1], var[WMLABEL+off-1]);
+        } else d_pve[WMLABEL+off-1] = HUGE;
 
-        if (fabs(mean[CSFLABEL]) > TINY) {
-          d_pve[BKGCSFLABEL] = ComputeMarginalizedLikelihood(val, 0.0, mean[CSFLABEL],
-                                        0.1*MIN3(var[CSFLABEL],var[GMLABEL],var[WMLABEL]), var[CSFLABEL], 100 );
-        } else d_pve[BKGCSFLABEL] = HUGE;
-
-        if ((fabs(mean[WMLABEL]) > TINY) && (fabs(mean[GMLABEL]) > TINY)) {
-          d_pve[WMGMLABEL] = ComputeMarginalizedLikelihood(val, mean[WMLABEL], mean[GMLABEL],
-                                        var[WMLABEL], var[GMLABEL], 100 );
-        } else d_pve[WMGMLABEL] = HUGE;
+        if ((fabs(mean[WMLABEL+off-1]) > TINY) && (fabs(mean[GMLABEL+off-1]) > TINY)) {
+          d_pve[WMGMLABEL+off-1] = ComputeMarginalizedLikelihood(val, mean[WMLABEL+off-1], mean[GMLABEL+off-1],
+                                        var[WMLABEL+off-1], var[GMLABEL+off-1], 100 );
+        } else d_pve[WMGMLABEL+off-1] = HUGE;
             
-        if ((fabs(mean[CSFLABEL]) > TINY) && (fabs(mean[GMLABEL]) > TINY)) {
-          d_pve[GMCSFLABEL] = ComputeMarginalizedLikelihood(val, mean[GMLABEL], mean[CSFLABEL],
-                                        var[GMLABEL], var[CSFLABEL], 100 );
-        } else d_pve[GMCSFLABEL] = HUGE;
+        if ((fabs(mean[CSFLABEL+off-1]) > TINY) && (fabs(mean[GMLABEL+off-1]) > TINY)) {
+          d_pve[GMCSFLABEL+off-1] = ComputeMarginalizedLikelihood(val, mean[GMLABEL+off-1], mean[CSFLABEL+off-1],
+                                        var[GMLABEL+off-1], var[CSFLABEL+off-1], 100 );
+        } else d_pve[GMCSFLABEL+off-1] = HUGE;
+        
+        /* BKGCSF only for 6 classes */
+        if(pve==6) {
+          if (fabs(mean[CSFLABEL]) > TINY) {
+            d_pve[BKGCSFLABEL] = ComputeMarginalizedLikelihood(val, 0.0, mean[CSFLABEL],
+                                        0.1*MIN3(var[CSFLABEL],var[GMLABEL],var[WMLABEL]), var[CSFLABEL], 100 );
+          } else d_pve[BKGCSFLABEL] = HUGE;
+        }
 
-        label[index] = (unsigned char) MaxArg(d_pve, MAX_NC);
+        label[index] = (unsigned char) MaxArg(d_pve, n_pure_classes+2+off);
       }
     }
   }   
@@ -557,11 +563,11 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
     
   EstimateSegmentation(src, label, prob, r, mean, var, nc, niters, sub, dims, thresh, beta);
 
-  /* Use marginalized likelihood to estimate initial 6 classes */
+  /* Use marginalized likelihood to estimate initial 5 or 6 classes */
   if (pve) {
     GetMeansVariances(src, label, nc, r, sub, dims, thresh);    
-    ComputeInitialPveLabel(src, label, r, nc, sub, dims);
-    nc += 3;
+    ComputeInitialPveLabel(src, label, r, nc, sub, dims, pve);
+    nc = pve;
     EstimateSegmentation(src, label, prob, r, mean, var, nc, niters, sub, dims, thresh, beta);
   }
 
@@ -569,9 +575,11 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
     beta[0] *= weight_MRF;
     fprintf(stdout,"Weighted MRF beta %3.3f\n",beta[0]);
   }
+  
   /* use much smaller beta for if no pve is selected */
   if(!pve) beta[0] /= 20.0;
   
+  /* iterative conditional mode */
   ICM(src, label, mean, var, nc, dims, beta[0], 50);
 
   free(r);

@@ -6,11 +6,10 @@
 
 char *mask_filename = NULL;
 int n_pure_classes = 3;
-int n_classes = 6;
 int Niters = 200;
 int subsample = 16;
 int iters_nu = 40;
-int pve = 1;
+int pve = 5;
 int correct_nu = 1;
 int write_seg[3] = {0, 1, 0};
 int write_nu = 0;
