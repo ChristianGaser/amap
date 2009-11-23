@@ -35,49 +35,49 @@ void Pve5(double *src, unsigned char *prob, unsigned char *label, double *mean, 
 
         switch(label[ind]) {
         case 0: /* BG */
-          new_val[CSFLABEL] = 0;
-          new_val[GMLABEL]  = 0;
-          new_val[WMLABEL]  = 0;
+          new_val[CSFLABEL-1] = 0;
+          new_val[GMLABEL-1]  = 0;
+          new_val[WMLABEL-1]  = 0;
           break;
-        case CSFLABEL+1: /* CSF */
-          new_val[CSFLABEL] = 255;
-          new_val[GMLABEL]  = 0;
-          new_val[WMLABEL]  = 0;
+        case CSFLABEL: /* CSF */
+          new_val[CSFLABEL-1] = 255;
+          new_val[GMLABEL-1]  = 0;
+          new_val[WMLABEL-1]  = 0;
           if(update_label == PVELABEL) label[ind] = (unsigned char) ROUND(255.0/3.0);
           break;
-        case GMLABEL+1: /* GM */
-          new_val[CSFLABEL] = 0;
-          new_val[GMLABEL]  = 255;
-          new_val[WMLABEL]  = 0;
+        case GMLABEL: /* GM */
+          new_val[CSFLABEL-1] = 0;
+          new_val[GMLABEL-1]  = 255;
+          new_val[WMLABEL-1]  = 0;
           if(update_label == PVELABEL) label[ind] = (unsigned char) ROUND(2.0*255.0/3.0);
           break;
-        case WMLABEL+1: /* WM */
-          new_val[CSFLABEL] = 0;
-          new_val[GMLABEL]  = 0;
-          new_val[WMLABEL]  = 255;
+        case WMLABEL: /* WM */
+          new_val[CSFLABEL-1] = 0;
+          new_val[GMLABEL-1]  = 0;
+          new_val[WMLABEL-1]  = 255;
           if(update_label == PVELABEL) label[ind] = 255;
           break;
-        case GMCSFLABEL+1: /* GMCSF */
-          w = (src[ind] - mean[CSFLABEL])/(mean[GMLABEL]-mean[CSFLABEL]);
+        case GMCSFLABEL: /* GMCSF */
+          w = (src[ind] - mean[CSFLABEL-1])/(mean[GMLABEL-1]-mean[CSFLABEL-1]);
           if(w > 1.0) w = 1.0; if(w < 0.0) w = 0.0;
-          new_val[CSFLABEL] = (unsigned char) ROUND(255.0*(1-w));
-          new_val[GMLABEL]  = (unsigned char) ROUND(255.0*w);
-          new_val[WMLABEL]  = 0;
+          new_val[CSFLABEL-1] = (unsigned char) ROUND(255.0*(1-w));
+          new_val[GMLABEL-1]  = (unsigned char) ROUND(255.0*w);
+          new_val[WMLABEL-1]  = 0;
           if(update_label == PVELABEL) label[ind] = ROUND(255.0/3.0*(1.0 + w));
           break;
-        case WMGMLABEL+1: /* WMGM */
-          w = (src[ind] - mean[GMLABEL])/(mean[WMLABEL]-mean[GMLABEL]);
+        case WMGMLABEL: /* WMGM */
+          w = (src[ind] - mean[GMLABEL-1])/(mean[WMLABEL-1]-mean[GMLABEL-1]);
           if(w > 1.0) w = 1.0; if(w < 0.0) w = 0.0;
-          new_val[CSFLABEL] = 0;
-          new_val[GMLABEL]  = (unsigned char) ROUND(255.0*(1-w));
-          new_val[WMLABEL]  = (unsigned char) ROUND(255.0*w);
+          new_val[CSFLABEL-1] = 0;
+          new_val[GMLABEL-1]  = (unsigned char) ROUND(255.0*(1-w));
+          new_val[WMLABEL-1]  = (unsigned char) ROUND(255.0*w);
           if(update_label == PVELABEL) label[ind] = ROUND(255.0/3.0*(2.0 + w));
           break;
         }
 
-        prob[          ind] = new_val[CSFLABEL];
-        prob[vol +     ind] = new_val[GMLABEL];
-        prob[(2*vol) + ind] = new_val[WMLABEL];
+        prob[          ind] = new_val[CSFLABEL-1];
+        prob[vol +     ind] = new_val[GMLABEL-1];
+        prob[(2*vol) + ind] = new_val[WMLABEL-1];
         
         /* set old probabilities for mixed classes to zero */
         prob[(3*vol) + ind] = 0;
