@@ -18,7 +18,7 @@ extern nifti_image *read_nifti_float( const char *input_filename, double *image[
 static ArgvInfo argTable[] = {
   {"-mask", ARGV_STRING, (char *) 1, (char *) &mask_filename, 
        "Prior brainmask."},
-  {"-iters", ARGV_INT, (char *) 1, (char *) &Niters,
+  {"-iters", ARGV_INT, (char *) 1, (char *) &iters_amap,
        "Number of iterations to end."},
   {"-sub", ARGV_INT, (char *) 1, (char *) &subsample,
        "Subsampling for Amap approach."},
@@ -75,7 +75,7 @@ main( int argc, char **argv )
   char		*arg_string, buffer[1024], *str_ptr;
   unsigned char *label, *prob, *mask, *marker, *init_mask, *priors;
   double	*src, *buffer_vol, ratio_zeros, slope;
-  double    val, max_vol, min_vol, separations[3];
+  double    val, max_vol, min_vol, voxelsize[3];
 
   /* Get arguments */
   if (ParseArgv(&argc, argv, argTable, 0) || (argc < 2)) {
@@ -107,7 +107,7 @@ main( int argc, char **argv )
   if (iters_nu <= 0)
     correct_nu = 0;
 
-  if (Niters == 0) {
+  if (iters_amap == 0) {
     for (i = 0; i < 3; i++) write_seg[i] = 0;
     fprintf(stdout,"To write segmentation you need at least one iteration.\n");
   }
@@ -224,21 +224,21 @@ main( int argc, char **argv )
   if(ratio_zeros < 5)
     fprintf(stdout,"Warning: Only %g%s of the voxels outside the mask have zero values. This points to an image, which is not skull-stripped.\n", ratio_zeros,"%");
      
-  separations[0] = src_ptr->dx;
-  separations[1] = src_ptr->dy;
-  separations[2] = src_ptr->dz;
+  voxelsize[0] = src_ptr->dx;
+  voxelsize[1] = src_ptr->dy;
+  voxelsize[2] = src_ptr->dz;
   dims[0] = src_ptr->nx;
   dims[1] = src_ptr->ny;
   dims[2] = src_ptr->nz;
 
   /* initial nu-correction works best with 6 class Kmeans approach followed by a 3 class approach */
   if (correct_nu)
-    max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS, bias_fwhm);
+    max_vol = Kmeans( src, label, mask, 25, n_pure_classes, voxelsize, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS, bias_fwhm);
   
   /* final Kmeans estimation */
-  max_vol = Kmeans( src, label, mask, 25, n_pure_classes, separations, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE, bias_fwhm);
+  max_vol = Kmeans( src, label, mask, 25, n_pure_classes, voxelsize, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE, bias_fwhm);
 
-  Amap( src, label, prob, mean, n_pure_classes, Niters, subsample, dims, pve, weight_MRF);
+  Amap( src, label, prob, mean, n_pure_classes, iters_amap, subsample, dims, pve, weight_MRF, voxelsize);
 
   /* PVE */
   if (pve) {
@@ -256,7 +256,7 @@ main( int argc, char **argv )
      (void) sprintf( buffer, "%s_nu%s",basename,extension); 
 
     if(!write_nifti( buffer, src, DT_FLOAT32, 1.0, dims, 
-            separations, src_ptr))
+            voxelsize, src_ptr))
       exit(EXIT_FAILURE);
   }
   
@@ -273,7 +273,7 @@ main( int argc, char **argv )
     (void) sprintf( buffer, "%s_seg%s",basename,extension); 
 
     if(!write_nifti(buffer, src, DT_UINT8, slope, 
-            dims, separations, src_ptr))
+            dims, voxelsize, src_ptr))
       exit(EXIT_FAILURE);
     
   }
@@ -291,7 +291,7 @@ main( int argc, char **argv )
           src[i] = prob[i+(j*src_ptr->nvox)];
         
         if(!write_nifti( buffer, src, DT_UINT8, slope, 
-                dims, separations, src_ptr))
+                dims, voxelsize, src_ptr))
           exit(EXIT_FAILURE);
       
       }

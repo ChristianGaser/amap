@@ -6,7 +6,7 @@
 
 char *mask_filename = NULL;
 int n_pure_classes = 3;
-int Niters = 200;
+int iters_amap = 200;
 int subsample = 16;
 int iters_nu = 40;
 int pve = 5;
