@@ -283,7 +283,7 @@ main( int argc, char **argv )
     
     slope = 1.0/255.0;
 
-    for (j = 0; j<n_pure_classes; j++) {
+    for (j = 0; j < n_pure_classes; j++) {
       if (write_seg[j]) {
         (void) sprintf( buffer, "%s_prob%d%s",basename,j,extension); 
         
