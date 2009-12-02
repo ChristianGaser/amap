@@ -553,7 +553,7 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
     
     /* recalculate means for pure and mixed classes */
     for(j = 0; j < n_classes; j++) {
-      n[j] = 0.0;
+      n[j] = 0;
       mean[j] = 0.0;
     }
     for(i = 0; i < vol; i++) {
