@@ -10,8 +10,7 @@
 #include <float.h>
 
 #define NOPVE 0
-#define MARGINALIZED 1
-#define KMEANS 2
+#define KMEANS 1
 
 #ifndef MAX
 #define MAX(A,B) ((A) > (B) ? (A) : (B))

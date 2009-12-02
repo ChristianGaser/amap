@@ -172,7 +172,7 @@ main( int argc, char **argv )
 
   /* use amap approach with PVE */
   Amap( src, label, prob, mean, 3, 10, 16, dims, 1, 0.5, voxelsize);
-  Pve6(src, prob, label, mean, dims, PVELABEL);
+  Pve6(src, prob, label, mean, dims);
 
   /* final skull-stripping */
   morph_open_uint8(label, dims, strip_param[2], 160);

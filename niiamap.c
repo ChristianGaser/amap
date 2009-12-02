@@ -244,9 +244,9 @@ main( int argc, char **argv )
   if (pve) {
     fprintf(stdout,"Calculate Partial Volume Estimate.\n");
     if(pve==6)
-      Pve6(src, prob, label, mean, dims, PVELABEL);
+      Pve6(src, prob, label, mean, dims);
     else
-      Pve5(src, prob, label, mean, dims, PVELABEL);
+      Pve5(src, prob, label, mean, dims);
   }
   
   basename = nifti_makebasename(output_filename);

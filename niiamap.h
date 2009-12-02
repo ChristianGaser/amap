@@ -17,4 +17,4 @@ int write_label = 1;
 double bias_fwhm = 500.0;
 double thresh_brainmask = 0.05;
 double thresh_kmeans = 0.5;
-double weight_MRF = 1.0;
+double weight_MRF = 0.15;
