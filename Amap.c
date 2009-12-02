@@ -196,7 +196,7 @@ void ComputeInitialPveLabel(double *src, unsigned char *label, unsigned char *pr
   int x, y, z, z_area, y_dims, index, label_value, off;
   int i, ix, iy, iz, ind, ind2, nix, niy, niz, narea, nvol;
   long area, vol;
-  double val, sub_1, mean[n_pure_classes], var[n_pure_classes], d_pve[n_pure_classes];
+  double val, sub_1, mean[MAX_NC], var[MAX_NC], d_pve[MAX_NC];
   
   area = dims[0]*dims[1];
   vol = area*dims[2];
@@ -264,9 +264,9 @@ void ComputeInitialPveLabel(double *src, unsigned char *label, unsigned char *pr
         
         /* BKGCSF only for 6 classes */
         if(pve == 6) {
-          if (fabs(mean[CSFLABEL]) > TINY) {
-            d_pve[BKGCSFLABEL] = ComputeMarginalizedLikelihood(val, 0.0, mean[CSFLABEL],
-                                        0.1*MIN3(var[CSFLABEL],var[GMLABEL],var[WMLABEL]), var[CSFLABEL], 100 );
+          if (fabs(mean[CSFLABEL+off-1]) > TINY) {
+            d_pve[BKGCSFLABEL] = ComputeMarginalizedLikelihood(val, 0.0, mean[CSFLABEL+off-1],
+                                        0.1*MIN3(var[CSFLABEL+off-1],var[GMLABEL+off-1],var[WMLABEL+off-1]), var[CSFLABEL+off-1], 100 );
           } else d_pve[BKGCSFLABEL] = HUGE;
         }
 
@@ -326,8 +326,8 @@ void ICM(unsigned char *prob, unsigned char *label, int n_classes, int *dims, do
   
   int i, iter, x, y, z, z_area, y_dims, index, sum_voxel;
   long area, vol;
-  double rel_changed, mrf_probability[n_classes], voxelsize_squared[3];
-  double exponent[n_classes], sum_voxelsize = 0.0;
+  double rel_changed, mrf_probability[MAX_NC], voxelsize_squared[3];
+  double exponent[MAX_NC], sum_voxelsize = 0.0;
   unsigned char new_label;
     
   area = dims[0]*dims[1];
@@ -380,8 +380,8 @@ void EstimateSegmentation(double *src, unsigned char *label, unsigned char *prob
   int i;
   int area, narea, nvol, vol, z_area, y_dims, index, ind;
   double sub_1, dmin, val;
-  double d[n_classes], alpha[n_classes], log_alpha[n_classes], log_var[n_classes];
-  double pvalue[n_classes], psum;
+  double d[MAX_NC], alpha[MAX_NC], log_alpha[MAX_NC], log_var[MAX_NC];
+  double pvalue[MAX_NC], psum;
   int nix, niy, niz, iters, count_change;
   int x, y, z, label_value, xBG;
   int ix, iy, iz, ind2;
