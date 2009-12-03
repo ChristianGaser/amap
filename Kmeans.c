@@ -229,7 +229,6 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
 
   /* find the final clustering and correct for nu */
   if (iters_nu > 0) {
-#ifdef SPLINESMOOTH
     fprintf(stdout,"Nu correction.\n");
     e = EstimateKmeans(src, label, mask, n_clusters, mu, NI, dims, thresh_mask, thresh_kmeans, max_src);
     count_err = 0;
@@ -277,7 +276,6 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       fflush(stdout);
     
     }
-#endif
   } else {
     e = EstimateKmeans(src, label, mask, n_clusters, mu, NI, dims, thresh_mask, thresh_kmeans, max_src);
   }
