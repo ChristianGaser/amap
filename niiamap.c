@@ -72,7 +72,7 @@ main( int argc, char **argv )
   char      *input_filename, *output_filename, *basename, *extension;
   int       i, j, dims[3], thresh, thresh_kmeans_int;
   int		x, y, z, z_area, y_dims, count_zero;
-  char		*arg_string, buffer[1024], *str_ptr;
+  char		*arg_string, buffer[1024];
   unsigned char *label, *prob, *mask, *marker, *init_mask, *priors;
   double	*src, *buffer_vol, ratio_zeros, slope;
   double    val, max_vol, min_vol, voxelsize[3];
@@ -88,13 +88,16 @@ main( int argc, char **argv )
   }
   
   input_filename  = argv[1];
-  
+
   /* if not defined use original name as basename for output */
-  if(argc==3)
+  if(argc == 3)
     output_filename = argv[2];
   else
     output_filename = argv[1];
   
+  /* get basename */
+  basename = nifti_makebasename(output_filename);
+
   /* deal with extension */
   extension = nifti_find_file_extension(output_filename);
   
@@ -136,8 +139,6 @@ main( int argc, char **argv )
   }
   
   /* read data and scale it to 0..255 */
-  strcpy(buffer, input_filename);
-  str_ptr = strrchr(buffer, '.');
   src_ptr = read_nifti_float(input_filename, &src);
   if(src_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", input_filename);
@@ -249,8 +250,6 @@ main( int argc, char **argv )
       Pve5(src, prob, label, mean, dims);
   }
   
-  basename = nifti_makebasename(output_filename);
-
   /* write nu corrected image */
   if (write_nu) {
      (void) sprintf( buffer, "%s_nu%s",basename,extension); 
