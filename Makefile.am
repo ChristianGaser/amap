@@ -5,6 +5,7 @@ bin_PROGRAMS = \
   niiamap \
 	niiaverage \
 	niismooth \
+	niiornlm \
 	niibrainmask 
 	
 mincremovebridges_SOURCES = \
@@ -41,6 +42,14 @@ niismooth_SOURCES = \
 	nifti1/znzlib.c \
 	vollib.c \
 	ParseArgv.c \
+	niilib.c
+
+niiornlm_SOURCES = \
+	niiornlm.c \
+	nifti1/nifti1_io.c \
+	nifti1/znzlib.c \
+	ParseArgv.c \
+	ornlm.c \
 	niilib.c
 
 niiamap_SOURCES = \
