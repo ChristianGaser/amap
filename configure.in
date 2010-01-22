@@ -33,6 +33,9 @@ AC_FUNC_FORK
 AC_CHECK_HEADERS(values.h malloc.h)
 AC_CHECK_FUNCS(finite isfinite mkstemp)
 
+AC_CHECK_LIB([m], [sqrt], LDFLAGS="$LDFLAGS -lm")
+
+
 AVE_ZLIB=0
 AS_IF([test "$with_zlib" != no],
   [AC_SEARCH_LIBS([zlibVersion], [z],
