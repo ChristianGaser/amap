@@ -27,6 +27,7 @@ niibrainmask_SOURCES = \
 	niilib.c \
 	ParseArgv.c \
 	SplineSmooth.cc \
+	ornlm.c \
 	vollib.c 
 
 niiaverage_SOURCES = \

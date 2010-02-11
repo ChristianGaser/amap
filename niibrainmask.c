@@ -45,7 +45,7 @@ main( int argc, char **argv )
   int		n_classes;
   char		buffer[1024], *str_ptr;
   unsigned char *label, *mask, *prob;
-  double	*src, slope;
+  double	*src, *filtered, slope;
   double    max_vol, min_vol, voxelsize[3];
 
   /* Get arguments */
@@ -86,7 +86,8 @@ main( int argc, char **argv )
 
   mask  = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox);
   label = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox);
-  
+  filtered = (double *)malloc(sizeof(double)*src_ptr->nvox);
+    
   if((mask == NULL) || (label == NULL)) {
     fprintf(stderr,"Memory allocation error\n");
     exit(EXIT_FAILURE);
@@ -124,7 +125,7 @@ main( int argc, char **argv )
   
   /* initially use 4 classes to consider background */
   n_classes = 4;
-  max_vol = Kmeans( src, label, mask, 25, n_classes, voxelsize, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE, 50.0);
+  max_vol = Kmeans( src, label, mask, 25, n_classes, voxelsize, dims, thresh, thresh_kmeans_int, 20, NOPVE, bias_fwhm);
 
   double mu[2];
   int n_voxel[2];
@@ -145,40 +146,65 @@ main( int argc, char **argv )
   double mn_thresh = (mu[0]+mu[1])/3.0;
   for (i = 0; i < src_ptr->nvox; i++) {
     if (src[i] < mn_thresh) {
-      mask[i] = 0;
+//      mask[i] = 0;
     }
   }
   
+fprintf(stderr,"%g\n",(mu[0]+mu[1])/2.0);
+  ornlm(src, filtered, 3, 1, (mu[0]+mu[1])/2.0, dims);
+
   /* second Kmeans with 3 classes */
   n_classes = 3;
-  max_vol = Kmeans( src, label, mask, 25, n_classes, voxelsize, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS, 50.0);
+  max_vol = Kmeans( src, label, mask, 25, n_classes, voxelsize, dims, thresh, thresh_kmeans_int, 20, KMEANS, bias_fwhm);    
 
   /* first rough skull-stripping */  
+fprintf(stderr,".");
   morph_open_uint8(label, dims, strip_param[0], 3);
+
+fprintf(stderr,".");
   get_largest_cluster(label, dims);
+    for (i = 0; i < src_ptr->nvox; i++)
+      src[i] = (double)label[i];
+
+    (void) sprintf( buffer, "%s_brainmask%s",basename,extension); 
+    
+    if(!write_nifti(buffer, src, DT_UINT8, slope, 
+            dims, voxelsize, src_ptr))
+      exit(EXIT_FAILURE);
+fprintf(stderr,":");
   morph_dilate_uint8(label, dims, strip_param[1], 0);
+fprintf(stderr,".");
   morph_close_uint8(label, dims, 10, 0);
+fprintf(stderr,".");
   
   /* update mask */
   for (i = 0; i < src_ptr->nvox; i++)
     mask[i] = 255*(label[i] > 0);
 
-  n_classes = 6;
+  n_classes = 5;
   double mean[n_classes];
   prob  = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox*n_classes);
 
-  /* use Kmeans with 6 classes */
-  max_vol = Kmeans( src, label, mask, 25, 3, voxelsize, dims, thresh, thresh_kmeans_int, iters_nu, 1, 50.0);
+  /* use Kmeans with 5 classes */
+  max_vol = Kmeans( filtered, label, mask, 25, 3, voxelsize, dims, thresh, thresh_kmeans_int, 10, NOPVE, bias_fwhm);
 
   /* use amap approach with PVE */
-  Amap( src, label, prob, mean, 3, 10, 16, dims, 1, 0.5, voxelsize);
-  Pve6(src, prob, label, mean, dims);
+fprintf(stderr,".");
+  Amap( filtered, label, prob, mean, 3, 10, subsample, dims, 1, weight_MRF, voxelsize);
+fprintf(stderr,".");
+  Pve5(filtered, prob, label, mean, dims);
+
+fprintf(stderr,".");
 
   /* final skull-stripping */
   morph_open_uint8(label, dims, strip_param[2], 160);
+fprintf(stderr,".");
   get_largest_cluster(label, dims);
+fprintf(stderr,".");
   morph_dilate_uint8(label, dims, strip_param[3], 0);
+fprintf(stderr,".");
   morph_close_uint8(label, dims, 10, 0);
+fprintf(stderr,".");
 
   basename = nifti_makebasename(output_filename);
 
@@ -188,7 +214,7 @@ main( int argc, char **argv )
   if (write_nu) {
      (void) sprintf( buffer, "%s_unmasked%s",basename,extension); 
 
-    if(!write_nifti( buffer, src, DT_FLOAT32, slope, dims, 
+    if(!write_nifti( buffer, filtered, DT_FLOAT32, slope, dims, 
             voxelsize, src_ptr))
       exit(EXIT_FAILURE);
   }
@@ -197,7 +223,7 @@ main( int argc, char **argv )
   if (write_masked) {
 
     for (i = 0; i < src_ptr->nvox; i++)
-      src[i] = (double)label[i]*src[i];
+      src[i] = (double)label[i]*filtered[i];
 
     if(!write_nifti( output_filename, src, DT_FLOAT32, slope, dims, 
             voxelsize, src_ptr))
