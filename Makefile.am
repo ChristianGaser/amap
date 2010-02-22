@@ -62,6 +62,7 @@ niiamap_SOURCES = \
 	nifti1/nifti1_io.c \
 	nifti1/znzlib.c \
 	niilib.c \
+	vollib.c \
 	SplineSmooth.cc \
 	ParseArgv.c
 
