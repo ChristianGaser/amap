@@ -18,7 +18,6 @@
  * $Header: /private-cvsroot/minc/libsrc/ParseArgv.h,v 6.5.2.1 2004/09/28 20:23:39 bert Exp $ SPRITE (Berkeley)
  */
 
-//#include "minc.h"
 /*
  * Definitions that allow this header file to be used either with or
  * without ANSI C features like function prototypes.
