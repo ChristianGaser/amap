@@ -254,8 +254,11 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
 #ifdef SPLINESMOOTH
         /* spline estimate: start with distance of 1500 end end up with bias_fwhm */
         splineSmooth(nu, 0.01, MAX(bias_fwhm, 1500.0/(j+1)), 4, voxelsize, dims);
-#else      
+#else   
+        /* smoothing of residuals */
         for(i=0; i<3; i++) fwhm[i] = bias_fwhm;
+        
+        /* use subsampling for faster processing */
         subsample = 2;
         masked_smoothing = 0;
         smooth_subsample_double(nu, dims, voxelsize, fwhm, masked_smoothing, subsample);
@@ -263,7 +266,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       
       /* apply nu correction to source image */
       for (i = 0; i < vol; i++) {
-          if ((src[i]>0) && (nu[i]!=0)) src[i] -= nu[i];
+          if (src[i]>0) src[i] -= nu[i];
       }
       
       /* update k-means estimate */
@@ -279,8 +282,8 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       else count_err = 0;
 
       /* interrupt if last error was for the last 2 iterations larger 
-       * or change is < 0.25% */
-      if ((count_err > 1) || (((last_err-e)/e < 0.0025) && ((last_err-e)/e > 0))) {
+       * or change is < 0.1% */
+      if ((count_err > 1) || (((last_err-e)/e < 0.001) && ((last_err-e)/e > 0))) {
         /* rescue old values from previous iteration */
         for (i = 0; i < vol; i++) src[i] = src_bak[i];
         break;
