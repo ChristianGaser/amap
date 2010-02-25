@@ -24,6 +24,8 @@ static ArgvInfo argTable[] = {
        "Subsampling for Amap approach."},
   {"-iters_nu", ARGV_INT, (char *) 1, (char *) &iters_nu,
        "Number of iterations for nu correction."},
+  {"-iters_icm", ARGV_INT, (char *) 1, (char *) &iters_ICM,
+       "Number of iterations for Iterative Conditional Mode (ICM)."},
   {"-no_nucorrect", ARGV_CONSTANT, (char *) 0, (char *) &correct_nu,
        "Do not use nu correction."},
   {"-mrf", ARGV_FLOAT, (char *) 1, (char *) &weight_MRF,
@@ -239,7 +241,7 @@ main( int argc, char **argv )
   /* final Kmeans estimation */
   max_vol = Kmeans( src, label, mask, 25, n_pure_classes, voxelsize, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE, bias_fwhm);
 
-  Amap( src, label, prob, mean, n_pure_classes, iters_amap, subsample, dims, pve, weight_MRF, voxelsize);
+  Amap( src, label, prob, mean, n_pure_classes, iters_amap, subsample, dims, pve, weight_MRF, voxelsize, iters_ICM);
 
   /* PVE */
   if (pve) {

@@ -190,7 +190,8 @@ fprintf(stderr,".");
 
   /* use amap approach with PVE */
 fprintf(stderr,".");
-  Amap( filtered, label, prob, mean, 3, 10, subsample, dims, 1, weight_MRF, voxelsize);
+int iters_icm = 50;
+  Amap( filtered, label, prob, mean, 3, 10, subsample, dims, 1, weight_MRF, voxelsize, iters_icm);
 fprintf(stderr,".");
   Pve5(filtered, prob, label, mean, dims);
 

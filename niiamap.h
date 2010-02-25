@@ -9,6 +9,7 @@ int n_pure_classes = 3;
 int iters_amap = 200;
 int subsample = 16;
 int iters_nu = 40;
+int iters_ICM = 50;
 int pve = 5;
 int correct_nu = 1;
 int write_seg[3] = {0, 1, 0};
