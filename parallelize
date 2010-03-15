@@ -190,7 +190,7 @@ parallelize ()
       j=$(($i+1))
       echo job ${j}/"$NUMBER_OF_JOBS": $COMMAND ${ARG_LIST[$i]}
       echo job ${j}/"$NUMBER_OF_JOBS": $COMMAND ${ARG_LIST[$i]} >> $log
-      nohup $COMMAND ${ARG_LIST[$i]}>> $log 2>&1 &
+      nohup bash -c "for k in ${ARG_LIST[$i]}; do $COMMAND \$k; done" >> $log 2>&1 &
     fi
     ((i++))
   done
