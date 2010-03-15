@@ -18,12 +18,15 @@ extern int smooth_double(double *vol, int dims[3], double separations[3], double
 
 double fwhm = 8.0;
 int use_mask = 0;
+int verbose = 0;
 
 static ArgvInfo argTable[] = {
   {"-fwhm", ARGV_FLOAT, (char *) 1, (char *) &fwhm, 
        "FWHM in mm."},
   {"-mask", ARGV_CONSTANT, (char *) 1, (char *) &use_mask,
        "Use masked smoothing (default no masking)."},
+  {"-v", ARGV_CONSTANT, (char *) 1, (char *) &verbose,
+       "Be verbose."},
    {NULL, ARGV_END, NULL, NULL, NULL}
 };
 
@@ -39,7 +42,7 @@ int main(int argc, char *argv[])
   /* Get arguments */
   if  (ParseArgv(&argc, argv, argTable, 0) ||(argc < 2)) {
    (void) fprintf(stderr, 
-   "\nUsage: %s [-fwhm fwhm_in_mm] <in.nii> <out.nii>\n",
+   "\nUsage: %s [-fwhm fwhm_in_mm] [-mask] [-v] <in.nii> <out.nii>\n",
         argv[0]);
    (void) fprintf(stderr, 
    "    %s -help\n\n", argv[0]);
@@ -47,7 +50,10 @@ int main(int argc, char *argv[])
   }
   
   infile = argv[1];
-
+  
+  if (verbose)
+    fprintf(stdout,"Filtering %s with FWHM of %gmm.\n", infile, fwhm);
+  
   /* read first image to get image parameters */
   nii_ptr = read_nifti_float(infile, &input);
   if(nii_ptr == NULL) {

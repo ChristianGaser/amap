@@ -222,8 +222,9 @@ OUTPUT:
    parallelize_${time}.log with current data and time in name as log-file
 
 EXAMPLE
-   parallelize.sh -c "niismooth -fwhm 10" sTRIO*.nii
-   Parallelize smoothing with fwhm of 10mm for all files sTRIO*.nii. 
+   parallelize.sh -c "niismooth -v -fwhm 10" sTRIO*.nii
+   Parallelize smoothing with fwhm of 10mm for all files sTRIO*.nii. Use
+   verbose mode to see diagnostic output.
    
    parallelize.sh -c gunzip *.zip
    Parallelize unzipping of all zip-files in current folder. 
