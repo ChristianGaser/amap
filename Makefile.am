@@ -1,6 +1,9 @@
 AUTOMAKE_OPTIONS = check-news
 ACLOCAL_AMFLAGS = -I m4
 
+dist_bin_SCRIPTS = \
+	parallelize
+
 bin_PROGRAMS = \
   niiamap \
 	niiaverage \
