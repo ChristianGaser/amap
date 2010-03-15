@@ -9,6 +9,16 @@
 #include "nifti1/nifti1_io.h"
 #include "nifti1/nifti1_local.h"
 
+#include <float.h>
+
+#ifndef MAX
+#define MAX(A,B) ((A) > (B) ? (A) : (B))
+#endif
+
+#ifndef MIN
+#define MIN(A,B) ((A) < (B) ? (A) : (B))
+#endif
+
 int
 equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2) {
 
@@ -114,13 +124,17 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
   nifti_image *nii_ptr, nii_rec;
   char *extension, buffer[1024];
   int i;
+  double img_range[2], dt_range[2];
   
   if((data_type != DT_UINT8) && 
-     (data_type != DT_FLOAT32) && 
      (data_type != DT_INT8) && 
+     (data_type != DT_UINT16) && 
      (data_type != DT_INT16) && 
+     (data_type != DT_UINT32) && 
      (data_type != DT_INT32) && 
-     (data_type != DT_FLOAT32)) {
+     (data_type != DT_INT64) && 
+     (data_type != DT_FLOAT32) && 
+     (data_type != DT_FLOAT64)) {
     fprintf(stderr,"Datatype %d not supported to write data.\n",data_type);
     return(0);
   }
@@ -165,8 +179,54 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
   nii_ptr->scl_slope = slope;
   nii_ptr->scl_inter = 0;
   nii_ptr->nvox = dim[0]*dim[1]*dim[2];
-  nii_ptr->nifti_type = 1;
   nii_ptr->ndim = 3;
+
+  /* for floating data no resacling is neccessary */
+  if ((slope == 0.0) && ((data_type == DT_FLOAT32) || (data_type == DT_FLOAT32)))
+    slope = 1.0;
+     
+  if (slope == 0.0) {
+    /* find min and max of image */
+    img_range[0] = FLT_MAX;
+    img_range[1] = -FLT_MAX;
+    for (i = 0; i < nii_ptr->nvox; i++) {
+      img_range[0] = MIN(image[i], img_range[0]);
+      img_range[1] = MAX(image[i], img_range[1]);
+    }
+  }
+
+  switch (data_type) {
+  case DT_UINT8:
+    dt_range[0] = 0.0; dt_range[1] = 255.0;
+    break;
+  case DT_INT8:
+    dt_range[0] = -128.0; dt_range[1] = 127.0;
+    break;
+  case DT_INT16:
+    dt_range[0] = -32768.0; dt_range[1] = 32767.0;
+    break;
+  case DT_UINT16:
+    dt_range[0] = 0.0; dt_range[1] = 65535.0;
+    break;
+  case DT_INT32:
+    dt_range[0] = -2147483648.0; dt_range[1] = 2147483647.0;
+    break;
+  case DT_UINT32:
+    dt_range[0] = 0.0; dt_range[1] = 4294967295.0;
+    break;
+  case DT_INT64:
+    dt_range[0] = -9223372036854775808.0; dt_range[1] = 9223372036854775807.0;
+    break;
+  }
+
+  /* rescale data to fit into data range */
+  if (slope == 0.0) {
+    nii_ptr->scl_slope = ((img_range[1] - img_range[0]) / 
+                          (dt_range[1] - dt_range[0]));
+    nii_ptr->scl_inter = img_range[0] - (dt_range[0] * nii_ptr->scl_slope);
+    for (i = 0; i < nii_ptr->nvox; i++)
+      image[i] = (image[i] + nii_ptr->scl_inter)/nii_ptr->scl_slope;
+  }
 
   nii_ptr->datatype = data_type;
   switch (data_type) {
@@ -179,7 +239,7 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
       return(0);
     }
     for (i = 0; i < nii_ptr->nvox; i++)
-      ((unsigned char *)nii_ptr->data)[i] = image[i];
+      ((unsigned char *)nii_ptr->data)[i] = round(image[i]);
     break;
   case DT_INT8:
     nii_ptr->nbyper = 1;
@@ -190,7 +250,18 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
       return(0);
     }
     for (i = 0; i < nii_ptr->nvox; i++)
-      ((signed char *)nii_ptr->data)[i] = image[i];
+      ((signed char *)nii_ptr->data)[i] = round(image[i]);
+    break;
+  case DT_UINT16:
+    nii_ptr->nbyper = 2;
+    nii_ptr->data = (unsigned short *)malloc(sizeof(unsigned short)*nii_ptr->nvox);
+    /* check for memory */
+    if(nii_ptr->data == NULL) {
+      fprintf(stderr,"Memory allocation error\n");
+      return(0);
+    }
+    for (i = 0; i < nii_ptr->nvox; i++)
+      ((unsigned short *)nii_ptr->data)[i] = round(image[i]);
     break;
   case DT_INT16:
     nii_ptr->nbyper = 2;
@@ -201,7 +272,18 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
       return(0);
     }
     for (i = 0; i < nii_ptr->nvox; i++)
-      ((signed short *)nii_ptr->data)[i] = image[i];
+      ((signed short *)nii_ptr->data)[i] = round(image[i]);
+    break;
+  case DT_UINT32:
+    nii_ptr->nbyper = 4;
+    nii_ptr->data = (unsigned int *)malloc(sizeof(unsigned int)*nii_ptr->nvox);
+    /* check for memory */
+    if(nii_ptr->data == NULL) {
+      fprintf(stderr,"Memory allocation error\n");
+      return(0);
+    }
+    for (i = 0; i < nii_ptr->nvox; i++)
+      ((unsigned int *)nii_ptr->data)[i] = round(image[i]);
     break;
   case DT_INT32:
     nii_ptr->nbyper = 4;
@@ -212,7 +294,7 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
       return(0);
     }
     for (i = 0; i < nii_ptr->nvox; i++)
-      ((signed int *)nii_ptr->data)[i] = image[i];
+      ((signed int *)nii_ptr->data)[i] = round(image[i]);
     break;
   case DT_INT64:
     nii_ptr->nbyper = 8;
@@ -223,7 +305,7 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
       return(0);
     }
     for (i = 0; i < nii_ptr->nvox; i++)
-      ((long long *)nii_ptr->data)[i] = image[i];
+      ((long long *)nii_ptr->data)[i] = round(image[i]);
     break;
   case DT_FLOAT32:
     nii_ptr->nbyper = 4;
@@ -235,6 +317,17 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
     }
     for (i = 0; i < nii_ptr->nvox; i++)
       ((float *)nii_ptr->data)[i] = image[i];
+    break;
+  case DT_FLOAT64:
+    nii_ptr->nbyper = 8;
+    nii_ptr->data = (double *)malloc(sizeof(double)*nii_ptr->nvox);
+    /* check for memory */
+    if(nii_ptr->data == NULL) {
+      fprintf(stderr,"Memory allocation error\n");
+      return(0);
+    }
+    for (i = 0; i < nii_ptr->nvox; i++)
+      ((double *)nii_ptr->data)[i] = image[i];
     break;
   }
     
@@ -299,6 +392,9 @@ nifti_image
         break;
       case DT_UINT32:
         tmp = (double) ((unsigned int *)nii_ptr->data)[i];
+        break;
+      case DT_INT64:
+        tmp = (double) ((long long *)nii_ptr->data)[i];
         break;
       case DT_FLOAT32:
         tmp = (double) ((float *)nii_ptr->data)[i];

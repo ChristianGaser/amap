@@ -7,12 +7,14 @@
 #include <ParseArgv.h>
 #include <float.h>
 #include <stdlib.h>
+#include <libgen.h>
 
 #include "nifti1/nifti1_io.h"
 #include "nifti1/nifti1_local.h"
 
 extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
-extern write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
+extern int write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
+extern int smooth_double(double *vol, int dims[3], double separations[3], double s[3], int use_mask);
 
 double fwhm = 8.0;
 int use_mask = 0;
@@ -30,24 +32,22 @@ static ArgvInfo argTable[] = {
 int main(int argc, char *argv[])
 {
   char *infile, *outfile;
-  int i, j, dims[3];
+  int i, dims[3];
   double *input, separations[3], s[3];
   nifti_image *nii_ptr;
-  double filt[3]={1,1,1};
 
   /* Get arguments */
   if  (ParseArgv(&argc, argv, argTable, 0) ||(argc < 2)) {
    (void) fprintf(stderr, 
-   "\nUsage: %s -fwhm fwhm_in_mm <in.nii> <out.nii>\n",
+   "\nUsage: %s [-fwhm fwhm_in_mm] <in.nii> <out.nii>\n",
         argv[0]);
    (void) fprintf(stderr, 
    "    %s -help\n\n", argv[0]);
    exit(EXIT_FAILURE);
   }
   
-  infile  = argv[1];
-  outfile = argv[2];
-  
+  infile = argv[1];
+
   /* read first image to get image parameters */
   nii_ptr = read_nifti_float(infile, &input);
   if(nii_ptr == NULL) {
@@ -66,8 +66,17 @@ int main(int argc, char *argv[])
   dims[2] = nii_ptr->nz;
   
   smooth_double(input, dims, separations, s, use_mask);
+  
+  /* if not defined use original name as basename for output */
+  if(argc == 3)
+    outfile = argv[2];
+  else {
+    outfile = argv[1];
+    (void) sprintf( outfile, "%s/s%g%s",dirname(outfile),fwhm,basename(outfile)); 
+  }
 
-  if (!write_nifti( outfile, input, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
+  /* write data using same data type and rescale */
+  if (!write_nifti( outfile, input, nii_ptr->datatype, 0.0, dims, separations, nii_ptr)) 
     exit(EXIT_FAILURE);
 
   free(input);
