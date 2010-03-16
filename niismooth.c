@@ -84,8 +84,6 @@ int main(int argc, char *argv[])
   /* write data using same data type and rescale */
   if (!write_nifti( outfile, input, nii_ptr->datatype, 0.0, dims, separations, nii_ptr)) 
     exit(EXIT_FAILURE);
-
-  free(input);
   
   return(EXIT_SUCCESS);
 
