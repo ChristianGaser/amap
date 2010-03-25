@@ -28,7 +28,13 @@ equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2) {
      (nii_ptr->dx != nii_ptr2->dx) ||
      (nii_ptr->dy != nii_ptr2->dy) ||
      (nii_ptr->dz != nii_ptr2->dz)) {
-    fprintf(stderr,"Error: Image %s and image %s differ.\n",nii_ptr->fname, nii_ptr2->fname);
+    fprintf(stderr,"Warning: Image %s and image %s differ.\n",nii_ptr->fname, nii_ptr2->fname);
+    if(nii_ptr->nx != nii_ptr2->nx) fprintf(stderr,"nx: %d vs. %d.\n",nii_ptr->nx, nii_ptr2->nx);
+    if(nii_ptr->ny != nii_ptr2->ny) fprintf(stderr,"ny: %d vs. %d.\n",nii_ptr->ny, nii_ptr2->ny);
+    if(nii_ptr->nz != nii_ptr2->nz) fprintf(stderr,"nz: %d vs. %d.\n",nii_ptr->nz, nii_ptr2->nz);
+    if(nii_ptr->dx != nii_ptr2->dx) fprintf(stderr,"dx: %g vs. %g.\n",nii_ptr->dx, nii_ptr2->dx);
+    if(nii_ptr->dy != nii_ptr2->dy) fprintf(stderr,"dy: %g vs. %g.\n",nii_ptr->dy, nii_ptr2->dy);
+    if(nii_ptr->dz != nii_ptr2->dz) fprintf(stderr,"dz: %g vs. %g.\n",nii_ptr->dz, nii_ptr2->dz);
     return(0);    
   }
   return(1);

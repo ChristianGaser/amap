@@ -90,8 +90,7 @@ int main(int argc, char *argv[])
     }
     
     /* check for dimensions */
-    if(!equal_image_dimensions(nii_ptr,nii_ptr2))
-      return(0);
+    equal_image_dimensions(nii_ptr,nii_ptr2);
     
     /* calculate average */
     for (j=0; j<nii_ptr->nvox; j++) 
