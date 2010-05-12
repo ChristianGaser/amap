@@ -20,7 +20,8 @@ double fwhm = 8.0;
 int use_mask = 0;
 int verbose = 0;
 
-static ArgvInfo argTable[] = {
+static
+ArgvInfo argTable[] = {
   {"-fwhm", ARGV_FLOAT, (char *) 1, (char *) &fwhm, 
        "FWHM in mm."},
   {"-mask", ARGV_CONSTANT, (char *) 1, (char *) &use_mask,
@@ -30,9 +31,10 @@ static ArgvInfo argTable[] = {
    {NULL, ARGV_END, NULL, NULL, NULL}
 };
 
-/* Main program */
 
-int main(int argc, char *argv[])
+/* Main program */
+int
+main(int argc, char *argv[])
 {
   char *infile, *outfile;
   int i, dims[3];
@@ -42,7 +44,7 @@ int main(int argc, char *argv[])
   /* Get arguments */
   if  (ParseArgv(&argc, argv, argTable, 0) ||(argc < 2)) {
    (void) fprintf(stderr, 
-   "\nUsage: %s [-fwhm fwhm_in_mm] [-mask] [-v] <in.nii> <out.nii>\n",
+   "\nUsage: %s [options] in.nii [out.nii]\n",
         argv[0]);
    (void) fprintf(stderr, 
    "    %s -help\n\n", argv[0]);
@@ -78,7 +80,7 @@ int main(int argc, char *argv[])
     outfile = argv[2];
   else {
     outfile = argv[1];
-    (void) sprintf( outfile, "%s/s%g%s",dirname(outfile),fwhm,basename(outfile)); 
+    (void) sprintf(outfile, "%s/s%g%s", dirname(outfile), fwhm, basename(outfile)); 
   }
 
   /* write data using same data type and rescale */
