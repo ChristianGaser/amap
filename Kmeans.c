@@ -246,7 +246,11 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
         nu[i] = 0.0;
         /* only use values above threshold where mask is defined for nu-estimate */
         if ((src[i] > th_src) && (mask[i] > thresh_kmeans)) {
+#ifdef SPLINESMOOTH
+          val_nu = src[i]/(max_src/255.0*mu[label[i]-1]);
+#else
           val_nu = src[i]-(max_src/255.0*mu[label[i]-1]);
+#endif
           nu[i] = val_nu;
         }
       }
@@ -266,7 +270,11 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       
       /* apply nu correction to source image */
       for (i = 0; i < vol; i++) {
-          if (src[i]>0) src[i] -= 0.5*nu[i];
+#ifdef SPLINESMOOTH
+          if (src[i]>0) src[i] /= nu[i];
+#else
+          if (src[i]>0) src[i] -= nu[i];
+#endif
       }
       
       /* update k-means estimate */
