@@ -273,7 +273,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
 #ifdef SPLINESMOOTH
           if (src[i]>0) src[i] /= nu[i];
 #else
-          if (src[i]>0) src[i] -= nu[i];
+          if (src[i]>0) src[i] -= 0.5*nu[i];
 #endif
       }
       
