@@ -73,11 +73,11 @@ main( int argc, char **argv )
   int       nifti_file_type;
   char      *input_filename, *output_filename, *basename, *extension;
   int       i, j, dims[3], thresh, thresh_kmeans_int;
-  int		x, y, z, z_area, y_dims, count_zero;
-  char		*arg_string, buffer[1024];
+  int		    x, y, z, z_area, y_dims, count_zero;
+  char		  *arg_string, buffer[1024];
   unsigned char *label, *prob, *mask, *marker, *init_mask, *priors;
-  double	*src, *buffer_vol, ratio_zeros, slope;
-  double    val, max_vol, min_vol, voxelsize[3];
+  double	  *src, *buffer_vol, ratio_zeros, slope;
+  double    offset, val, max_vol, min_vol, voxelsize[3];
 
   /* Get arguments */
   if (ParseArgv(&argc, argv, argTable, 0) || (argc < 2)) {
@@ -219,6 +219,11 @@ main( int argc, char **argv )
       src[i] = src[i] - min_vol;
   }
 
+  /* add offset to ensure that CSF values are much larger than background noise */
+  offset = 0.2*max_vol;  
+  for (i = 0; i < src_ptr->nvox; i++)
+    if (mask[i] > 0) src[i] += offset;
+
   count_zero = 0;
   for (i = 0; i < src_ptr->nvox; i++)
     if ((mask[i] == 0)) count_zero++;
@@ -241,7 +246,7 @@ main( int argc, char **argv )
   /* final Kmeans estimation */
   max_vol = Kmeans( src, label, mask, 25, n_pure_classes, voxelsize, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE, bias_fwhm);
 
-  Amap( src, label, prob, mean, n_pure_classes, iters_amap, subsample, dims, pve, weight_MRF, voxelsize, iters_ICM);
+  Amap( src, label, prob, mean, n_pure_classes, iters_amap, subsample, dims, pve, weight_MRF, voxelsize, iters_ICM, offset);
 
   /* PVE */
   if (pve) {

@@ -299,8 +299,10 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
 
       last_err = e;
     
+#if !defined(_WIN32)
       printf("iters: %2d error: %7.2f\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b",j+1, e*(double)n_clusters/(double)vol);
       fflush(stdout);
+#endif    
     
     }    
   } else {
@@ -312,11 +314,10 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     max_src = MAX(src[i], max_src);
 
   if (iters_nu > 0) printf("\n");
-  printf("K-Means: ");
+/*  printf("K-Means: ");
   for (i = 0; i < n_clusters; i++) printf("%3.3f ",max_src*mu[i]/255.0); 
   printf("\terror: %3.3f\n",e*(double)n_clusters/(double)vol);    
-  fflush(stdout);
-
+*/
   free(src_bak);
   
   if (iters_nu > 0)

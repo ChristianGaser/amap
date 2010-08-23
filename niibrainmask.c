@@ -42,11 +42,11 @@ main( int argc, char **argv )
   nifti_image *src_ptr;
   char      *input_filename, *output_filename, *basename, *extension;
   int       i, j, dims[3], thresh, thresh_kmeans_int;
-  int		n_classes;
-  char		buffer[1024], *str_ptr;
+  int		    n_classes;
+  char		  buffer[1024], *str_ptr;
   unsigned char *label, *mask, *prob;
-  double	*src, *filtered, slope;
-  double    max_vol, min_vol, voxelsize[3];
+  double	  *src, *filtered, slope;
+  double    offset, max_vol, min_vol, voxelsize[3];
 
   /* Get arguments */
   if (ParseArgv(&argc, argv, argTable, 0) || (argc < 3)) {
@@ -113,6 +113,11 @@ main( int argc, char **argv )
     else mask[i] = 255;
   }
      
+  /* add offset to ensure that CSF values are much larger than background noise */
+  offset = 0.2*max_vol;  
+  for (i = 0; i < src_ptr->nvox; i++)
+    if (mask[i] > 0) src[i] += offset;
+
   voxelsize[0] = src_ptr->dx;
   voxelsize[1] = src_ptr->dy;
   voxelsize[2] = src_ptr->dz;
@@ -191,7 +196,7 @@ fprintf(stderr,".");
   /* use amap approach with PVE */
 fprintf(stderr,".");
 int iters_icm = 50;
-  Amap( filtered, label, prob, mean, 3, 10, subsample, dims, 1, weight_MRF, voxelsize, iters_icm);
+  Amap( filtered, label, prob, mean, 3, 10, subsample, dims, 1, weight_MRF, voxelsize, iters_icm, offset);
 fprintf(stderr,".");
   Pve5(filtered, prob, label, mean, dims);
 
