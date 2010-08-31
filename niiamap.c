@@ -13,7 +13,7 @@
 #include "nifti1/nifti1_io.h"
 #include "nifti1/nifti1_local.h"
 
-extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
+extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
 	
 static ArgvInfo argTable[] = {
   {"-mask", ARGV_STRING, (char *) 1, (char *) &mask_filename, 
@@ -141,7 +141,7 @@ main( int argc, char **argv )
   }
   
   /* read data and scale it to 0..255 */
-  src_ptr = read_nifti_float(input_filename, &src);
+  src_ptr = read_nifti_double(input_filename, &src);
   if(src_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", input_filename);
     return(EXIT_FAILURE);
@@ -165,7 +165,7 @@ main( int argc, char **argv )
   if (mask_filename != NULL) {
       
     /* read volume */
-    mask_ptr = read_nifti_float(mask_filename, &buffer_vol);
+    mask_ptr = read_nifti_double(mask_filename, &buffer_vol);
     if(mask_ptr == NULL) {
       fprintf(stderr,"Error reading %s.\n", mask_filename);
       return(EXIT_FAILURE);

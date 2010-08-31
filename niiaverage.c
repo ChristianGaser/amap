@@ -11,7 +11,7 @@
 #include "nifti1/nifti1_io.h"
 #include "nifti1/nifti1_local.h"
 
-extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
+extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
 extern equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
 extern write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 extern int ParseArgv(int *argcPtr, char **argv, ArgvInfo *argTable, int flags);
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
   }
   
   /* read first image to get image parameters */
-  nii_ptr = read_nifti_float(infiles[0], &input);
+  nii_ptr = read_nifti_double(infiles[0], &input);
   if(nii_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", infiles[0]);
     return(EXIT_FAILURE);
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
   /* read remaining images and check for image parameters */
   for (i=1; i<nfiles; i++) {
     fprintf(stdout,"%3d: %s\n",i+1, infiles[i]);
-    nii_ptr2 = read_nifti_float(infiles[i], &input);
+    nii_ptr2 = read_nifti_double(infiles[i], &input);
     if(nii_ptr2 == NULL) {
       fprintf(stderr,"Error reading %s.\n", infiles[i]);
       return(EXIT_FAILURE);

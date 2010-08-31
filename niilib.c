@@ -358,7 +358,7 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
 }
 
 nifti_image
-*read_nifti_float( const char *input_filename, double *image[])
+*read_nifti_double( const char *input_filename, double *image[])
 {
   nifti_image *nii_ptr;
   double tmp;
@@ -366,7 +366,7 @@ nifti_image
   
   nii_ptr = nifti_image_read(input_filename, 1);
   if(nii_ptr == NULL) {
-    fprintf(stderr,"read_nifti_float: Error reading %s.\n", input_filename);
+    fprintf(stderr,"read_nifti_double: Error reading %s.\n", input_filename);
     return(NULL);
   }
   
@@ -375,7 +375,7 @@ nifti_image
   
   /* check for memory */
   if(image == NULL) {
-    fprintf(stderr,"read_nifti_float: Memory allocation error\n");
+    fprintf(stderr,"read_nifti_double: Memory allocation error\n");
     return(NULL);
   }
   
@@ -409,7 +409,7 @@ nifti_image
         tmp = (double) ((double *)nii_ptr->data)[i];
         break;
       default:
-        fprintf(stderr,"read_nifti_float: Unknown datatype\n");
+        fprintf(stderr,"read_nifti_double: Unknown datatype\n");
         return(NULL);
         break;
       }

@@ -73,7 +73,7 @@ main( int argc, char **argv )
   /* read data and scale it to 0..255 */
   strcpy(buffer, input_filename);
   str_ptr = strrchr(buffer, '.');
-  src_ptr = read_nifti_float(input_filename, &src);
+  src_ptr = read_nifti_double(input_filename, &src);
   if(src_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", input_filename);
     return(EXIT_FAILURE);

@@ -9,6 +9,7 @@ bin_PROGRAMS = \
 	niiaverage \
 	niismooth \
 	niiornlm \
+	niisanlm \
 	niibrainmask 
 	
 mincremovebridges_SOURCES = \
@@ -41,6 +42,14 @@ niiornlm_SOURCES = \
 	ornlm.c \
 	niilib.c
 
+niisanlm_SOURCES = \
+	niisanlm.c \
+	nifti1/nifti1_io.c \
+	nifti1/znzlib.c \
+	ParseArgv.c \
+	sanlm.c \
+	niilib.c
+	
 if EBTKS
   niiamap_SOURCES = \
 	  niiamap.c \
@@ -48,6 +57,7 @@ if EBTKS
 	  Kmeans.c \
 	  Pve.c \
 	  MrfPrior.c \
+	  sanlm.c \
 	  nifti1/nifti1_io.c \
 	  nifti1/znzlib.c \
 	  niilib.c \
@@ -77,6 +87,7 @@ else
 	  Kmeans.c \
 	  Pve.c \
 	  MrfPrior.c \
+	  sanlm.c \
 	  nifti1/nifti1_io.c \
 	  nifti1/znzlib.c \
 	  niilib.c \

@@ -12,7 +12,7 @@
 #include "nifti1/nifti1_io.h"
 #include "nifti1/nifti1_local.h"
 
-extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
+extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
 extern int write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 extern int smooth_double(double *vol, int dims[3], double separations[3], double s[3], int use_mask);
 
@@ -57,7 +57,7 @@ main(int argc, char *argv[])
     fprintf(stdout,"Filtering %s with FWHM of %gmm.\n", infile, fwhm);
   
   /* read first image to get image parameters */
-  nii_ptr = read_nifti_float(infile, &input);
+  nii_ptr = read_nifti_double(infile, &input);
   if(nii_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", infile);
     return(EXIT_FAILURE);
