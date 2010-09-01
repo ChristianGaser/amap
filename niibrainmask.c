@@ -114,10 +114,10 @@ main( int argc, char **argv )
   }
      
   /* add offset to ensure that CSF values are much larger than background noise */
-  offset = 0.2*max_vol;  
+/*  offset = 0.2*max_vol;  
   for (i = 0; i < src_ptr->nvox; i++)
     if (mask[i] > 0) src[i] += offset;
-
+*/
   voxelsize[0] = src_ptr->dx;
   voxelsize[1] = src_ptr->dy;
   voxelsize[2] = src_ptr->dz;
@@ -129,14 +129,14 @@ main( int argc, char **argv )
   thresh_kmeans_int = 128;
   
   /* initially use 4 classes to consider background */
-  n_classes = 4;
+  n_classes = 6;
   max_vol = Kmeans( src, label, mask, 25, n_classes, voxelsize, dims, thresh, thresh_kmeans_int, 20, NOPVE, bias_fwhm);
 
-  double mu[2];
-  int n_voxel[2];
+  double mu[n_classes];
+  int n_voxel[n_classes];
 
-  /* estimate mean for the first two classes */
-  for (j = 0; j < 2; j++) {
+  /* estimate mean for the classes */
+  for (j = 0; j < n_classes; j++) {
     n_voxel[j] = 0;
     for (i = 0; i < src_ptr->nvox; i++) {
       if (label[i] == j+1) {
@@ -150,23 +150,21 @@ main( int argc, char **argv )
   /* set mask to zero where image has values for background */
   double mn_thresh = (mu[0]+mu[1])/3.0;
   for (i = 0; i < src_ptr->nvox; i++) {
-    if (src[i] < mn_thresh) {
-//      mask[i] = 0;
+    if ((src[i] < mn_thresh) || (src[i]>mu[n_classes-1])) {
+      mask[i] = 0;
     }
   }
   
-fprintf(stderr,"%g\n",(mu[0]+mu[1])/2.0);
-  ornlm(src, filtered, 3, 1, (mu[0]+mu[1])/2.0, dims);
+  ornlm(src, filtered, 3, 1, mu[0], dims);
 
   /* second Kmeans with 3 classes */
   n_classes = 3;
   max_vol = Kmeans( src, label, mask, 25, n_classes, voxelsize, dims, thresh, thresh_kmeans_int, 20, KMEANS, bias_fwhm);    
 
   /* first rough skull-stripping */  
-fprintf(stderr,".");
+
   morph_open_uint8(label, dims, strip_param[0], 3);
 
-fprintf(stderr,".");
   get_largest_cluster(label, dims);
     for (i = 0; i < src_ptr->nvox; i++)
       src[i] = (double)label[i];
@@ -176,11 +174,8 @@ fprintf(stderr,".");
     if(!write_nifti(buffer, src, DT_UINT8, slope, 
             dims, voxelsize, src_ptr))
       exit(EXIT_FAILURE);
-fprintf(stderr,":");
   morph_dilate_uint8(label, dims, strip_param[1], 0);
-fprintf(stderr,".");
   morph_close_uint8(label, dims, 10, 0);
-fprintf(stderr,".");
   
   /* update mask */
   for (i = 0; i < src_ptr->nvox; i++)
@@ -194,23 +189,16 @@ fprintf(stderr,".");
   max_vol = Kmeans( filtered, label, mask, 25, 3, voxelsize, dims, thresh, thresh_kmeans_int, 10, NOPVE, bias_fwhm);
 
   /* use amap approach with PVE */
-fprintf(stderr,".");
 int iters_icm = 50;
   Amap( filtered, label, prob, mean, 3, 10, subsample, dims, 1, weight_MRF, voxelsize, iters_icm, offset);
-fprintf(stderr,".");
   Pve5(filtered, prob, label, mean, dims);
 
-fprintf(stderr,".");
 
   /* final skull-stripping */
-  morph_open_uint8(label, dims, strip_param[2], 160);
-fprintf(stderr,".");
-  get_largest_cluster(label, dims);
-fprintf(stderr,".");
+  morph_open_uint8(label, dims, strip_param[2], 80);
+//  get_largest_cluster(label, dims);
   morph_dilate_uint8(label, dims, strip_param[3], 0);
-fprintf(stderr,".");
   morph_close_uint8(label, dims, 10, 0);
-fprintf(stderr,".");
 
   basename = nifti_makebasename(output_filename);
 
