@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS = check-news
 ACLOCAL_AMFLAGS = -I m4
 
 dist_bin_SCRIPTS = \
-	parallelize
+	parallelize \
 	parallelize_xserves
 
 bin_PROGRAMS = \
