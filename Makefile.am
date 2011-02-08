@@ -3,6 +3,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 dist_bin_SCRIPTS = \
 	parallelize
+	parallelize_xserves
 
 bin_PROGRAMS = \
   niiamap \

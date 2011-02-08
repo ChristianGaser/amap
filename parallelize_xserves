@@ -3,13 +3,10 @@
 ########################################################
 # global parameters
 ########################################################
-version='parallelize $Id$'
+version='parallelize_xserves $Id$'
 
 COMMAND=""
-TEST=""
-CPUINFO=/proc/cpuinfo
-ARCH=`uname`
-time=`date "+%Y%b%d_%H%M"`
+XSERVES="141.35.68.68 141.35.68.71 141.35.68.72 141.35.68.73"
 
 ########################################################
 # run main
@@ -19,8 +16,7 @@ main ()
 {
   parse_args ${1+"$@"}
   check_files
-  get_no_of_cpus
-  parallelize
+  parallelize_xserves
 
   exit 0
 }
@@ -43,13 +39,10 @@ parse_args ()
             COMMAND=$optarg
             shift
             ;;
-        --processes* | -p*)
+        --server* | -s*)
             exit_if_empty "$optname" "$optarg"
-            NUMBER_OF_JOBS=$optarg
+            XSERVES=$optarg
             shift
-            ;;
-        --test* | -t*)
-            TEST=1
             ;;
         -h | --help | -v | --version | -V)
             help
@@ -122,52 +115,19 @@ check_files ()
 }
 
 ########################################################
-# get # of cpus
-########################################################
-# modified code from
-# PPSS, the Parallel Processing Shell Script
-# 
-# Copyright (c) 2009, Louwrentius
-# All rights reserved.
-
-get_no_of_cpus () {
-
-  if [ -z "$NUMBER_OF_JOBS" ];
-  then
-    if [ "$ARCH" == "Linux" ]
-    then
-      NUMBER_OF_JOBS=`grep ^processor $CPUINFO | wc -l`
-
-    elif [ "$ARCH" == "Darwin" ]
-    then
-      NUMBER_OF_JOBS=`sysctl -a hw | grep -w logicalcpu | awk '{ print $2 }'`
-
-    elif [ "$ARCH" == "FreeBSD" ]
-    then
-      NUMBER_OF_JOBS=`sysctl hw.ncpu | awk '{ print $2 }'`
-
-    else
-      NUMBER_OF_JOBS=`grep ^processor $CPUINFO | wc -l`
-
-    fi
-    echo "Found $NUMBER_OF_JOBS processors."
-
-    if [ -z "$NUMBER_OF_JOBS" ]
-    then
-        echo "$FUNCNAME ERROR - number of CPUs not obtained. Use -p to define number of processes."
-        exit 1
-    fi
-  fi
-}
-
-########################################################
-# run parallelize
+# run parallelize_xserves
 ########################################################
 
-parallelize ()
+parallelize_xserves ()
 {
+
+  NUMBER_OF_SERVERS=0
+  for k in ${XSERVES}; do
+    ((NUMBER_OF_SERVERS++))
+  done
+
   SIZE_OF_ARRAY="${#ARRAY[@]}"
-  BLOCK=$((10000* $SIZE_OF_ARRAY / $NUMBER_OF_JOBS ))
+  BLOCK=$((10000* $SIZE_OF_ARRAY / $NUMBER_OF_SERVERS ))
 
   i=0
   while [ "$i" -lt "$SIZE_OF_ARRAY" ]
@@ -180,26 +140,15 @@ parallelize ()
     fi
     ((i++))
   done
-
-  time=`date "+%Y%b%d_%H%M"`
-  log=parallelize_${time}.log
-  if [ "${TEST}" == "" ]; then
-    echo Check $log for logging information
-    echo > $log
-    echo
-  fi
     
   i=0
-  while [ "$i" -lt "$NUMBER_OF_JOBS" ]
+  for x in ${XSERVES};
   do
     if [ ! "${ARG_LIST[$i]}" == "" ]; then
       j=$(($i+1))
-      echo job ${j}/"$NUMBER_OF_JOBS":
+      echo job ${j}/"$NUMBER_OF_SERVERS":
       echo $COMMAND ${ARG_LIST[$i]}
-      if [ "${TEST}" == "" ]; then
-          echo job ${j}/"$NUMBER_OF_JOBS": $COMMAND ${ARG_LIST[$i]} >> $log
-          nohup bash -c "for k in ${ARG_LIST[$i]}; do $COMMAND \$k; done" >> $log 2>&1 &
-      fi
+      echo bash -c "ssh ${x} $COMMAND ${ARG_LIST[$i]}"
     fi
     ((i++))
   done
@@ -215,29 +164,26 @@ help ()
 cat <<__EOM__
 
 USAGE:
-  parallize [-p number_of_processes] [-t] -c command_to_parallelize filename|filepattern
+  parallize [-s server] -c command_to_parallelize_xserves filename|filepattern
   
-   -p   number of parallel jobs (=number of processors)
    -c   command that should be parallelized
-   -t   do not call command, but print files to be processed
+   -s   server list
 
    Only one filename or pattern is allowed. This can be either a single file or a pattern
    with wildcards to process multiple files. Optionally you can set number of processes,
    that are automatically set to the number of processors as default.
 
 PURPOSE:
-   Parallelize a job or command
+   parallelize_xserves a job or command
 
 OUTPUT:
-   parallelize_${time}.log with current data and time in name as log-file
 
 EXAMPLE
-   parallelize -c "niismooth -v -fwhm 8" sTRIO*.nii
-   Parallelize smoothing with fwhm of 8mm for all files sTRIO*.nii. Use
-   verbose mode to see diagnostic output.
+   parallelize_xserves -c "niismooth -v -fwhm 8" sTRIO*.nii
+   smoothing with fwhm of 8mm for all files sTRIO*.nii. Use verbose mode to see diagnostic output.
    
-   parallelize -c gunzip *.zip
-   Parallelize unzipping of all zip-files in current folder. 
+   parallelize_xserves -s "141.35.68.68 141.35.68.71" -c "/Volumes/UltraMax/spm8/toolbox/vbm8/cg_vbm8_batch.sh -w -m /usr/local/bin/matlab" /Volumes/UltraMax/ADNI/*sc*/ADNI*.nii
+   VBM8 batch for all files in /Volumes/UltraMax/ADNI/*sc*/ADNI*.nii with 2 servers 141.35.68.68 141.35.68.71
 
 This script was written by Christian Gaser (christian.gaser@uni-jena.de).
 This is ${version}.
