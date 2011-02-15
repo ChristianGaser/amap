@@ -11,6 +11,7 @@ bin_PROGRAMS = \
 	niismooth \
 	niiornlm \
 	niisanlm \
+	niinucorrect \
 	niibrainmask 
 	
 mincremovebridges_SOURCES = \
@@ -66,6 +67,16 @@ if EBTKS
 	  SplineSmooth.cc \
 	  ParseArgv.c
 
+  niinucorrect_SOURCES = \
+	  niinucorrect.c \
+	  Kmeans.c \
+	  nifti1/nifti1_io.c \
+	  nifti1/znzlib.c \
+	  niilib.c \
+	  vollib.c \
+	  SplineSmooth.cc \
+	  ParseArgv.c
+
   niibrainmask_SOURCES = \
 	  niibrainmask.c \
 	  bwlabel.c \
@@ -89,6 +100,15 @@ else
 	  Pve.c \
 	  MrfPrior.c \
 	  sanlm.c \
+	  nifti1/nifti1_io.c \
+	  nifti1/znzlib.c \
+	  niilib.c \
+	  vollib.c \
+	  ParseArgv.c
+
+  niinucorrect_SOURCES = \
+	  niinucorrect.c \
+	  Kmeans.c \
 	  nifti1/nifti1_io.c \
 	  nifti1/znzlib.c \
 	  niilib.c \

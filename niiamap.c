@@ -246,15 +246,17 @@ main( int argc, char **argv )
   /* final Kmeans estimation */
   max_vol = Kmeans( src, label, mask, 25, n_pure_classes, voxelsize, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE, bias_fwhm);
 
-  Amap( src, label, prob, mean, n_pure_classes, iters_amap, subsample, dims, pve, weight_MRF, voxelsize, iters_ICM, offset);
+  if (iters_amap > 0) {
+    Amap( src, label, prob, mean, n_pure_classes, iters_amap, subsample, dims, pve, weight_MRF, voxelsize, iters_ICM, offset);
 
-  /* PVE */
-  if (pve) {
-    fprintf(stdout,"Calculate Partial Volume Estimate.\n");
-    if(pve==6)
-      Pve6(src, prob, label, mean, dims);
-    else
-      Pve5(src, prob, label, mean, dims);
+    /* PVE */
+    if (pve) {
+      fprintf(stdout,"Calculate Partial Volume Estimate.\n");
+      if(pve==6)
+        Pve6(src, prob, label, mean, dims);
+      else
+        Pve5(src, prob, label, mean, dims);
+    }
   }
   
   /* write nu corrected image */
