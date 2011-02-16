@@ -46,9 +46,8 @@ main( int argc, char **argv )
   int		    count_zero;
   char		  buffer[1024];
   unsigned char *label, *mask;
-  double	  *src, ratio_zeros, slope;
-  double    avg, avg8, offset, max_src, min_src, voxelsize[3];
-  double    thresh_histo[2];
+  double	  *src, ratio_zeros;
+  double    avg, avg8, max_src, min_src, voxelsize[3];
 
   /* Get arguments */
   if (ParseArgv(&argc, argv, argTable, 0) || (argc < 2)) {
