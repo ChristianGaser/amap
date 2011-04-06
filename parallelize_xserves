@@ -104,8 +104,8 @@ check_files ()
   i=0
   while [ "$i" -lt "$SIZE_OF_ARRAY" ]
   do
-    if [ ! -f "${ARRAY[$i]}" ]; then
-      echo ERROR: File ${ARRAY[$i]} not found
+    if [ ! -f "${ARRAY[$i]}" ] && [ ! -d "${ARRAY[$i]}" ]; then
+      echo ERROR: File or directory ${ARRAY[$i]} not found
       help
       exit 1
     fi
