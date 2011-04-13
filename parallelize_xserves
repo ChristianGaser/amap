@@ -185,6 +185,9 @@ EXAMPLE
    parallelize_xserves -s "141.35.68.68 141.35.68.71 141.35.68.72 141.35.68.73" -c "/Volumes/UltraMax/spm8/toolbox/vbm8/cg_vbm8_batch.sh -w -m /usr/local/bin/matlab" /Volumes/UltraMax/ADNI/*sc*/ADNI*.nii
    VBM8 batch for all files in /Volumes/UltraMax/ADNI/*sc*/ADNI*.nii with 4 servers 141.35.68.68 141.35.68.71 141.35.68.72 141.35.68.73 
 
+   parallelize_xserves -c "/Volumes/UltraMax/spm8/toolbox/vbm8/cg_vbm8_batch.sh -p 4 -d /Volumes/UltraMax/cg_vbm8_defaults_rp1_affine.m -m /usr/local/bin/matlab" /Volumes/UltraMax/ADNI/*sc*/ADNI*.nii
+   VBM8 batch for all files in /Volumes/UltraMax/ADNI/*sc*/ADNI*.nii with 4 parallel jobs and optional default file 
+
    parallelize_xserves -c "/Volumes/UltraMax/parallelize -c /Volumes/UltraMax/niismooth" /Volumes/UltraMax/IXI-database/raw/rp1IXI*nii
 
 This script was written by Christian Gaser (christian.gaser@uni-jena.de).

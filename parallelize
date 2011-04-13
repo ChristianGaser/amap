@@ -215,7 +215,7 @@ help ()
 cat <<__EOM__
 
 USAGE:
-  parallize [-p number_of_processes] [-t] -c command_to_parallelize filename|filepattern
+  parallelize [-p number_of_processes] [-t] -c command_to_parallelize filename|filepattern
   
    -p   number of parallel jobs (=number of processors)
    -c   command that should be parallelized
