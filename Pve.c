@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id: Pve6.c 131 2009-07-24 20:59:26Z gaser $ 
+ * $Id$ 
  *
  */
 

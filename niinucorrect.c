@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id: niiamap.c 141 2010-08-31 22:14:11Z gaser $ 
+ * $Id$ 
  *
  */
 

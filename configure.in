@@ -1,8 +1,8 @@
-dnl $Id: configure.in,v 1.7 2003/06/12 15:54:01 spotspot Exp $
+dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT
-AC_REVISION($Revision: 0.99 $)
+AC_REVISION($Revision$)
 
 AM_INIT_AUTOMAKE(amap,0.1,Christian Gaser <christian.gaser@uni-jena.de>)
 AM_CONFIG_HEADER([config.h])

@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id: niismooth.c 95 2009-11-05 16:02:56Z gaser $ 
+ * $Id$ 
  *
  */
 
