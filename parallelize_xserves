@@ -190,6 +190,8 @@ EXAMPLE
 
    parallelize_xserves -c "/Volumes/UltraMax/bin/parallelize -c /Volumes/UltraMax/niismooth" /Volumes/UltraMax/IXI-database/raw/rp1IXI*nii
 
+   parallelize_xserves -s "141.35.68.68 141.35.68.71 141.35.68.73 141.35.68.74 141.35.68.75" -c "/Volumes/UltraMax/bin/parallelize -c /Volumes/UltraMax/subjects/recon-all-cg-no_skullstripping" /Volumes/UltraMax/MEDI_50_50/data/[MU]*.img
+
 This script was written by Christian Gaser (christian.gaser@uni-jena.de).
 This is ${version}.
 
