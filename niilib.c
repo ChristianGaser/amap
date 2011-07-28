@@ -187,8 +187,8 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
   nii_ptr->nvox = dim[0]*dim[1]*dim[2];
   nii_ptr->ndim = 3;
 
-  /* for floating data no resacling is neccessary */
-  if ((slope == 0.0) && ((data_type == DT_FLOAT32) || (data_type == DT_FLOAT32)))
+  /* for floating data no rescaling is neccessary */
+  if ((slope == 0.0) && ((data_type == DT_FLOAT32) || (data_type == DT_FLOAT64)))
     slope = 1.0;
      
   if (slope == 0.0) {
@@ -231,7 +231,7 @@ write_nifti( const char *output_filename, double image[], int data_type, double 
                           (dt_range[1] - dt_range[0]));
     nii_ptr->scl_inter = img_range[0] - (dt_range[0] * nii_ptr->scl_slope);
     for (i = 0; i < nii_ptr->nvox; i++)
-      image[i] = (image[i] + nii_ptr->scl_inter)/nii_ptr->scl_slope;
+      image[i] = (image[i] - nii_ptr->scl_inter)/nii_ptr->scl_slope;
   }
 
   nii_ptr->datatype = data_type;
