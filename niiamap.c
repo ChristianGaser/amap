@@ -140,12 +140,8 @@ main( int argc, char **argv )
     break;
   }
   
-  /* read data and scale it to 0..255 */
+  /* read data */
   src_ptr = read_nifti_double(input_filename, &src);
-  if(src_ptr == NULL) {
-    fprintf(stderr,"Error reading %s.\n", input_filename);
-    return(EXIT_FAILURE);
-  }
   
   if(src_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n",input_filename);

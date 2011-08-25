@@ -126,7 +126,7 @@ class CRemoveBridges{
   CRemoveBridges();
   ~CRemoveBridges();
   unsigned char remove(unsigned char *preSegData,
-		       unsigned char *unSegData,
+		       double *unSegData,
 		       unsigned char *resultData,
 		       int x,
 		       int y,
@@ -142,7 +142,7 @@ class CRemoveBridges{
  private:
   unsigned char posObj[256][256][256];
   unsigned char negObj[256][256][256];
-  unsigned char unsegVMRobj[256][256][256];
+  double unsegVMRobj[256][256][256];
   unsigned char vmrHeaderBuffer[6];
 
   int pas[27][17];

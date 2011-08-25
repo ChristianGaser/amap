@@ -712,7 +712,7 @@ float CRemoveBridges::deletionDamage(voxT vox){
   const float whiteMatterDeletionDamage = 1.0;
   const float whitestMatterDeletionDamage = 1.5;
   
-  float intensity=float(unsegVMRobj[vox.x][vox.y][vox.z]);
+  float intensity = (float)unsegVMRobj[vox.x][vox.y][vox.z];
   if(intensity<g_averageGrayIntensity) //air to gray matter
     r_svd=airDeletionDamage+intensity/g_averageGrayIntensity*(grayMatterDeletionDamage-airDeletionDamage);
   
@@ -750,7 +750,7 @@ float CRemoveBridges::additionDamage(voxT vox){
   const float whiteMatterAdditionDamage = -1.0;
   const float whitestMatterAdditionDamage = -1.5;
 
-  float intensity=float(unsegVMRobj[vox.x][vox.y][vox.z]);
+  float intensity = (float) unsegVMRobj[vox.x][vox.y][vox.z];
   
   if(intensity<g_averageGrayIntensity) //air to gray matter
     r_svd=airAdditionDamage+intensity/g_averageGrayIntensity*(grayMatterAdditionDamage-airAdditionDamage);
@@ -998,7 +998,7 @@ string CRemoveBridges::englishCutDescriptionElaboration(cutC* cutP){
       damage=deletionDamage(cVox);
     }
 
-    sprintf(buff, "\t\t\t%s voxel (%d,%d,%d) of intensity %d doing %f damage if %s.\n", 
+    sprintf(buff, "\t\t\t%s voxel (%d,%d,%d) of intensity %3.1f doing %f damage if %s.\n", 
 	    voxelTypeS.c_str(), cVox.z, cVox.x, cVox.y, unsegVMRobj[cVox.x][cVox.y][cVox.z], 
 	    damage, actionTypeS.c_str());
     r_description = r_description+buff;
@@ -1016,7 +1016,7 @@ string CRemoveBridges::englishCutDescriptionElaboration(cutC* cutP){
       damage=deletionDamage(cVox);
     }
     
-    sprintf(buff, "\t\t\t%s voxel (%d,%d,%d) of intensity %d doing %f damage if %s.\n", 
+    sprintf(buff, "\t\t\t%s voxel (%d,%d,%d) of intensity %3.1f doing %f damage if %s.\n", 
 	    voxelTypeS.c_str(), cVox.z, cVox.x, cVox.y, unsegVMRobj[cVox.x][cVox.y][cVox.z], 
 	    damage, actionTypeS.c_str());
     r_description = r_description+buff;
@@ -1446,7 +1446,7 @@ void CRemoveBridges::makeChanges(psq<choiceC*>& listOfChoicePs, unsigned char ob
 
 
 unsigned char CRemoveBridges::remove(unsigned char *preSegData,
-																		 unsigned char *unSegData,
+																		 double *unSegData,
 																		 unsigned char *resultData,
 																		 int x, int y, int z,
 																		 float averageWhiteIntensity, 

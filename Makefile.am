@@ -12,14 +12,19 @@ bin_PROGRAMS = \
 	niiornlm \
 	niisanlm \
 	niinucorrect \
+	niiremovebridges \
 	niibrainmask 
 	
-mincremovebridges_SOURCES = \
+niiremovebridges_SOURCES = \
+	niiremovebridges.cpp \
 	CRemoveBridges.cpp \
-	mincremovebridges.cpp
+	nifti1/nifti1_io.c \
+	nifti1/znzlib.c \
+	ParseArgv.c \
+	niilib.c
 
-mincmarchingcubes_SOURCES = \
-	mincmarchingcubes.c
+#mincmarchingcubes_SOURCES = \
+#	mincmarchingcubes.c
 	
 niiaverage_SOURCES = \
 	niiaverage.c \
