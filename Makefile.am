@@ -18,6 +18,7 @@ bin_PROGRAMS = \
 niiremovebridges_SOURCES = \
 	niiremovebridges.cpp \
 	CRemoveBridges.cpp \
+  bwlabel.c \
 	nifti1/nifti1_io.c \
 	nifti1/znzlib.c \
 	ParseArgv.c \

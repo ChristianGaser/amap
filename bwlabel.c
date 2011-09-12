@@ -102,9 +102,7 @@ unsigned int do_initial_labelling(unsigned char  *bw,   /* Binary map */
             nr_set = 0;
             if (bw[index(r,c,sl,dim)])
             {
-fprintf(stderr,".");
                nabo[0] = check_previous_slice(il,r,c,sl,dim,conn,*tt,ttn);
-fprintf(stderr,":");
                if (nabo[0]) {nr_set += 1;}
                /*
                   For six(surface)-connectivity
@@ -135,11 +133,9 @@ fprintf(stderr,":");
                      if ((l = il[index(r+1,c-1,sl,dim)])) {nabo[nr_set++] = l;}
                   }
                }
-fprintf(stderr,"-");
                if (nr_set)
                {
                   il[index(r,c,sl,dim)] = nabo[0];
-fprintf(stderr,"+");
                   fill_tratab(*tt,ttn,nabo,nr_set);
                }
                else
