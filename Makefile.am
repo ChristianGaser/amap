@@ -23,9 +23,6 @@ niiremovebridges_SOURCES = \
 	nifti1/znzlib.c \
 	ParseArgv.c \
 	niilib.c
-
-#mincmarchingcubes_SOURCES = \
-#	mincmarchingcubes.c
 	
 niiaverage_SOURCES = \
 	niiaverage.c \
