@@ -10,8 +10,8 @@
 #include "Amap.h"
 #include "niinucorrect.h"
 
-#include "nifti1/nifti1_io.h"
-#include "nifti1/nifti1_local.h"
+#include "nifti/nifti1_io.h"
+#include "nifti/nifti1_local.h"
 
 extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
 	

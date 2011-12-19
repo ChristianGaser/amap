@@ -1,3 +1,9 @@
+/*
+ * Christian Gaser
+ * $Id$ 
+ *
+ */
+
 #include "CRemoveBridges.h"
 
 #ifndef SQR
@@ -15,8 +21,8 @@
 extern "C"
 {
 #include <ParseArgv.h>
-#include "nifti1/nifti1_io.h"
-#include "nifti1/nifti1_local.h"
+#include "nifti/nifti1_io.h"
+#include "nifti/nifti1_local.h"
 extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
 extern int equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
 extern int write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);

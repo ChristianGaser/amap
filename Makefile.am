@@ -1,80 +1,146 @@
 AUTOMAKE_OPTIONS = check-news
 ACLOCAL_AMFLAGS = -I m4
 
+ZLIBCFLAGS=-I$(top_srcdir)/zlib
+NIFTICFLAGS=-I$(top_srcdir)/nifti
+REGCFLAGS=-I$(top_srcdir)/reg-lib
+
+AM_CPPFLAGS=$(ZLIBCFLAGS) $(NIFTICFLAGS) $(REGCFLAGS)
+
 dist_bin_SCRIPTS = \
 	parallelize \
-	parallelize_xserves
+	parallelize_xserves \
+	reg-apps/reg_full.sh
 
 bin_PROGRAMS = \
-  niiamap \
+    niiamap \
 	niiaverage \
 	niismooth \
 	niiornlm \
 	niisanlm \
 	niinucorrect \
 	niiremovebridges \
-	niibrainmask 
+	niibrainmask \
+    reg_aladin \
+	reg_f3d \
+	reg_resample \
+	reg_tools
 	
+zlib_SOURCES = \
+    zlib/adler32.c \
+    zlib/crc32.c \
+    zlib/gzio.c  \
+    zlib/inffast.c \
+    zlib/inftrees.c \
+    zlib/trees.c \
+    zlib/zutil.c \
+    zlib/compress.c \
+    zlib/deflate.c \
+    zlib/infback.c \
+    zlib/inflate.c \
+    zlib/uncompr.c
+
+nifti_SOURCES = \
+    nifti/nifti1_io.c \
+    nifti/znzlib.c
+
+reg_aladin_SOURCES = \
+	reg-apps/reg_aladin.cpp \
+	reg-lib/_reg_resampling.cpp \
+	reg-lib/_reg_affineTransformation.cpp \
+	reg-lib/_reg_blockMatching.cpp \
+	reg-lib/_reg_tools.cpp \
+	$(zlib_SOURCES) \
+	$(nifti_SOURCES) 
+
+reg_f3d_SOURCES = \
+	reg-apps/reg_f3d.cpp \
+	reg-lib/_reg_resampling.cpp \
+	reg-lib/_reg_bspline.cpp \
+	reg-lib/_reg_bspline_comp.cpp \
+	reg-lib/_reg_mutualinformation.cpp \
+	reg-lib/_reg_affineTransformation.cpp \
+	reg-lib/_reg_ssd.cpp \
+	reg-lib/_reg_tools.cpp \
+	$(zlib_SOURCES) \
+	$(nifti_SOURCES)  
+
+reg_resample_SOURCES = \
+	reg-apps/reg_resample.cpp \
+	reg-lib/_reg_resampling.cpp \
+	reg-lib/_reg_bspline.cpp \
+	reg-lib/_reg_bspline_comp.cpp \
+	reg-lib/_reg_tools.cpp \
+	reg-lib/_reg_affineTransformation.cpp \
+	$(zlib_SOURCES) \
+	$(nifti_SOURCES)  
+
+reg_tools_SOURCES = \
+    reg-apps/reg_tools.cpp \
+	reg-lib/_reg_resampling.cpp \
+	reg-lib/_reg_tools.cpp \
+	reg-lib/_reg_affineTransformation.cpp \
+    $(zlib_SOURCES) \
+	$(nifti_SOURCES) 
+
 niiremovebridges_SOURCES = \
 	niiremovebridges.cpp \
 	CRemoveBridges.cpp \
-  bwlabel.c \
-	nifti1/nifti1_io.c \
-	nifti1/znzlib.c \
-	ParseArgv.c \
+    bwlabel.c \
+	$(nifti_SOURCES) \
+    $(zlib_SOURCES) \
+    ParseArgv.c \
 	niilib.c
 	
 niiaverage_SOURCES = \
 	niiaverage.c \
-	nifti1/nifti1_io.c \
-	nifti1/znzlib.c \
+	$(nifti_SOURCES) \
+    $(zlib_SOURCES) \
 	ParseArgv.c \
 	niilib.c
 
 niismooth_SOURCES = \
 	niismooth.c \
-	nifti1/nifti1_io.c \
-	nifti1/znzlib.c \
+	$(nifti_SOURCES) \
+    $(zlib_SOURCES) \
 	vollib.c \
 	ParseArgv.c \
 	niilib.c
 
 niiornlm_SOURCES = \
 	niiornlm.c \
-	nifti1/nifti1_io.c \
-	nifti1/znzlib.c \
+	$(nifti_SOURCES) \
+    $(zlib_SOURCES) \
 	ParseArgv.c \
 	ornlm.c \
 	niilib.c
 
 niisanlm_SOURCES = \
 	niisanlm.c \
-	nifti1/nifti1_io.c \
-	nifti1/znzlib.c \
+	$(nifti_SOURCES) \
+    $(zlib_SOURCES) \
 	ParseArgv.c \
 	sanlm.c \
 	niilib.c
 	
 if EBTKS
-  niiamap_SOURCES = \
-	  niiamap.c \
-	  Amap.c \
-	  Kmeans.c \
-	  Pve.c \
-	  MrfPrior.c \
-	  sanlm.c \
-	  nifti1/nifti1_io.c \
-	  nifti1/znzlib.c \
-	  niilib.c \
-	  vollib.c \
-	  SplineSmooth.cc \
-	  ParseArgv.c
+    niiamap_SOURCES = \
+    niiamap.c \
+    Amap.c \
+    Kmeans.c \
+    Pve.c \
+    MrfPrior.c \
+    sanlm.c \
+    $(nifti_SOURCES) \
+    niilib.c \
+    vollib.c \
+    SplineSmooth.cc \
+    ParseArgv.c
 
   niinucorrect_SOURCES = \
 	  niinucorrect.c \
 	  Kmeans.c \
-	  nifti1/nifti1_io.c \
-	  nifti1/znzlib.c \
+	  $(nifti_SOURCES) \
 	  niilib.c \
 	  vollib.c \
 	  SplineSmooth.cc \
@@ -87,8 +153,7 @@ if EBTKS
 	  Kmeans.c \
 	  Pve.c \
 	  MrfPrior.c \
-	  nifti1/nifti1_io.c \
-	  nifti1/znzlib.c \
+	  $(nifti_SOURCES) \
 	  niilib.c \
 	  ParseArgv.c \
 	  ornlm.c \
@@ -103,8 +168,7 @@ else
 	  Pve.c \
 	  MrfPrior.c \
 	  sanlm.c \
-	  nifti1/nifti1_io.c \
-	  nifti1/znzlib.c \
+	  $(nifti_SOURCES) \
 	  niilib.c \
 	  vollib.c \
 	  ParseArgv.c
@@ -112,8 +176,7 @@ else
   niinucorrect_SOURCES = \
 	  niinucorrect.c \
 	  Kmeans.c \
-	  nifti1/nifti1_io.c \
-	  nifti1/znzlib.c \
+	  $(nifti_SOURCES) \
 	  niilib.c \
 	  vollib.c \
 	  ParseArgv.c
@@ -125,8 +188,7 @@ else
 	  Kmeans.c \
 	  Pve.c \
 	  MrfPrior.c \
-	  nifti1/nifti1_io.c \
-	  nifti1/znzlib.c \
+	  $(nifti_SOURCES) \
 	  niilib.c \
 	  ParseArgv.c \
 	  ornlm.c \
@@ -135,7 +197,7 @@ else
 endif
 
 m4_files = m4/mni_REQUIRE_LIB.m4 \
-  m4/mni_REQUIRE_MNILIBS.m4 \
+    m4/mni_REQUIRE_MNILIBS.m4 \
 	m4/mni_REQUIRE_OPENINVENTOR.m4 \
 	m4/mni_cxx_have_koenig_lookup.m4 \
 	m4/smr_CGAL_MAKEFILE.m4 \

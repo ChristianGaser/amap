@@ -4,8 +4,8 @@
  *
  */
 
-#include "nifti1/nifti1_io.h"
-#include "nifti1/nifti1_local.h"
+#include "nifti/nifti1_io.h"
+#include "nifti/nifti1_local.h"
 
 #include <float.h>
 

@@ -8,8 +8,8 @@
 #include <float.h>
 #include <stdlib.h>
 
-#include "nifti1/nifti1_io.h"
-#include "nifti1/nifti1_local.h"
+#include "nifti/nifti1_io.h"
+#include "nifti/nifti1_local.h"
 
 extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
 extern write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
