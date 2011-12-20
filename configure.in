@@ -35,7 +35,7 @@ AM_CONDITIONAL([OPENMP], [test "$enable_openmp" = yes])
 
      
 AC_ARG_ENABLE(ebtks, [AC_HELP_STRING([--disable-ebtks],[disable use of spline smoothing in EBTKS [default=no]])], disable_ebtks=$disableval, disable_ebtks=no)
-if test "$disable_ebtks" = "yes"; then
+if test "$disable_ebtks" = "no"; then
 	AC_DEFINE(EBTKS,1,[Define to disable EBTKS.])
     [CFLAGS="$CFLAGS -DSPLINESMOOTH"] 
     [CXXFLAGS="$CXXFLAGS -DSPLINESMOOTH"] 
