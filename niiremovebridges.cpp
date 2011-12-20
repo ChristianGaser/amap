@@ -18,6 +18,10 @@
 #define ROUND( x ) ((long) ((x) + ( ((x) >= 0) ? 0.5 : (-0.5) ) ))
 #endif
 
+#ifndef HUGE
+#define HUGE 1e15
+#endif
+
 extern "C"
 {
 #include <ParseArgv.h>

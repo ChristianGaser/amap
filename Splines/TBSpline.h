@@ -79,9 +79,9 @@ $State: Exp $
 #ifndef TBSPLINE_H
 #define TBSPLINE_H
 
-#include "EBTKS/SimpleArray.h"
-#include "EBTKS/Matrix.h"
-#include "EBTKS/MatrixSupport.h"
+#include "EBTKS/templates/SimpleArray.h"
+#include "EBTKS/templates/Matrix.h"
+#include "EBTKS/templates/MatrixSupport.h"
 #include "Spline.h"
 
 #define DEBUG_TBSPLINE

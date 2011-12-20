@@ -46,8 +46,8 @@ static char rcsid[] = "$Header: /software/source/INSECT/N3/src/SplineSmooth/spli
 #include <iostream>		// (bert)
 using namespace std;		// (bert)
 #include <math.h>
-#include <EBTKS/Matrix.h>	// (bert) 
-#include <EBTKS/TBSpline.h>	// (bert)
+#include <EBTKS/templates/Matrix.h>	// (bert) 
+#include <Splines/TBSpline.h>	// (bert)
 #undef ROUND
 #undef SIGN
 

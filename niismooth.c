@@ -7,7 +7,9 @@
 #include <ParseArgv.h>
 #include <float.h>
 #include <stdlib.h>
-#include <libgen.h>
+#if !defined(_WIN32)
+  #include <libgen.h>
+#endif
 
 #include "nifti/nifti1_io.h"
 #include "nifti/nifti1_local.h"
@@ -42,7 +44,11 @@ main(int argc, char *argv[])
   nifti_image *nii_ptr;
 
   /* Get arguments */
+#if !defined(_WIN32)
   if  (ParseArgv(&argc, argv, argTable, 0) ||(argc < 2)) {
+#else
+  if  (ParseArgv(&argc, argv, argTable, 0) ||(argc < 3)) {
+#endif
    (void) fprintf(stderr, 
    "\nUsage: %s [options] in.nii [out.nii]\n",
         argv[0]);
@@ -80,7 +86,9 @@ main(int argc, char *argv[])
     outfile = argv[2];
   else {
     outfile = argv[1];
-    (void) sprintf(outfile, "%s/s%g%s", dirname(outfile), fwhm, basename(outfile)); 
+    #if !defined(_WIN32)
+      (void) sprintf(outfile, "%s/s%g%s", dirname(outfile), fwhm, basename(outfile)); 
+    #endif
   }
 
   /* write data using same data type and rescale */

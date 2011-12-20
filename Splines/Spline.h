@@ -20,9 +20,9 @@ $State: Exp $
 #ifndef SPLINE_3D_H
 #define SPLINE_3D_H
 
-#include "EBTKS/SimpleArray.h"
-#include "EBTKS/Matrix.h"
-#include "EBTKS/OrderedCltn.h"
+#include "EBTKS/templates/SimpleArray.h"
+#include "EBTKS/templates/Matrix.h"
+#include "EBTKS/include/OrderedCltn.h"
 #ifdef HAVE_INTERFACE
 #include "MRegion.h"
 #endif

@@ -19,9 +19,9 @@ $State: Exp $
 --------------------------------------------------------------------------*/
 #include <config.h>
 #include "Spline.h"
-#include "EBTKS/Matrix.h"
-#include "EBTKS/MPoint.h"
-#include "EBTKS/trivials.h"
+#include "EBTKS/templates/Matrix.h"
+#include "EBTKS/include/MPoint.h"
+#include "EBTKS/include/trivials.h"
 #include <assert.h>
 
 using namespace std;
