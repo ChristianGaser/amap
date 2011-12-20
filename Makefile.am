@@ -4,8 +4,13 @@ ACLOCAL_AMFLAGS = -I m4
 ZLIBCFLAGS=-I$(top_srcdir)/zlib
 NIFTICFLAGS=-I$(top_srcdir)/nifti
 REGCFLAGS=-I$(top_srcdir)/reg-lib
+EBTKSCFLAGS=-I$(top_srcdir)/EBTKS/include -I$(top_srcdir)/EBTKS/templates -I$(top_srcdir)/Splines
 
-AM_CPPFLAGS=$(ZLIBCFLAGS) $(NIFTICFLAGS) $(REGCFLAGS)
+if EBTKS
+  AM_CPPFLAGS=$(ZLIBCFLAGS) $(NIFTICFLAGS) $(REGCFLAGS) $(EBTKSCFLAGS) -DUSE_COMPMAT -DUSE_DBLMAT 
+else
+  AM_CPPFLAGS=$(ZLIBCFLAGS) $(NIFTICFLAGS) $(REGCFLAGS) 
+endif
 
 dist_bin_SCRIPTS = \
 	parallelize \
@@ -26,6 +31,45 @@ bin_PROGRAMS = \
 	reg_resample \
 	reg_tools
 	
+ebtks_SOURCES = \
+	EBTKS/src/FileIO.cc \
+	EBTKS/src/Histogram.cc \
+	EBTKS/src/Path.cc \
+	EBTKS/src/MString.cc \
+	EBTKS/src/OrderedCltn.cc \
+	EBTKS/src/dcomplex.cc \
+	EBTKS/templates/Array.cc \
+	EBTKS/templates/Matrix.cc \
+	EBTKS/templates/MatrixSupport.cc \
+	EBTKS/templates/SimpleArray.cc \
+	EBTKS/templates/ValueMap.cc \
+	EBTKS/templates/miscTemplateFunc.cc \
+	EBTKS/templates/MatrixConv.cc \
+	EBTKS/clapack/dcopy.c \
+	EBTKS/clapack/dgemm.c \
+	EBTKS/clapack/dgemv.c \
+	EBTKS/clapack/dger.c \
+	EBTKS/clapack/dlasyf.c \
+	EBTKS/clapack/dscal.c \
+	EBTKS/clapack/dswap.c \
+	EBTKS/clapack/dsyr.c \
+	EBTKS/clapack/dsysv.c \
+	EBTKS/clapack/dsytf2.c \
+	EBTKS/clapack/dsytrf.c \
+	EBTKS/clapack/dsytrs.c \
+	EBTKS/clapack/idamax.c \
+	EBTKS/clapack/ieeeck.c \
+	EBTKS/clapack/ilaenv.c \
+	EBTKS/clapack/lsame.c \
+	EBTKS/clapack/s_cmp.c \
+	EBTKS/clapack/s_copy.c \
+	EBTKS/clapack/xerbla.c
+
+splines_SOURCES = \
+    Splines/SplineSmooth.cc \
+    Splines/TBSpline.cc \
+    Splines/Spline.cc
+
 zlib_SOURCES = \
     zlib/adler32.c \
     zlib/crc32.c \
@@ -125,25 +169,27 @@ niisanlm_SOURCES = \
 	
 if EBTKS
     niiamap_SOURCES = \
-    niiamap.c \
-    Amap.c \
-    Kmeans.c \
-    Pve.c \
-    MrfPrior.c \
-    sanlm.c \
-    $(nifti_SOURCES) \
-    niilib.c \
-    vollib.c \
-    SplineSmooth.cc \
-    ParseArgv.c
+	  niiamap.c \
+	  Amap.c \
+	  Kmeans.c \
+	  Pve.c \
+	  MrfPrior.c \
+	  sanlm.c \
+	  $(nifti_SOURCES) \
+	  $(ebtks_SOURCES) \
+      $(splines_SOURCES) \
+	  niilib.c \
+	  vollib.c \
+	  ParseArgv.c
 
   niinucorrect_SOURCES = \
 	  niinucorrect.c \
 	  Kmeans.c \
 	  $(nifti_SOURCES) \
+	  $(ebtks_SOURCES) \
+      $(splines_SOURCES) \
 	  niilib.c \
 	  vollib.c \
-	  SplineSmooth.cc \
 	  ParseArgv.c
 
   niibrainmask_SOURCES = \
@@ -154,10 +200,11 @@ if EBTKS
 	  Pve.c \
 	  MrfPrior.c \
 	  $(nifti_SOURCES) \
+	  $(ebtks_SOURCES) \
+      $(splines_SOURCES) \
 	  niilib.c \
 	  ParseArgv.c \
 	  ornlm.c \
-	  SplineSmooth.cc \
 	  vollib.c 
 
 else

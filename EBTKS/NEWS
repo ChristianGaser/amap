@@ -1,0 +1,59 @@
+New in Release 1.6.4
+--------------------
+Moved splines from EBTKS to N3
+
+New in Release 1.6.3
+--------------------
+Changes for build with gcc 4.3
+
+New in Release 1.6.2
+--------------------
+Fixed a bug in the splines to make N3 invariant to voxel sizes.
+Added destructors for the spline classes to free the memory.
+
+New in Release 1.6.1
+--------------------
+Added a bug fix for TBSpline that was manifested in certain cases in nu_correct
+as "inputCompactField(): Incorrect number of coefficients"
+
+New in release 1.5
+------------------
+Fix for temp file creation in src/FileIO.cc
+
+New in release 1.4
+------------------
+Build fixes for GCC 3.4.X
+
+New in release 1.3 
+------------------ 
+
+Bugfix: Vivek Singh corrected a fairly
+major problem in the TBSpline::bendingEnergy() function.  This is especially
+important to users of N3.
+
+Bugfix: Added "if(_debug)" to suppress some debug statements in
+CachedArray.cc and SimpleArray.cc
+
+Build change: EBTKS now includes the bits of CLAPACK required to link
+with the TBSpline object.  It is no longer necessary to build or
+install a separate LAPACK library.
+
+New in release 1.2
+------------------ 
+
+Bugfix release.  CachedArray class should now work, and so should N3
+and inormalize as a result.
+
+New in release 1.1
+------------------
+Bugfix release.  No user-visible changes.
+
+New in release 1.0
+
+* Now builds with g++ 3.2, g++ 2.96, and IRIX CC 7.30
+* Substantial restructuring was required to accomplish this, but no
+  significant functional changes should have been made.
+
+New in Release 0.99
+
+* autoconfiscated and builds with (only?) gcc version 3

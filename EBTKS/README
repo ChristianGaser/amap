@@ -1,0 +1,27 @@
+This is a new version of the EBTKS library which has been tested with
+the following compilers and systems:
+
+g++ 3.3  / Linux and IRIX
+CC 7.30  / IRIX
+
+The code should be functionally identical to EBTKS 0.99.
+
+Building with GNU g++ should be straightforward, just unpack the
+archive and issue the commands './configure' and 'make'.
+
+If you wish to compile with IRIX CC, you need to set the environment
+variables CC and CXX to appropriate values:
+
+    ./configure CC=cc CXX='CC -LANG:std'
+
+The -LANG:std flag is required with IRIX CC in order to support the
+modern C++ standard header files.
+
+There will be several warnings issued during compilation.  I'm still
+looking into fixing these.
+
+Good luck.  Please report any problems to bert@bic.mni.mcgill.ca
+
+
+
+

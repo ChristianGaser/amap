@@ -34,15 +34,15 @@ fi
 AM_CONDITIONAL([OPENMP], [test "$enable_openmp" = yes])
 
      
-AC_ARG_ENABLE(ebtks, [AC_HELP_STRING([--enable-ebtks],[enable use of spline smoothing in EBTKS [default=no]])], enable_ebtks=$enableval, enable_ebtks=no)
-if test "$enable_ebtks" = "yes"; then
-	AC_DEFINE(EBTKS,1,[Define to enable EBTKS.])
+AC_ARG_ENABLE(ebtks, [AC_HELP_STRING([--disable-ebtks],[disable use of spline smoothing in EBTKS [default=no]])], disable_ebtks=$disableval, disable_ebtks=no)
+if test "$disable_ebtks" = "yes"; then
+	AC_DEFINE(EBTKS,1,[Define to disable EBTKS.])
     [CFLAGS="$CFLAGS -DSPLINESMOOTH"] 
     [CXXFLAGS="$CXXFLAGS -DSPLINESMOOTH"] 
-  AC_PROG_CXX
-  mni_REQUIRE_EBTKS
+else
+	AC_DEFINE(EBTKS,0,[Define to disable EBTKS.])
 fi
-AM_CONDITIONAL([EBTKS], [test "$enable_ebtks" = yes])
+AM_CONDITIONAL([EBTKS], [test "$disable_ebtks" = no])
 
 dnl Build only static libs by default
 AM_DISABLE_SHARED

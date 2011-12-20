@@ -1,0 +1,123 @@
+2010-06-16  Dave MacFarlane <david.macfarlane2@mcgill.ca>
+   * Moved splines from EBTKS to N3
+
+2010-05-19  Andrew Janke  <a.janke@gmail.com>
+   * added some C++ fixes regarding templates via Vladimir for gcc 4.3
+
+2010-02-23  Andrew Janke  <a.janke@gmail.com>
+   * removed all rcsid[]'s
+
+2009-05-08  Andrew + Claude  <a.janke@gmail.com>
+   * Fixed a bug in the splines to make N3 invariant to voxel sizes.
+   * Added destructors for the spline classes to free the memory.
+
+2006-06-29  Andrew + Claude  <a.janke@gmail.com>
+   * Changed the code by EPSILON for generating the number of co-efficients in
+      a TBSpline. -- This was causing an esoteric error with nu_correct when
+      imp files were written out with %15g and were thus rounded.
+   
+2006-03-02  Bert Vincent <bert@bic.mni.mcgill.ca>
+   * src/FileIO.cc - in get_temp_filename(), add an explicit path to 
+   the template passed to mkstemp() to avoid creating the temporary 
+   file in the current directory.
+   
+2005-03-16  Andrew Janke   <a.janke@gmail.com>
+   * Added epm-header.in
+
+2004-12-08  Bert Vincent   <bert@bic.mni.mcgill.ca>
+   * Various changes for building against GCC 3.4.X
+   
+2004-04-08  Bert Vincent   <bert@bic.mni.mcgill.ca>
+   * Add CLAPACK sources to the distribution.
+   
+2004-04-04  Vivek Singh    <vsingh@bic.mni.mcgill.ca>
+
+   * In TBSpline.cc changed iterating variables from unsigned
+   to signed in the method bendingEnergy.  This is necessary
+   to deal with possibility negative results when calculating
+   index values.  The change appears to fix the incorrect bias field
+   with N3 under IRIX and the 0 field estimates seen under linux.
+
+2004-02-13  Bert Vincent   <bert@bic.mni.mcgill.ca>
+   
+   * In CachedArray.cc, uncommented bits that actually
+   read/wrote/opened the cache file.  Also, fstream::open() requires
+   the "trunc" attribute to be set in order to create a new file, as
+   of GCC 3.0 and later.
+   
+   * Sadly, EBTKS now uses tempnam() so the annoying linker warning
+   is back in some versions of GCC.  I promise to fix this someday...
+   
+2004-01-29  Bert Vincent   <bert@bic.mni.mcgill.ca>
+   * Include config.h in templates/MatrixSupport.cc so that the
+   HAVE_MALLOC_H is defined!
+
+   * Use explicit "C" linkage for isfinite()/finite() in SimpleArray.cc
+   and SimpleArraySpec.cc
+   
+2004-01-19  Jason Lerch      <jason@bic.mni.mcgill.ca>
+
+   * added checks for values.h and malloc.h and changed the includes
+   where necessary. This fixes a compilation problem on OS 10.3
+   
+2003-11-25  Steve ROBBINS  <stever@bic.mni.mcgill.ca>
+
+   * CVS TAG: EBTKS-1_1.
+   
+   * configure.ac: Set version to 1.1.
+
+2003-11-21  Steve ROBBINS  <stever@bic.mni.mcgill.ca>
+
+   * templates/CachedArray.cc: Remove debugging statements
+   erroneously left in code.
+
+2003-11-14  Steve ROBBINS  <stever@bic.mni.mcgill.ca>
+
+   * configure.ac: Set version to 1.0.
+
+   * templates/miscTemplateFunc.h: Qualify use of std:: identifiers.
+
+   * templates/ValueMap.h: 
+   * templates/Matrix.h: 
+   * templates/Dictionary.h: 
+   * templates/CachedArray.h: 
+   * templates/Array.h: 
+   * include/OpTimer.h: 
+   * include/MPoint.h: 
+   * include/Histogram.h: 
+   * include/FileIO.h: 
+   * include/fcomplex.h: 
+   * include/dcomplex.h: 
+   * include/backProp.h: Do not import all of namespace std.
+
+   * templates/MatrixSpec.cc: 
+   * src/Histogram.cc:
+   * src/MPoint.cc:
+   * src/MString.cc:
+   * src/OpTimer.cc:
+   * src/Polynomial.cc:
+   * src/Spline.cc:
+   * src/TBSpline.cc:
+   * src/TrainingSet.cc:
+   * src/backProp.cc: Use namespace std.
+
+   * templates/SimpleArray.cc: Do not declare _rangeErrorCount multiple times
+   with __GNUC__.
+
+   * configure.ac: Do not check for volume_io.
+
+   * COPYING: New.  License statement taken from templates/Array.cc.
+
+   * Makefile.am (EXTRA_DIST): Distribute m4/*.m4.
+
+2003-06-17  Steve ROBBINS  <stever@bic.mni.mcgill.ca>
+
+   * autogen.sh: Add libtoolize call.
+
+   * Makefile.am (ACLOCAL_AMFLAGS): Add "-I m4" to help
+   autoreconf.
+
+2002-09-04   Jason Lerch   <jason@bic.mni.mcgill.ca>
+   * ugly hack in Matrix.h on line 1004. See documentation in code to
+   understand just how ugly the hack really is!.
+   
