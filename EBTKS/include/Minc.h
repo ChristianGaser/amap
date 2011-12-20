@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: Minc.h,v $
-$Revision: 1.1.1.1 $
-$Author: jason $
-$Date: 2001-11-09 16:37:25 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 // Some things to prevent clashes between the MNI volume_io library

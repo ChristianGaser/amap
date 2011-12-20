@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: backProp.h,v $
-$Revision: 1.4 $
-$Author: stever $
-$Date: 2003-11-17 04:07:52 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #ifndef BACKPROP_H

@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: MatrixSupport.cc,v $
-$Revision: 1.4 $
-$Author: bert $
-$Date: 2004-01-29 19:42:19 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #include "config.h"

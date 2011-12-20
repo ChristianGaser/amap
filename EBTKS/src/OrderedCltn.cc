@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: OrderedCltn.cc,v $
-$Revision: 1.3 $
-$Author: jason $
-$Date: 2004-01-19 15:38:15 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #include <iostream>		// (bert) changed from iostream.h

@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: Matrix3D.h,v $
-$Revision: 1.2 $
-$Author: bert $
-$Date: 2003-04-16 15:09:37 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #ifndef _MATRIX3D_H

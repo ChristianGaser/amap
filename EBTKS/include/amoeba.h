@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: amoeba.h,v $
-$Revision: 1.1.1.1 $
-$Author: jason $
-$Date: 2001-11-09 16:37:25 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #ifndef  _DEF_AMOEBA_H

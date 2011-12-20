@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: Histogram.cc,v $
-$Revision: 1.3 $
-$Author: stever $
-$Date: 2003-11-17 04:07:52 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #include <config.h>

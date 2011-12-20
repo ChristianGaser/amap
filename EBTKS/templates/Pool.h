@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: Pool.h,v $
-$Revision: 1.1.1.1 $
-$Author: jason $
-$Date: 2001-11-09 16:37:26 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #ifndef POOL_H

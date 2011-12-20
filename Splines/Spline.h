@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: Spline.h,v $
-$Revision: 1.1 $
-$Author: claude $
-$Date: 2010-12-09 19:35:01 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #ifndef SPLINE_3D_H

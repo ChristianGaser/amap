@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: Path.cc,v $
-$Revision: 1.3 $
-$Author: bert $
-$Date: 2003-04-16 18:42:39 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #include <config.h>

@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: MatrixSupport.h,v $
-$Revision: 1.2 $
-$Author: bert $
-$Date: 2003-04-16 16:57:04 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #ifndef _MATRIX_SUPPORT_H

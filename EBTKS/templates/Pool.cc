@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: Pool.cc,v $
-$Revision: 1.2 $
-$Author: bert $
-$Date: 2003-04-16 16:57:23 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #include <config.h>

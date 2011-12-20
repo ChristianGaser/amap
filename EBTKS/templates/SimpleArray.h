@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: SimpleArray.h,v $
-$Revision: 1.5 $
-$Author: bert $
-$Date: 2004-12-08 17:05:18 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #ifndef SIMPLE_ARRAY_H

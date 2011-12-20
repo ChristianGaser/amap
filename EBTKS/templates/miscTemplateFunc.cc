@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: miscTemplateFunc.cc,v $
-$Revision: 1.3 $
-$Author: bert $
-$Date: 2003-04-16 17:56:57 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #include "miscTemplateFunc.h"

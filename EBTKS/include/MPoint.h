@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: MPoint.h,v $
-$Revision: 1.3 $
-$Author: stever $
-$Date: 2003-11-17 04:07:51 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #ifndef MPOINT_H

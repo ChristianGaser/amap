@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: OpTimer.h,v $
-$Revision: 1.4 $
-$Author: stever $
-$Date: 2003-11-17 04:07:51 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #ifndef _OP_TIMER_H

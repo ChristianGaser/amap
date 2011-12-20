@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: MTypes.h,v $
-$Revision: 1.4 $
-$Author: jason $
-$Date: 2004-01-19 15:38:15 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #ifndef MTYPES_H

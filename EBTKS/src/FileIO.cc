@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: FileIO.cc,v $
-$Revision: 1.4 $
-$Author: bert $
-$Date: 2006-03-02 13:22:17 $
+$Revision$
+$Author$
+$Date$
 $State: Exp $
 --------------------------------------------------------------------------*/
 #include <config.h>
