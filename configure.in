@@ -8,6 +8,7 @@ AC_PREREQ([2.62])
 
 AM_INIT_AUTOMAKE(amap,0.1,Christian Gaser <christian.gaser@uni-jena.de>)
 AM_CONFIG_HEADER([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_PROG_CC
 AC_PROG_CXX
