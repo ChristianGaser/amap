@@ -25,6 +25,7 @@ bin_PROGRAMS = \
 	niisanlm \
 	niinucorrect \
 	niiremovebridges \
+	niiskullstrip \
     reg_aladin \
 	reg_f3d \
 	reg_resample \
@@ -166,6 +167,16 @@ niisanlm_SOURCES = \
 	sanlm_float.c \
 	niilib.c
 	
+niiskullstrip_SOURCES = \
+	niiskullstrip.cpp \
+	skullstrip.cpp \
+	reg-lib/_reg_resampling.cpp \
+	reg-lib/_reg_affineTransformation.cpp \
+	reg-lib/_reg_blockMatching.cpp \
+	reg-lib/_reg_tools.cpp \
+	$(zlib_SOURCES) \
+	$(nifti_SOURCES) 
+
 if EBTKS
     niiamap_SOURCES = \
 	  niiamap.c \
