@@ -18,40 +18,40 @@
 #define isfinite(x) ((x) * (x) >= 0.) /* check for NaNs */
 #endif
 
-extern void
+void
 morph_erode_uint8(unsigned char *vol, int dims[3], int niter, int th);
 
-extern void
+void
 morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, int th);
 
-extern void
+void
 morph_close_uint8(unsigned char *vol, int dims[3], int niter, int th);
 
-extern void
+void
 morph_open_uint8(unsigned char *vol, int dims[3], int niter, int th);
 
-extern void
+void
 morph_close_double(double *vol, int dims[3], int niter, double th);
 
-extern void
+void
 morph_open_double(double *vol, int dims[3], int niter, double th);
 
-extern void 
+void 
 subsample_double(double *in, double *out, int dim_in[3], int dim_out[3]);
 
-extern void 
+void 
 subsample_float(float *in, float *out, int dim_in[3], int dim_out[3]);
 
-extern void
+void
 smooth_double(double *vol, int dims[3], double separations[3], double s[3], int use_mask);
 
-extern void
+void
 smooth_float(float *vol, int dims[3], double separations[3], double s[3], int use_mask);
 
-extern void
+void
 smooth_subsample_double(double *vol, int dims[3], double separations[3], double s[3], int use_mask, int samp);
 
-extern void
+void
 smooth_subsample_float(float *vol, int dims[3], double separations[3], double s[3], int use_mask, int samp);
 
 #endif

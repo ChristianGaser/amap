@@ -22,19 +22,19 @@
 #define MIN(A,B) ((A) < (B) ? (A) : (B))
 #endif
 
-extern int
+int
 equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
 
-extern int
+int
 write_nifti_double( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 
-extern int
+int
 write_nifti_float( const char *output_filename, float image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 
-extern nifti_image
+nifti_image
 *read_nifti_double( const char *input_filename, double *image[]);
 
-extern nifti_image
+nifti_image
 *read_nifti_float( const char *input_filename, float *image[]);
 
 #endif
