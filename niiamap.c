@@ -4,17 +4,13 @@
  *
  */
 
-#include <ParseArgv.h>
 #include <float.h>
 
+#include "ParseArgv.h"
+#include "niilib.h"
 #include "Amap.h"
 #include "niiamap.h"
 
-#include "nifti/nifti1_io.h"
-#include "nifti/nifti1_local.h"
-
-extern nifti_image *read_nifti_float( const char *input_filename, float *image[]);
-	
 static ArgvInfo argTable[] = {
   {"-mask", ARGV_STRING, (char *) 1, (char *) &mask_filename, 
        "Prior brainmask."},

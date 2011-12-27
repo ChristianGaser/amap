@@ -4,19 +4,15 @@
  *
  */
 
-#include <ParseArgv.h>
 #include <float.h>
 #include <stdlib.h>
 #if !defined(_WIN32)
   #include <libgen.h>
 #endif
 
-#include "nifti/nifti1_io.h"
-#include "nifti/nifti1_local.h"
-
-extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
-extern int write_nifti_double( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
-extern int smooth_double(double *vol, int dims[3], double separations[3], double s[3], int use_mask);
+#include "ParseArgv.h"
+#include "niilib.h"
+#include "vollib.h"
 
 double fwhm = 8.0;
 int use_mask = 0;

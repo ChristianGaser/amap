@@ -4,17 +4,13 @@
  *
  */
 
-#include <ParseArgv.h>
+#include "ParseArgv.h"
+#include "niilib.h"
+
 #include <float.h>
 #include <stdlib.h>
 
-#include "nifti/nifti1_io.h"
-#include "nifti/nifti1_local.h"
-
-extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
-extern equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
-extern write_nifti_double( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
-extern int ParseArgv(int *argcPtr, char **argv, ArgvInfo *argTable, int flags);
+extern int ParseArgv(int *argcPtr, char **argv, ArgvInfo *argTable, int flags);
 
 char *std_filename = NULL;
 

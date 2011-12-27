@@ -1,7 +1,14 @@
+/*
+ * Christian Gaser
+ * $Id$ 
+ *
+ */
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 #include "Amap.h"
+#include "vollib.h"
 
 /* use always 6 classes */
 #define Kb 6
@@ -11,7 +18,6 @@
 #define isfinite(x) ((x) * (x) >= 0.) /* check for NaNs */
 #endif
 
-smooth_subsample_double(double *vol, int dims[3], double separations[3], double s[3], int use_mask, int samp);
 void WarpPriors(unsigned char *prob, unsigned char *priors, float *flow, int *dims, int loop, int loop_start, int samp);
 
 void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned char *prob, double *separations, int *dims, int correct_nu)

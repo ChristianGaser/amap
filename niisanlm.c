@@ -7,11 +7,7 @@
 #include <float.h>
 #include <stdlib.h>
 
-#include "nifti/nifti1_io.h"
-#include "nifti/nifti1_local.h"
-
-extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
-extern write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
+#include "niilib.h"
 
 /* Main program */
 
@@ -19,7 +15,8 @@ int main(int argc, char *argv[])
 {
   char *infile, *outfile;
   int i, j, dims[3];
-  double *input, separations[3];
+  float *input;
+  double separations[3];
   nifti_image *nii_ptr;
   
   if(argc < 3)
@@ -48,7 +45,7 @@ Usage: %s input.nii output.nii\n\n\
   dims[2] = nii_ptr->nz;
   
   
-  anlm(input, 3, 1, 1, dims);
+  sanlm(input, 3, 1, 1, dims);
 
   if (!write_nifti_float( outfile, input, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
     exit(EXIT_FAILURE);

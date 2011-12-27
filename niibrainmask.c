@@ -4,9 +4,9 @@
  *
  */
 
-#include <ParseArgv.h>
+#include "ParseArgv.h"
+#include "niilib.h"
 #include "niibrainmask.h"
-
 #include "Amap.h"
 #include "niiamap.h"
 

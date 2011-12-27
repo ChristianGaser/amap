@@ -25,7 +25,7 @@ static char rcsid[] = "$Header: /private-cvsroot/minc/libsrc/ParseArgv.c,v 6.4.2
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <ParseArgv.h>
+#include "ParseArgv.h"
 
 /*
  * Default table of argument descriptors.  These are normally available

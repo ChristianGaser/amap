@@ -4,20 +4,7 @@
  *
  */
 
-#include <stdlib.h>
-
-#include "nifti/nifti1_io.h"
-#include "nifti/nifti1_local.h"
-
-#include <float.h>
-
-#ifndef MAX
-#define MAX(A,B) ((A) > (B) ? (A) : (B))
-#endif
-
-#ifndef MIN
-#define MIN(A,B) ((A) < (B) ? (A) : (B))
-#endif
+#include "niilib.h"
 
 int
 equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2) {

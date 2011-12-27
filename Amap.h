@@ -4,9 +4,8 @@
  *
  */
 
-#ifdef MATLAB_MEX
-#include "mex.h"
-#endif
+#ifndef _AMAP_H_
+#define _AMAP_H_
 
 #define SQRT2PI 2.506628
 #define G 6
@@ -73,3 +72,5 @@ struct ipoint {
   double s;
   double ss;
 };
+
+#endif

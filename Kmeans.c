@@ -24,6 +24,10 @@
 #include <math.h>
 #include "Amap.h"
 
+#if !defined SPLINESMOOTH
+#include "vollib.h"
+#endif
+
 double EstimateKmeans(float *src, unsigned char *label, unsigned char *mask, int n_classes, double *mean, int ni, int *dims, int thresh_mask, int thresh_kmeans, double max_src)
 /* perform k-means algorithm give initial mean estimates */    
 {

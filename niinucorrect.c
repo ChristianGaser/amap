@@ -4,16 +4,11 @@
  *
  */
 
-#include <ParseArgv.h>
 #include <float.h>
-
+#include "ParseArgv.h"
+#include "niilib.h"
 #include "Amap.h"
 #include "niinucorrect.h"
-
-#include "nifti/nifti1_io.h"
-#include "nifti/nifti1_local.h"
-
-extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
 	
 static ArgvInfo argTable[] = {
   {"-iters_nu", ARGV_INT, (char *) 1, (char *) &iters_nu,

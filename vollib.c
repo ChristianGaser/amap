@@ -6,16 +6,7 @@
  * from J. Ashburner
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <memory.h>
-#include <float.h>
-
-#define RINT(A) floor((A)+0.5)
-#ifndef isfinite
-#define isfinite(x) ((x) * (x) >= 0.) /* check for NaNs */
-#endif
+#include "vollib.h"
 
 static void 
 convxy(double out[], int xdim, int ydim, double filtx[], double filty[], int fxdim, int fydim, int xoff, int yoff, double buff[])

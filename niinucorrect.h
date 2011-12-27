@@ -4,6 +4,9 @@
  *
  */
 
+#ifndef _NIINUCORRECT_H_
+#define _NIINUCORRECT_H_
+
 char *mask_filename = NULL;
 int n_pure_classes = 3;
 int iters_amap = 200;
@@ -23,3 +26,5 @@ int write_label = 1;
 double thresh_brainmask = 0.05;
 double thresh_kmeans = 0.5;
 double weight_MRF = 0.15;
+
+#endif
