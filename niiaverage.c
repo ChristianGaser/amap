@@ -13,7 +13,7 @@
 
 extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
 extern equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
-extern write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
+extern write_nifti_double( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 extern int ParseArgv(int *argcPtr, char **argv, ArgvInfo *argTable, int flags);
 
 char *std_filename = NULL;
@@ -107,12 +107,12 @@ int main(int argc, char *argv[])
   if(std_filename != NULL) {
     for (j=0; j<nii_ptr->nvox; j++) 
       sum_squares[j] = sqrt(1.0/((double)nfiles-1.0)*(sum_squares[j] - (double)nfiles*avg[j]*avg[j]));
-    if (!write_nifti( std_filename, sum_squares, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
+    if (!write_nifti_double( std_filename, sum_squares, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
       exit(EXIT_FAILURE);
     free(sum_squares);
   }
 
-  if (!write_nifti( outfile, avg, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
+  if (!write_nifti_double( outfile, avg, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
     exit(EXIT_FAILURE);
 
   free(avg);

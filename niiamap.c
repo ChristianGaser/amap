@@ -13,7 +13,7 @@
 #include "nifti/nifti1_io.h"
 #include "nifti/nifti1_local.h"
 
-extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
+extern nifti_image *read_nifti_float( const char *input_filename, float *image[]);
 	
 static ArgvInfo argTable[] = {
   {"-mask", ARGV_STRING, (char *) 1, (char *) &mask_filename, 
@@ -76,7 +76,8 @@ main( int argc, char **argv )
   int		    x, y, z, z_area, y_dims, count_zero;
   char		  *arg_string, buffer[1024];
   unsigned char *label, *prob, *mask, *marker, *init_mask, *priors;
-  double	  *src, *buffer_vol, ratio_zeros, slope;
+  float	  *src, *buffer_vol;
+  double   ratio_zeros, slope;
   double    offset, val, max_vol, min_vol, voxelsize[3];
 
   /* Get arguments */
@@ -141,7 +142,7 @@ main( int argc, char **argv )
   }
   
   /* read data */
-  src_ptr = read_nifti_double(input_filename, &src);
+  src_ptr = read_nifti_float(input_filename, &src);
   
   if(src_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n",input_filename);
@@ -161,7 +162,7 @@ main( int argc, char **argv )
   if (mask_filename != NULL) {
       
     /* read volume */
-    mask_ptr = read_nifti_double(mask_filename, &buffer_vol);
+    mask_ptr = read_nifti_float(mask_filename, &buffer_vol);
     if(mask_ptr == NULL) {
       fprintf(stderr,"Error reading %s.\n", mask_filename);
       return(EXIT_FAILURE);
@@ -176,12 +177,12 @@ main( int argc, char **argv )
     /* get min/max */  
     min_vol =  FLT_MAX; max_vol = -FLT_MAX;
     for (i = 0; i < mask_ptr->nvox; i++) {
-      min_vol = MIN(buffer_vol[i], min_vol);
-      max_vol = MAX(buffer_vol[i], max_vol);
+      min_vol = MIN((double)buffer_vol[i], min_vol);
+      max_vol = MAX((double)buffer_vol[i], max_vol);
     }
     /* scale mask image to a range 0..255 */
     for (i = 0; i < mask_ptr->nvox; i++) 
-      mask[i] = (unsigned char) round(255*(buffer_vol[i] - min_vol)/(max_vol - min_vol));
+      mask[i] = (unsigned char) round(255*((double)buffer_vol[i] - min_vol)/(max_vol - min_vol));
   }
 
   /* get sure that threshold for brainmask is zero if no mask is defined */
@@ -197,8 +198,8 @@ main( int argc, char **argv )
   /* get min/max */
   min_vol =  FLT_MAX; max_vol = -FLT_MAX;
   for (i = 0; i < src_ptr->nvox; i++) {
-    min_vol = MIN(src[i], min_vol);
-    max_vol = MAX(src[i], max_vol);
+    min_vol = MIN((double)src[i], min_vol);
+    max_vol = MAX((double)src[i], max_vol);
   }
 
   /* if no mask file is given use minimum value or zeros in the image to get mask value */
@@ -212,13 +213,13 @@ main( int argc, char **argv )
   /* correct images with values < 0 */
   if (min_vol < 0) {
     for (i = 0; i < src_ptr->nvox; i++)
-      src[i] = src[i] - min_vol;
+      src[i] = src[i] - (float)min_vol;
   }
 
   /* add offset to ensure that CSF values are much larger than background noise */
   offset = 0.2*max_vol;  
   for (i = 0; i < src_ptr->nvox; i++)
-    if (mask[i] > 0) src[i] += offset;
+    if (mask[i] > 0) src[i] += (float)offset;
 
   count_zero = 0;
   for (i = 0; i < src_ptr->nvox; i++)
@@ -259,7 +260,7 @@ main( int argc, char **argv )
   if (write_nu) {
      (void) sprintf( buffer, "%s_nu%s",basename,extension); 
 
-    if(!write_nifti( buffer, src, DT_FLOAT32, 1.0, dims, 
+    if(!write_nifti_float( buffer, src, DT_FLOAT32, 1.0, dims, 
             voxelsize, src_ptr))
       exit(EXIT_FAILURE);
   }
@@ -272,11 +273,11 @@ main( int argc, char **argv )
     else slope = 1.0;
 
     for (i = 0; i < src_ptr->nvox; i++)
-      src[i] = (double)label[i];
+      src[i] = (float)label[i];
 
     (void) sprintf( buffer, "%s_seg%s",basename,extension); 
 
-    if(!write_nifti(buffer, src, DT_UINT8, slope, 
+    if(!write_nifti_float(buffer, src, DT_UINT8, slope, 
             dims, voxelsize, src_ptr))
       exit(EXIT_FAILURE);
     
@@ -294,7 +295,7 @@ main( int argc, char **argv )
         for (i = 0; i < src_ptr->nvox; i++)
           src[i] = prob[i+(j*src_ptr->nvox)];
         
-        if(!write_nifti( buffer, src, DT_UINT8, slope, 
+        if(!write_nifti_float( buffer, src, DT_UINT8, slope, 
                 dims, voxelsize, src_ptr))
           exit(EXIT_FAILURE);
       

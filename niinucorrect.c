@@ -46,8 +46,8 @@ main( int argc, char **argv )
   int		    count_zero;
   char		  buffer[1024];
   unsigned char *label, *mask;
-  double	  *src, ratio_zeros;
-  double    avg, avg8, max_src, min_src, voxelsize[3];
+  float	  *src;
+  double    ratio_zeros, avg, avg8, max_src, min_src, voxelsize[3];
 
   /* Get arguments */
   if (ParseArgv(&argc, argv, argTable, 0) || (argc < 2)) {
@@ -80,7 +80,7 @@ main( int argc, char **argv )
   }
   
   /* read data and scale it to 0..255 */
-  src_ptr = read_nifti_double(input_filename, &src);
+  src_ptr = read_nifti_float(input_filename, &src);
   if(src_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", input_filename);
     return(EXIT_FAILURE);
@@ -109,27 +109,27 @@ main( int argc, char **argv )
   min_src =  FLT_MAX; max_src = -FLT_MAX;
   avg = 0.0;
   for (i = 0; i < src_ptr->nvox; i++) {
-    min_src = MIN(src[i], min_src);
-    max_src = MAX(src[i], max_src);
-    avg += src[i];
+    min_src = MIN((double)src[i], min_src);
+    max_src = MAX((double)src[i], max_src);
+    avg += (float)src[i];
   }
   avg /= (double)src_ptr->nvox;
   
   avg8 = 0.0;
   for (i = 0; i < src_ptr->nvox; i++)
-    if (src[i] > avg/8) avg8 += src[i];
+    if (src[i] > (float)avg/8.0) avg8 += (double)src[i];
   avg8 /= (double)src_ptr->nvox;
 
   /* correct images with values < 0 */
   if (min_src < 0) {
     avg8 -= min_src;
     for (i = 0; i < src_ptr->nvox; i++)
-      src[i] -= min_src;
+      src[i] -= (float)min_src;
   }
 
   /* if no mask file is given use minimum value or zeros in the image to get mask value */
   for (i = 0; i < src_ptr->nvox; i++) {
-    if ((src[i] < avg8) || (src[i] > 0.95*max_src)) mask[i] = 0;
+    if ((src[i] < (float)avg8) || (src[i] > 0.95*(float)max_src)) mask[i] = 0;
     else mask[i] = 255;
   }
 
@@ -154,7 +154,7 @@ main( int argc, char **argv )
   /* write nu corrected image */
   (void) sprintf( buffer, "%s_nu%s",basename,extension); 
 
-  if(!write_nifti( buffer, src, src_ptr->datatype, 1.0, dims, 
+  if(!write_nifti_float( buffer, src, src_ptr->datatype, 1.0, dims, 
           voxelsize, src_ptr))
     exit(EXIT_FAILURE);
       

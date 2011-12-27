@@ -29,7 +29,7 @@ extern "C"
 #include "nifti/nifti1_local.h"
 extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
 extern int equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
-extern int write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
+extern int write_nifti_double( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 extern void get_largest_cluster(unsigned char *bw, int dim[3]);
 }
 
@@ -374,7 +374,7 @@ int  main(
   fprintf(stderr,"%d voxels changed\n",n_changes);
   
   for (i = 0; i < vol; i++) vol_tmp[i] = (double)wm_out[i];
-  if(!write_nifti( wm_out_filename, vol_tmp, DT_UINT8, 1, dims, 
+  if(!write_nifti_double( wm_out_filename, vol_tmp, DT_UINT8, 1, dims, 
           voxelsize, wm_ptr))
     exit(EXIT_FAILURE);
 

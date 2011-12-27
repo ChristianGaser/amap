@@ -29,7 +29,7 @@
 #include "Amap.h"
 
 /* calculate the mean and variance for every class on a grid size SUBxSUBxSUB */
-static void GetMeansVariances(double *src, unsigned char *label, int n_classes, struct point *r, int sub, int *dims, double *thresh)
+static void GetMeansVariances(float *src, unsigned char *label, int n_classes, struct point *r, int sub, int *dims, double *thresh)
 {
   int i, j, ind;
   int area, narea, nvol, zsub, ysub, xsub, yoffset, zoffset;
@@ -82,7 +82,7 @@ static void GetMeansVariances(double *src, unsigned char *label, int n_classes, 
                 label_value = (int)label[zsub2 + ysub2 + xsub];
                 label_value_BG = label_value - 1;
                 if (label_value_BG < 0) continue;
-                val = src[zsub2 + ysub2 + xsub];
+                val = (double)src[zsub2 + ysub2 + xsub];
                     
                 /* exclude values out of quartile 1-99% */
                 if ((val < thresh[0]) || (val > thresh[1])) continue;
@@ -191,7 +191,7 @@ void Normalize(double* val, char n)
 }
 
 /* Compute initial PVE labeling based on marginalized likelihood */
-void ComputeInitialPveLabel(double *src, unsigned char *label, unsigned char *prob, struct point *r, int n_pure_classes, int sub, int *dims, int pve)
+void ComputeInitialPveLabel(float *src, unsigned char *label, unsigned char *prob, struct point *r, int n_pure_classes, int sub, int *dims, int pve)
 {
   int x, y, z, z_area, y_dims, index, label_value, off;
   int i, ix, iy, iz, ind, ind2, nix, niy, niz, narea, nvol;
@@ -226,7 +226,7 @@ void ComputeInitialPveLabel(double *src, unsigned char *label, unsigned char *pr
         index = x + y_dims + z_area;
         label_value = (int)label[index];
         if (label_value == 0) continue;
-        val = src[index];
+        val = (double)src[index];
           
         /* find the interpolation factors */
         ix = (int)(sub_1*x), iy = (int)(sub_1*y), iz = (int)(sub_1*z);
@@ -377,7 +377,7 @@ void ICM(unsigned char *prob, unsigned char *label, int n_classes, int *dims, do
   printf("\n");
 } 
 
-void EstimateSegmentation(double *src, unsigned char *label, unsigned char *prob, struct point *r, double *mean, double *var, int n_classes, int niters, int sub, int *dims, double *thresh, double *beta, double offset)
+void EstimateSegmentation(float *src, unsigned char *label, unsigned char *prob, struct point *r, double *mean, double *var, int n_classes, int niters, int sub, int *dims, double *thresh, double *beta, double offset)
 {
   int i;
   int area, narea, nvol, vol, z_area, y_dims, index, ind;
@@ -427,7 +427,7 @@ void EstimateSegmentation(double *src, unsigned char *label, unsigned char *prob
           index = x + y_dims + z_area;
           label_value = (int) label[index];
           if (label_value < 1) continue;
-          val = src[index];
+          val = (double)src[index];
           
           /* find the interpolation factors */
           ix = (int)(sub_1*x);
@@ -497,7 +497,7 @@ void EstimateSegmentation(double *src, unsigned char *label, unsigned char *prob
 
 
 /* perform adaptive MAP on given src and initial segmentation label */
-void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, int n_classes, int niters, int sub, int *dims, int pve, double weight_MRF, double *voxelsize, int niters_ICM, double offset)
+void Amap(float *src, unsigned char *label, unsigned char *prob, double *mean, int n_classes, int niters, int sub, int *dims, int pve, double weight_MRF, double *voxelsize, int niters_ICM, double offset)
 {
   int i, nix, niy, niz;
   int area, nvol, vol;
@@ -513,15 +513,15 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
   vol = area*dims[2];
  
   for(i = 0; i < vol; i++) {
-    min_src = MIN(src[i], min_src);
-    max_src = MAX(src[i], max_src);
+    min_src = MIN((double)src[i], min_src);
+    max_src = MAX((double)src[i], max_src);
   }
   
   /* build histogram */
   for(i = 0; i < 65536; i++) histo[i] = 0;
   for(i = 0; i < vol; i++) {
     if (label[i] == 0) continue;
-    histo[(int)ROUND(65535.0*(src[i]-min_src)/(max_src-min_src))]++;
+    histo[(int)ROUND(65535.0*((double)src[i]-min_src)/(max_src-min_src))]++;
   }
 
   /* find values between 1% and 99% quartile */
@@ -562,7 +562,7 @@ void Amap(double *src, unsigned char *label, unsigned char *prob, double *mean, 
     for(i = 0; i < vol; i++) {
       if(label[i] == 0) continue;
       n[label[i]-1]++;
-      mean[label[i]-1] += src[i];
+      mean[label[i]-1] += (double)src[i];
     }
     for(j = 0; j < n_classes; j++) mean[j] /= n[j];
   }

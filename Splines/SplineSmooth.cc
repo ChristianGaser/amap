@@ -62,14 +62,14 @@ using namespace std;		// (bert)
 //---------------------------------------------------------------------------------
 // Declarations
 DblMat volume_domain(double *separations, int *dims);
-int fitSplinesToVolumeLookup(TBSplineVolume *spline, double *src, 
+int fitSplinesToVolumeLookup(TBSplineVolume *spline, float *src, 
                               const DblMat &domain,
                               int subsample, double *separations, int *dims);
-void smoothVolumeLookup(TBSplineVolume *spline, double *src, int *dims);
+void smoothVolumeLookup(TBSplineVolume *spline, float *src, int *dims);
 
 //--------------------------------------------------------------------------------
 // main program
-extern "C" int splineSmooth( double *src, double lambda, double distance, int subsample, double *separations, int *dims)    
+extern "C" int splineSmooth( float *src, double lambda, double distance, int subsample, double *separations, int *dims)    
 {
   int i;
   
@@ -127,7 +127,7 @@ volume_domain(double *separations, int *dims)
 
 
 int
-fitSplinesToVolumeLookup(TBSplineVolume *spline, double* src,
+fitSplinesToVolumeLookup(TBSplineVolume *spline, float* src,
                          const DblMat &domain, int subsample, double* separations, int* dims)
 {
   int i,x,y,z,j,k;
@@ -157,7 +157,7 @@ fitSplinesToVolumeLookup(TBSplineVolume *spline, double* src,
       y_dims = y*dims[0];
       for(x = lower[0]; x <= upper[0]; x += subsample)
 	  {
-        value = src[z_area + y_dims + x];
+        value = (double)src[z_area + y_dims + x];
 	    if(value > 0)
 		  spline->addDataPoint(x,y,z, value);
 	  }
@@ -172,7 +172,7 @@ fitSplinesToVolumeLookup(TBSplineVolume *spline, double* src,
 }
 
 void 
-smoothVolumeLookup(TBSplineVolume *spline, double* src, int* dims)
+smoothVolumeLookup(TBSplineVolume *spline, float* src, int* dims)
 {
   int x,y,z;
   double value;
@@ -187,7 +187,7 @@ smoothVolumeLookup(TBSplineVolume *spline, double* src, int* dims)
       y_dims = y*dims[0];
       for (x = 0; x < dims[0]; x++) {
 		value = (*spline)(x,y,z); 
-		src[z_area + y_dims + x] = value;
+		src[z_area + y_dims + x] = (float)value;
 	  }
     }
   }

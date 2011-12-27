@@ -532,7 +532,7 @@ return 0;
 }
 
 
-void anlm(double *ima, int v, int f, int rician, const int *dims)
+void sanlm(double *ima, int v, int f, int rician, const int *dims)
 {
 float *means, *variances, *Estimate, *average, *bias;
 unsigned char *Label;
@@ -547,12 +547,38 @@ vol = dims[0]*dims[1]*dims[2];
 
 /*Allocate memory */
 average = (float*)malloc(Ndims*sizeof(float));
+if(average == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+}
 means = (float*)malloc(vol*sizeof(float));
+if(means == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+}
 variances = (float*)malloc(vol*sizeof(float));
+if(variances == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+}
 Estimate = (float*)malloc(vol*sizeof(float));
+if(Estimate == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+}
 Label = (unsigned char*)malloc(vol*sizeof(unsigned char));
+if(Label == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+}
 
-if (rician) bias = (float*)malloc(vol*sizeof(float));
+if (rician) {
+    bias = (float*)malloc(vol*sizeof(float));
+    if(bias == NULL) {
+        fprintf(stderr,"Memory allocation error\n");
+        exit(EXIT_FAILURE);
+    }
+}
 
 for (i = 0; i < vol; i++)
 {
@@ -640,6 +666,7 @@ Nthreads = 1;
 #ifdef _OPENMP
     Nthreads = omp_get_num_procs();
     omp_set_num_threads(Nthreads);
+    printf("Using %d processors\n",Nthreads);fflush(stdout);
 #endif
 
 /* Reserve room for handles of threads in ThreadList */

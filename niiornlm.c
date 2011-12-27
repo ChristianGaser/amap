@@ -12,7 +12,7 @@
 #include "nifti/nifti1_local.h"
 
 extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
-extern write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
+extern write_nifti_double( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 
 double h;
 
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   
   ornlm(input, output, 3, 1, h, dims);
 
-  if (!write_nifti( outfile, output, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
+  if (!write_nifti_double( outfile, output, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
     exit(EXIT_FAILURE);
 
   free(input);

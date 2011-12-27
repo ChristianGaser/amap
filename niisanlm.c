@@ -10,7 +10,7 @@
 #include "nifti/nifti1_io.h"
 #include "nifti/nifti1_local.h"
 
-extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
+extern nifti_image *read_nifti_float( const char *input_filename, double *image[]);
 extern write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 
 /* Main program */
@@ -34,7 +34,7 @@ Usage: %s input.nii output.nii\n\n\
   outfile = argv[2];
   
   /* read first image to get image parameters */
-  nii_ptr = read_nifti_double(infile, &input);
+  nii_ptr = read_nifti_float(infile, &input);
   if(nii_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", infile);
     return(EXIT_FAILURE);
@@ -50,7 +50,7 @@ Usage: %s input.nii output.nii\n\n\
   
   anlm(input, 3, 1, 1, dims);
 
-  if (!write_nifti( outfile, input, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
+  if (!write_nifti_float( outfile, input, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
     exit(EXIT_FAILURE);
 
   free(input);

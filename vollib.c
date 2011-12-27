@@ -61,7 +61,7 @@ convxy(double out[], int xdim, int ydim, double filtx[], double filty[], int fxd
 }
 
 static void 
-convxy_float(float out[], int xdim, int ydim, float filtx[], float filty[], int fxdim, int fydim, int xoff, int yoff, float buff[])
+convxy_float(float out[], int xdim, int ydim, double filtx[], double filty[], int fxdim, int fydim, int xoff, int yoff, float buff[])
 {
   int x,y,k;
   for(y=0; y<ydim; y++)
@@ -74,14 +74,14 @@ convxy_float(float out[], int xdim, int ydim, float filtx[], float filty[], int 
     }
     for(x=0; x<xdim; x++)
     {
-      float sum1 = 0.0;
+      double sum1 = 0.0;
       int fstart, fend;
       fstart = ((x-xoff >= xdim) ? x-xdim-xoff+1 : 0);
       fend = ((x-(xoff+fxdim) < 0) ? x-xoff+1 : fxdim);
 
       for(k=fstart; k<fend; k++)
-        sum1 += buff[x-xoff-k]*filtx[k];
-      out[x+y*xdim] = sum1;
+        sum1 += (double)buff[x-xoff-k]*filtx[k];
+      out[x+y*xdim] = (float)sum1;
     }
   }
   for(x=0; x<xdim; x++)
@@ -91,14 +91,14 @@ convxy_float(float out[], int xdim, int ydim, float filtx[], float filty[], int 
 
     for(y=0; y<ydim; y++)
     {
-      float sum1 = 0.0;
+      double sum1 = 0.0;
       int fstart, fend;
       fstart = ((y-yoff >= ydim) ? y-ydim-yoff+1 : 0);
       fend = ((y-(yoff+fydim) < 0) ? y-yoff+1 : fydim);
 
       for(k=fstart; k<fend; k++)
-        sum1 += buff[y-yoff-k]*filty[k];
-      out[y*xdim+x] = sum1;
+        sum1 += (double)buff[y-yoff-k]*filty[k];
+      out[y*xdim+x] = (float)sum1;
     }
   }
 }
@@ -177,7 +177,7 @@ convxyz_double(double *iVol, double filtx[], double filty[], double filtz[],
 }
 
 int 
-convxyz_float(float *iVol, float filtx[], float filty[], float filtz[],
+convxyz_float(float *iVol, double filtx[], double filty[], double filtz[],
   int fxdim, int fydim, int fzdim, int xoff, int yoff, int zoff,
   float *oVol, int dims[3])
 {
@@ -203,7 +203,7 @@ convxyz_float(float *iVol, float filtx[], float filty[], float filtz[],
 
   for (z=startz; z<endz; z++)
   {
-    float sum2 = 0.0;
+    double sum2 = 0.0;
 
     if (z >= 0 && z<zdim)
     {
@@ -231,11 +231,11 @@ convxyz_float(float *iVol, float filtx[], float filty[], float filtz[],
       {
         for(xy=0; xy<xdim*ydim; xy++)
         {
-          float sum1=0.0;
+          double sum1=0.0;
           for(k=fstart; k<fend; k++)
-            sum1 += filtz[k]*sortedv[k][xy];
+            sum1 += filtz[k]*(double)sortedv[k][xy];
 
-          obuf[xy] = sum1/sum2;
+          obuf[xy] = (float)sum1/sum2;
         }
       }
       else
@@ -769,11 +769,11 @@ smooth_double(double *vol, int dims[3], double separations[3], double s[3], int 
 }
 
 void
-smooth_float(float *vol, int dims[3], float separations[3], float s[3], int use_mask)
+smooth_float(float *vol, int dims[3], double separations[3], double s[3], int use_mask)
 {
   int i;
-  float xsum, ysum, zsum;
-  float *x, *y, *z;
+  double xsum, ysum, zsum;
+  double *x, *y, *z;
   int xyz[3], nvol, sum_mask;
   float *mask;
   unsigned char *mask2;
@@ -787,9 +787,9 @@ smooth_float(float *vol, int dims[3], float separations[3], float s[3], int use_
     xyz[i] = (int) RINT(6.0*s[i]);
   }
   
-  x = (float *) malloc(sizeof(float)*((2*xyz[0])+1));
-  y = (float *) malloc(sizeof(float)*((2*xyz[1])+1));
-  z = (float *) malloc(sizeof(float)*((2*xyz[2])+1));
+  x = (double *) malloc(sizeof(double)*((2*xyz[0])+1));
+  y = (double *) malloc(sizeof(double)*((2*xyz[1])+1));
+  z = (double *) malloc(sizeof(double)*((2*xyz[2])+1));
   
   /* build mask for masked smoothing */
   if(use_mask) {
@@ -808,9 +808,9 @@ smooth_float(float *vol, int dims[3], float separations[3], float s[3], int use_
     }
   }
   
-  for(i=-xyz[0]; i <= xyz[0]; i++) x[i+xyz[0]] = (float)i;
-  for(i=-xyz[1]; i <= xyz[1]; i++) y[i+xyz[1]] = (float)i;
-  for(i=-xyz[2]; i <= xyz[2]; i++) z[i+xyz[2]] = (float)i;
+  for(i=-xyz[0]; i <= xyz[0]; i++) x[i+xyz[0]] = (double)i;
+  for(i=-xyz[1]; i <= xyz[1]; i++) y[i+xyz[1]] = (double)i;
+  for(i=-xyz[2]; i <= xyz[2]; i++) z[i+xyz[2]] = (double)i;
   
   xsum = 0.0; ysum = 0.0; zsum = 0.0;
   for(i=0; i < ((2*xyz[0])+1); i++) {
@@ -873,16 +873,16 @@ smooth_subsample_double(double *vol, int dims[3], double separations[3], double 
 }
 
 void
-smooth_subsample_float(float *vol, int dims[3], float separations[3], float s[3], int use_mask, int samp)
+smooth_subsample_float(float *vol, int dims[3], double separations[3], double s[3], int use_mask, int samp)
 {
   int i, nvol_samp, nvol;
   int dims_samp[3];
   float *vol_samp;
-  float separations_samp[3];
+  double separations_samp[3];
   
   /* define grid dimensions */
-  for(i=0; i<3; i++) dims_samp[i] = (int) ceil((dims[i]-1)/((float) samp))+1;
-  for(i=0; i<3; i++) separations_samp[i] = separations[i]*((float)dims[i]/(float)dims_samp[i]);
+  for(i=0; i<3; i++) dims_samp[i] = (int) ceil((dims[i]-1)/((double) samp))+1;
+  for(i=0; i<3; i++) separations_samp[i] = separations[i]*((double)dims[i]/(double)dims_samp[i]);
 
   nvol  = dims[0]*dims[1]*dims[2];
   nvol_samp  = dims_samp[0]*dims_samp[1]*dims_samp[2];

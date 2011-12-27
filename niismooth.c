@@ -15,7 +15,7 @@
 #include "nifti/nifti1_local.h"
 
 extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
-extern int write_nifti( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
+extern int write_nifti_double( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 extern int smooth_double(double *vol, int dims[3], double separations[3], double s[3], int use_mask);
 
 double fwhm = 8.0;
@@ -92,7 +92,7 @@ main(int argc, char *argv[])
   }
 
   /* write data using same data type and rescale */
-  if (!write_nifti( outfile, input, nii_ptr->datatype, 0.0, dims, separations, nii_ptr)) 
+  if (!write_nifti_double( outfile, input, nii_ptr->datatype, 0.0, dims, separations, nii_ptr)) 
     exit(EXIT_FAILURE);
   
   return(EXIT_SUCCESS);

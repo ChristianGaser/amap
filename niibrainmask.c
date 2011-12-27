@@ -45,8 +45,8 @@ main( int argc, char **argv )
   int		    n_classes;
   char		  buffer[1024], *str_ptr;
   unsigned char *label, *mask, *prob;
-  double	  *src, *filtered, slope;
-  double    offset, max_vol, min_vol, voxelsize[3];
+  float	  *src, *filtered;
+  double    slope, offset, max_vol, min_vol, voxelsize[3];
 
   /* Get arguments */
   if (ParseArgv(&argc, argv, argTable, 0) || (argc < 3)) {
@@ -73,7 +73,7 @@ main( int argc, char **argv )
   /* read data and scale it to 0..255 */
   strcpy(buffer, input_filename);
   str_ptr = strrchr(buffer, '.');
-  src_ptr = read_nifti_double(input_filename, &src);
+  src_ptr = read_nifti_float(input_filename, &src);
   if(src_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", input_filename);
     return(EXIT_FAILURE);
@@ -86,7 +86,7 @@ main( int argc, char **argv )
 
   mask  = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox);
   label = (unsigned char *)malloc(sizeof(unsigned char)*src_ptr->nvox);
-  filtered = (double *)malloc(sizeof(double)*src_ptr->nvox);
+  filtered = (float *)malloc(sizeof(float)*src_ptr->nvox);
     
   if((mask == NULL) || (label == NULL)) {
     fprintf(stderr,"Memory allocation error\n");
@@ -96,27 +96,27 @@ main( int argc, char **argv )
   /* get min/max */
   min_vol =  FLT_MAX; max_vol = -FLT_MAX;
   for (i = 0; i < src_ptr->nvox; i++) {
-    min_vol = MIN(src[i], min_vol);
-    max_vol = MAX(src[i], max_vol);
+    min_vol = MIN((double)src[i], min_vol);
+    max_vol = MAX((double)src[i], max_vol);
   }
 
   /* correct images with values < 0 */
   if (min_vol < 0) {
     for (i = 0; i < src_ptr->nvox; i++)
-      src[i] = src[i] - min_vol;
+      src[i] = src[i] - (float)min_vol;
     min_vol = 0.0;
   }
 
   /* use minimum value in the image to get mask value */
   for (i = 0; i < src_ptr->nvox; i++) {
-    if (src[i] == min_vol) mask[i] = 0;
+    if (src[i] == (float)min_vol) mask[i] = 0;
     else mask[i] = 255;
   }
      
   /* add offset to ensure that CSF values are much larger than background noise */
 /*  offset = 0.2*max_vol;  
   for (i = 0; i < src_ptr->nvox; i++)
-    if (mask[i] > 0) src[i] += offset;
+    if (mask[i] > 0) src[i] += (float)offset;
 */
   voxelsize[0] = src_ptr->dx;
   voxelsize[1] = src_ptr->dy;
@@ -141,7 +141,7 @@ main( int argc, char **argv )
     for (i = 0; i < src_ptr->nvox; i++) {
       if (label[i] == j+1) {
         n_voxel[j]++;
-        mu[j] += src[i];
+        mu[j] += (double)src[i];
       }
     }
     mu[j] /= (double)n_voxel[j];
@@ -150,11 +150,12 @@ main( int argc, char **argv )
   /* set mask to zero where image has values for background */
   double mn_thresh = (mu[0]+mu[1])/3.0;
   for (i = 0; i < src_ptr->nvox; i++) {
-    if ((src[i] < mn_thresh) || (src[i]>mu[n_classes-1])) {
+    if ((src[i] < (float)mn_thresh) || (src[i]>(float)mu[n_classes-1])) {
       mask[i] = 0;
     }
   }
   
+  anlm(src, 3, 1, 1, dims);
   ornlm(src, filtered, 3, 1, mu[0], dims);
 
   /* second Kmeans with 3 classes */

@@ -25,7 +25,6 @@ bin_PROGRAMS = \
 	niisanlm \
 	niinucorrect \
 	niiremovebridges \
-	niibrainmask \
     reg_aladin \
 	reg_f3d \
 	reg_resample \
@@ -164,7 +163,7 @@ niisanlm_SOURCES = \
 	$(nifti_SOURCES) \
     $(zlib_SOURCES) \
 	ParseArgv.c \
-	sanlm.c \
+	sanlm_float.c \
 	niilib.c
 	
 if EBTKS

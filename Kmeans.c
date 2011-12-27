@@ -24,7 +24,7 @@
 #include <math.h>
 #include "Amap.h"
 
-double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, int n_classes, double *mean, int ni, int *dims, int thresh_mask, int thresh_kmeans, double max_src)
+double EstimateKmeans(float *src, unsigned char *label, unsigned char *mask, int n_classes, double *mean, int ni, int *dims, int thresh_mask, int thresh_kmeans, double max_src)
 /* perform k-means algorithm give initial mean estimates */    
 {
   int i, j, j0, v;
@@ -37,7 +37,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
   /* build intensity histogram */
   for (i = 0; i < 256; i++) histo[i] = 0;
   for (i = 0; i < vol; i++) {
-    v = (int)ROUND(255.0*src[i]/max_src);
+    v = (int)ROUND(255.0*(double)src[i]/max_src);
     if (v < 1) continue;
     if ((thresh_mask > 0) && ((int)mask[i] < thresh_kmeans))
       continue;
@@ -107,7 +107,7 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
   diff = 0;
   
   for (i = 0; i < vol; i++) {
-    v = (int)ROUND(255.0*src[i]/max_src);
+    v = (int)ROUND(255.0*(double)src[i]/max_src);
     if (v >= 1) {
       if (v < 0) v = 0;
       if (v > 255) v = 255;
@@ -123,10 +123,11 @@ double EstimateKmeans(double *src, unsigned char *label, unsigned char *mask, in
   return(diff);
 }
 
-double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, int n_clusters, double *voxelsize, int *dims, int thresh_mask, int thresh_kmeans, int iters_nu, int pve, double bias_fwhm)
+double Kmeans(float *src, unsigned char *label, unsigned char *mask, int NI, int n_clusters, double *voxelsize, int *dims, int thresh_mask, int thresh_kmeans, int iters_nu, int pve, double bias_fwhm)
 {
   int i, j, k, subsample, masked_smoothing;
-  double e, emin, eps, *nu, *src_bak, th_src, val, val_nu, sum;
+  float *src_bak, *nu;
+  double e, emin, eps, th_src, val, val_nu, sum;
   double last_err = HUGE;
   double max_src = -HUGE;
   double fwhm[3];
@@ -141,21 +142,20 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
 
   vol  = dims[0]*dims[1]*dims[2];
 
-  src_bak = (double *)malloc(sizeof(double)*vol);
+  src_bak = (float *)malloc(sizeof(float)*vol);
   if(src_bak == NULL) {
     fprintf(stderr,"Memory allocation error\n");
     exit(EXIT_FAILURE);
   }
   
   if (iters_nu > 0) {
-    nu = (double *)malloc(sizeof(double)*vol);
+    nu = (float *)malloc(sizeof(float)*vol);
     if(nu == NULL) {
       fprintf(stderr,"Memory allocation error\n");
       exit(EXIT_FAILURE);
     }
   }  
   
-
 #if !defined SPLINESMOOTH
   if (iters_nu > 0) {
     /* use larger filter */
@@ -164,29 +164,29 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
     /* estimate mean */
     count = 0; sum = 0.0;
     for (i = 0; i < vol; i++) {
-      if(src[i]>0) {
-        sum += src[i];
+      if(src[i]>0.0) {
+        sum += (double)src[i];
         count++;
       }
     }
 
     if (count==0) return(0);
-    sum /= (double)count;
+    sum /= (float)count;
 
     for (i = 0; i < vol; i++) {
-      if(src[i]>0) {
-        nu[i] = src[i] - sum;
+      if(src[i]>0.0) {
+        nu[i] = src[i] - (float)sum;
       } else nu[i] = 0;
     }
         
     /* use subsampling for faster processing */
     subsample = 2;
     masked_smoothing = 0;
-    smooth_subsample_double(nu, dims, voxelsize, fwhm, masked_smoothing, subsample);
+    smooth_subsample_float(nu, dims, voxelsize, fwhm, masked_smoothing, subsample);
         
     /* and correct bias */
     for (i = 0; i < vol; i++)
-      if(src[i]>0)
+      if(src[i]>0.0)
         src[i] -= nu[i];
   }
 #endif
@@ -194,7 +194,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   /* find maximum and mean inside mask */
   for (i = 0; i < vol; i++) {
     if (mask[i] > 0) {
-      max_src = MAX(src[i], max_src);
+      max_src = MAX((double)src[i], max_src);
     }
   }
    
@@ -213,7 +213,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       n[0]=0; mean[0] = 0.0; var[0] = 0.0;
 
       for (i = 0; i < vol; i++) {
-        val = 255.0*src[i]/max_src;
+        val = 255.0*(double)src[i]/max_src;
         if (val < 1.0/255.0) continue;
         n[0]++;
         mean[0] += val;
@@ -252,7 +252,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
   }
 
   /* only use values above the mean of the lower two clusters for nu-estimate */
-  th_src = max_src*(double)((Mu[0]+Mu[1])/2.0)/255.0;
+  th_src = max_src*((Mu[0]+Mu[1])/2.0)/255.0;
   
   /* extend initial 3 clusters to 6 clusters by averaging clusters */
   if (pve == KMEANS) {
@@ -281,13 +281,13 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
       for (i = 0; i < vol; i++) {
         nu[i] = 0.0;
         /* only use values above threshold where mask is defined for nu-estimate */
-        if ((src[i] > th_src) && (mask[i] > thresh_kmeans)) {
+        if (((double)src[i] > th_src) && (mask[i] > thresh_kmeans)) {
 #ifdef SPLINESMOOTH
-          val_nu = src[i]/(max_src/255.0*mu[label[i]-1]);
+          val_nu = (double)src[i]/(max_src/255.0*mu[label[i]-1]);
 #else
-          val_nu = src[i]-(max_src/255.0*mu[label[i]-1]);
+          val_nu = (double)src[i]-(max_src/255.0*mu[label[i]-1]);
 #endif
-          nu[i] = val_nu;
+          nu[i] = (float)val_nu;
         }
       }
             
@@ -302,7 +302,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
         subsample = 2;
         masked_smoothing = 0;
 
-        smooth_subsample_double(nu, dims, voxelsize, fwhm, masked_smoothing, subsample);
+        smooth_subsample_float(nu, dims, voxelsize, fwhm, masked_smoothing, subsample);
 #endif
       
       /* apply nu correction to source image */
@@ -348,7 +348,7 @@ double Kmeans(double *src, unsigned char *label, unsigned char *mask, int NI, in
 
   max_src = -HUGE;
   for (i = 0; i < vol; i++)
-    max_src = MAX(src[i], max_src);
+    max_src = MAX((double)src[i], max_src);
 
   if (iters_nu > 0) printf("\n");
 
