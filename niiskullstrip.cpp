@@ -48,7 +48,6 @@ int main(int argc, char **argv)
 	
 	PARAM *param = (PARAM *)calloc(1,sizeof(PARAM));
 	FLAG *flag = (FLAG *)calloc(1,sizeof(FLAG));
-    nifti_image *resultImage;
 
 	flag->affineFlag=1;
 	flag->rigidFlag=1;
@@ -120,18 +119,70 @@ int main(int argc, char **argv)
 	
 	param->levelNumber=3;
 	param->maxIteration=5;
+	param->maxIteration=1;
 	param->level2Perform=param->levelNumber;
 	param->level2Perform=param->level2Perform<param->levelNumber?param->level2Perform:param->levelNumber;
 	
-	resultImage = affineRegistration(param, flag);
-	
-	if (resultImage == NULL) {
-		fprintf(stderr,"Error\n");
-		return 1;
+	/* Read the target and source images */
+	nifti_image *targetHeader = nifti_image_read(param->targetImageName,false);
+	if(targetHeader == NULL){
+		fprintf(stderr,"** ERROR Error when reading the target image: %s\n",param->targetImageName);
+		return NULL;
 	}
-	
-	nifti_set_filenames(resultImage, param->outputResultName, 0, 0);
-	nifti_image_write(resultImage);
+
+    nifti_image *sourceImage = nifti_image_read(param->sourceImageName,true);
+    if(sourceImage->data == NULL){
+    	fprintf(stderr, "** ERROR Error when reading the source image: %s\n", param->sourceImageName);
+    	return NULL;
+    }
+
+    nifti_image *targetImage = nifti_image_read(param->targetImageName,true);
+		
+    if(targetImage->data == NULL){
+			fprintf(stderr, "** ERROR Error when reading the target image: %s\n", param->targetImageName);
+			return NULL;
+    }
+
+    nifti_image *positionFieldImage = nifti_copy_nim_info(targetImage);
+    positionFieldImage->dim[0]=positionFieldImage->ndim=5;
+    positionFieldImage->dim[1]=positionFieldImage->nx=targetImage->nx;
+    positionFieldImage->dim[2]=positionFieldImage->ny=targetImage->ny;
+    positionFieldImage->dim[3]=positionFieldImage->nz=targetImage->nz;
+    positionFieldImage->dim[4]=positionFieldImage->nt=1;positionFieldImage->pixdim[4]=positionFieldImage->dt=1.0;
+    if(flag->twoDimRegistration) positionFieldImage->dim[5]=positionFieldImage->nu=2;
+    else positionFieldImage->dim[5]=positionFieldImage->nu=3;
+    positionFieldImage->pixdim[5]=positionFieldImage->du=1.0;
+    positionFieldImage->dim[6]=positionFieldImage->nv=1;positionFieldImage->pixdim[6]=positionFieldImage->dv=1.0;
+    positionFieldImage->dim[7]=positionFieldImage->nw=1;positionFieldImage->pixdim[7]=positionFieldImage->dw=1.0;
+    positionFieldImage->nvox=positionFieldImage->nx*positionFieldImage->ny*positionFieldImage->nz*positionFieldImage->nt*positionFieldImage->nu;
+    if(sizeof(PrecisionTYPE)==4) positionFieldImage->datatype = NIFTI_TYPE_FLOAT32;
+    else positionFieldImage->datatype = NIFTI_TYPE_FLOAT64;
+    positionFieldImage->nbyper = sizeof(PrecisionTYPE);
+    positionFieldImage->data = (void *)calloc(positionFieldImage->nvox, positionFieldImage->nbyper);
+
+    reg_affine_positionField(affineRegistration(param, flag),
+							targetHeader,
+							positionFieldImage);
+
+    /* allocate the result image */
+    nifti_image *resultImage = nifti_copy_nim_info(targetImage);
+    resultImage = nifti_copy_nim_info(targetHeader);
+    resultImage->cal_min=sourceImage->cal_min;
+    resultImage->cal_max=sourceImage->cal_max;
+    resultImage->scl_slope=sourceImage->scl_slope;
+    resultImage->scl_inter=sourceImage->scl_inter;
+    resultImage->datatype = sourceImage->datatype;
+    resultImage->nbyper = sourceImage->nbyper;
+    resultImage->data = (void *)calloc(resultImage->nvox, resultImage->nbyper);
+    reg_resampleSourceImage<double>(targetHeader,
+							sourceImage,
+							resultImage,
+							positionFieldImage,
+                            NULL,
+							3,
+							param->sourceBGValue);
+
+//	nifti_image_write(resultImage);
 
 	return 0;
 }

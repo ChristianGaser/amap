@@ -23,11 +23,10 @@ bool reg_test_convergence(mat44 *mat)
 	return convergence;
 }
 
-nifti_image *affineRegistration(PARAM *param, FLAG *flag)
+mat44 *affineRegistration(PARAM *param, FLAG *flag)
 {
 
 	time_t start; time(&start);
-    nifti_image *outputImage;
 
 	/* Read the target and source images */
 	nifti_image *targetHeader = nifti_image_read(param->targetImageName,false);
@@ -357,16 +356,16 @@ nifti_image *affineRegistration(PARAM *param, FLAG *flag)
 
 		}
 		nifti_image_free(positionFieldImage);
+		nifti_image_free(resultImage);
 		nifti_image_free(targetImage);
 		nifti_image_free(sourceImage);
 		reg_mat44_disp(affineTransformation, (char *)"Final affine transformation:");
 		printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n\n");
         
-        if(level==param->level2Perform-1) return(resultImage);
 	}
 
 			
-	free(affineTransformation);
+//	free(affineTransformation);
 	nifti_image_free(targetHeader);
 	nifti_image_free(sourceHeader);
 
@@ -378,4 +377,5 @@ nifti_image *affineRegistration(PARAM *param, FLAG *flag)
 	int seconds=(int)(end-start - 60*minutes);
 	printf("Registration Performed in %i min %i sec\n", minutes, seconds);
 	printf("Have a good day !\n");
+	return affineTransformation;
 }

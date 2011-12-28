@@ -54,4 +54,4 @@ typedef struct{
     bool twoDimRegistration;
 }FLAG;
 
-extern nifti_image *affineRegistration(PARAM *param, FLAG *flag);
+mat44 *affineRegistration(PARAM *param, FLAG *flag);
