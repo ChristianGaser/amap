@@ -16,6 +16,7 @@ typedef struct{
 	char *targetImageName;
 	char *sourceImageName;
 	char *outputResultName;
+	char **tpmImageName;
 
 	int maxIteration;
 
@@ -34,6 +35,7 @@ typedef struct{
 typedef struct{
 	bool targetImageFlag;
 	bool sourceImageFlag;
+	bool tpmImageFlag;
 	bool levelNumberFlag;
 	bool level2PerformFlag;
 	bool outputResultFlag;

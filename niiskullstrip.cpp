@@ -71,6 +71,11 @@ int main(int argc, char **argv)
 			param->sourceImageName=argv[++i];
 			flag->sourceImageFlag=1;
 		}
+		else if(strcmp(argv[i], "-tpm") == 0){
+		    for(int j=0; j<6; j++) 
+		        param->tpmImageName[j]=argv[++i];
+	        flag->tpmImageFlag=1;
+		}
 		else if(strcmp(argv[i], "-result") == 0){
 			param->outputResultName=argv[++i];
 			flag->outputResultFlag=1;
@@ -118,7 +123,7 @@ int main(int argc, char **argv)
 	}
 	
 	param->levelNumber=3;
-	param->maxIteration=5;
+//	param->maxIteration=5;
 	param->maxIteration=1;
 	param->level2Perform=param->levelNumber;
 	param->level2Perform=param->level2Perform<param->levelNumber?param->level2Perform:param->levelNumber;
@@ -136,8 +141,16 @@ int main(int argc, char **argv)
     	return NULL;
     }
 
-    nifti_image *targetImage = nifti_image_read(param->targetImageName,true);
-		
+	nifti_image **tpmImage = (nifti_image **)calloc(6,sizeof(nifti_image));
+    for (int j=0; j<6; j++) {
+        tpmImage[j] = nifti_image_read(param->tpmImageName[j],true);
+        if(tpmImage[j]->data == NULL){
+    	    fprintf(stderr, "** ERROR Error when reading the source image: %s\n", param->tpmImageName[j]);
+    	    return NULL;
+        }
+    }
+    
+    nifti_image *targetImage = nifti_image_read(param->targetImageName,true);		
     if(targetImage->data == NULL){
 			fprintf(stderr, "** ERROR Error when reading the target image: %s\n", param->targetImageName);
 			return NULL;
@@ -165,24 +178,39 @@ int main(int argc, char **argv)
 							positionFieldImage);
 
     /* allocate the result image */
-    nifti_image *resultImage = nifti_copy_nim_info(targetImage);
-    resultImage = nifti_copy_nim_info(targetHeader);
-    resultImage->cal_min=sourceImage->cal_min;
-    resultImage->cal_max=sourceImage->cal_max;
-    resultImage->scl_slope=sourceImage->scl_slope;
-    resultImage->scl_inter=sourceImage->scl_inter;
-    resultImage->datatype = sourceImage->datatype;
-    resultImage->nbyper = sourceImage->nbyper;
-    resultImage->data = (void *)calloc(resultImage->nvox, resultImage->nbyper);
-    reg_resampleSourceImage<double>(targetHeader,
-							sourceImage,
+    unsigned char *priors = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox*6);
+//	nifti_image **resultImage = (nifti_image **)calloc(6,sizeof(nifti_image));
+    for (int j=0; j<6; j++) {
+    
+        nifti_image *resultImage = nifti_copy_nim_info(targetImage);
+        resultImage = nifti_copy_nim_info(targetHeader);
+        resultImage->cal_min=tpmImage[0]->cal_min;
+        resultImage->cal_max=tpmImage[0]->cal_max;
+        resultImage->scl_slope=tpmImage[0]->scl_slope;
+        resultImage->scl_inter=tpmImage[0]->scl_inter;
+        resultImage->datatype = DT_UINT8;
+        resultImage->nbyper = 1;
+        resultImage->data = (void *)calloc(resultImage->nvox, resultImage->nbyper);
+        reg_resampleSourceImage<double>(targetHeader,
+							tpmImage[j],
 							resultImage,
 							positionFieldImage,
                             NULL,
 							3,
 							param->sourceBGValue);
+							
+        for(int i=0; i<sourceImage->nvox;i++) 
+            priors[i+j*sourceImage->nvox] = resultImage->data[i];
 
-//	nifti_image_write(resultImage);
+    }
+
+    unsigned char *label = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox);
+    double *src   = (double *)malloc(sizeof(double)*sourceImage->nvox);
+    
+//    Bayes( sourceImage, label, priors, 100, separations, dims, 10);
+
+//    nifti_set_filenames(resultImage[0], "test2.nii", 0, 0);
+//	nifti_image_write(resultImage[0]);
 
 	return 0;
 }
