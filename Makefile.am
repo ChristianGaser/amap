@@ -172,15 +172,16 @@ niiskullstrip_SOURCES = \
 	skullstrip.cpp \
 	Bayes.c \
 	WarpPriors.c \
-	vollib.c \
 	diffeo3d.c \
 	optimizer3d.c \
+	vollib.c \
+	$(nifti_SOURCES) \
+	$(zlib_SOURCES) \
+	niilib.c \
 	reg-lib/_reg_resampling.cpp \
 	reg-lib/_reg_affineTransformation.cpp \
 	reg-lib/_reg_blockMatching.cpp \
-	reg-lib/_reg_tools.cpp \
-	$(zlib_SOURCES) \
-	$(nifti_SOURCES) 
+	reg-lib/_reg_tools.cpp
 
 if EBTKS
     niiamap_SOURCES = \

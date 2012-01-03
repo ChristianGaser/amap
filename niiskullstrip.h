@@ -1,3 +1,12 @@
+/*
+ * Christian Gaser
+ * $Id$ 
+ *
+ */
+
+#ifndef _NIISKULLSTRIP_H_
+#define _NIISKULLSTRIP_H_
+
 #define RIGID 0
 #define AFFINE 1
 
@@ -57,3 +66,9 @@ typedef struct{
 }FLAG;
 
 mat44 *affineRegistration(PARAM *param, FLAG *flag);
+extern "C" {
+#include "niilib.h"
+void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned char *prob, double *separations, int *dims, int correct_nu);
+}
+
+#endif

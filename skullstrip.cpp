@@ -364,8 +364,6 @@ mat44 *affineRegistration(PARAM *param, FLAG *flag)
         
 	}
 
-			
-//	free(affineTransformation);
 	nifti_image_free(targetHeader);
 	nifti_image_free(sourceHeader);
 

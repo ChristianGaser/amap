@@ -70,7 +70,6 @@ void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned ch
 
     sum /= (double)count;
 
-
     for (i = 0; i < vol; i++) {
       if(src[i]>0)
         nu[i] = src[i] - sum;
@@ -289,9 +288,9 @@ void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned ch
     } else label[i] = 0;
   }
 
-/*  for (k=0; k<Kb; k++) 
+  for (k=0; k<Kb; k++) 
     printf("%g %g\n",mn[k],sqrt(vr[k]));
-*/    
+    
 
   free(flow);
   if (correct_nu) free(nu);

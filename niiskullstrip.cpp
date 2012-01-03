@@ -46,10 +46,10 @@ void Usage(char *exec)
 int main(int argc, char **argv)
 {
 	
-fprintf(stderr,".");
 	PARAM *param = (PARAM *)calloc(1,sizeof(PARAM));
 	FLAG *flag = (FLAG *)calloc(1,sizeof(FLAG));
-
+	char **tpmImageName = (char **)calloc(1000,sizeof(char));
+	
 	flag->affineFlag=1;
 	flag->rigidFlag=1;
 	param->block_percent_to_use=50;
@@ -73,8 +73,8 @@ fprintf(stderr,".");
 			flag->sourceImageFlag=1;
 		}
 		else if(strcmp(argv[i], "-tpm") == 0){
-		    for(int j=0; j<6; j++) 
-		        param->tpmImageName[j]=argv[++i];
+		    for(int j=0; j<6; j++)
+		        tpmImageName[j]=argv[++i];
 	        flag->tpmImageFlag=1;
 		}
 		else if(strcmp(argv[i], "-result") == 0){
@@ -144,10 +144,9 @@ fprintf(stderr,".");
 
 	nifti_image **tpmImage = (nifti_image **)calloc(6,sizeof(nifti_image));
     for (int j=0; j<6; j++) {
-fprintf(stderr,".");
-        tpmImage[j] = nifti_image_read(param->tpmImageName[j],true);
+        tpmImage[j] = nifti_image_read(tpmImageName[j],true);
         if(tpmImage[j]->data == NULL){
-    	    fprintf(stderr, "** ERROR Error when reading the source image: %s\n", param->tpmImageName[j]);
+    	    fprintf(stderr, "** ERROR Error when reading the source image: %s\n", tpmImageName[j]);
     	    return NULL;
         }
     }
@@ -175,29 +174,29 @@ fprintf(stderr,".");
     positionFieldImage->nbyper = sizeof(PrecisionTYPE);
     positionFieldImage->data = (void *)calloc(positionFieldImage->nvox, positionFieldImage->nbyper);
 
-    reg_affine_positionField(affineRegistration(param, flag),
+	mat44 *affineTransformation = (mat44 *)calloc(1,sizeof(mat44));
+	
+	/* get affine transformation and its inverse */
+    affineTransformation = affineRegistration(param, flag);
+	*affineTransformation = nifti_mat44_inverse(*affineTransformation);
+
+    reg_affine_positionField(affineTransformation,
 							targetHeader,
 							positionFieldImage);
 
-#ifdef tttttt
-fprintf(stderr,".");
     /* allocate the result image */
     unsigned char *priors = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox*6);
     nifti_image *resultImage = nifti_copy_nim_info(targetImage);
-fprintf(stderr,".");
     resultImage = nifti_copy_nim_info(targetHeader);
     resultImage->cal_min=tpmImage[0]->cal_min;
     resultImage->cal_max=tpmImage[0]->cal_max;
     resultImage->scl_slope=tpmImage[0]->scl_slope;
     resultImage->scl_inter=tpmImage[0]->scl_inter;
-    resultImage->datatype = DT_UINT8;
-    resultImage->nbyper = 1;
+    resultImage->datatype = tpmImage[0]->datatype;
+    resultImage->nbyper = tpmImage[0]->nbyper;
     resultImage->data = (void *)calloc(resultImage->nvox, resultImage->nbyper);
 
-fprintf(stderr,".");
-	unsigned char *resultImagePtr = static_cast<unsigned char *>(resultImage->data);
 	
-fprintf(stderr,".");
     for (int j=0; j<6; j++) {
     
         reg_resampleSourceImage<double>(targetHeader,
@@ -208,25 +207,53 @@ fprintf(stderr,".");
 							3,
 							param->sourceBGValue);
 							
-        for(int i=0; i<sourceImage->nvox;i++) 
-		    priors[i+j*sourceImage->nvox] = (unsigned char)*resultImagePtr * resultImage->scl_slope + resultImage->scl_inter;
+  	    unsigned char *resultImagePtr = static_cast<unsigned char *>(resultImage->data);
+        for(int i=0; i<sourceImage->nvox;i++) {
+		    priors[i+j*sourceImage->nvox] = (unsigned char)*resultImagePtr;
+            resultImagePtr++;
+        }
 
     }
 
+    free(resultImage);
+    free(positionFieldImage);
+
     unsigned char *label = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox);
     double *src   = (double *)malloc(sizeof(double)*sourceImage->nvox);
-	double *sourceImagePtr = static_cast<double *>(sourceImage->data);
+    unsigned char *probs   = (unsigned char *)malloc(6*sizeof(unsigned char)*sourceImage->nvox);
+    
+   	short *sourceImagePtr = static_cast<short *>(sourceImage->data);
+	switch(sourceImage->datatype){
+		case NIFTI_TYPE_INT16:
+			break;
+		default:
+			printf("The image data type is not supported\n");
+	}
 
-    for(int i=0; i<sourceImage->nvox;i++) 
+    for(int i=0; i<sourceImage->nvox;i++) {
         src[i] = (double)*sourceImagePtr * sourceImage->scl_slope + sourceImage->scl_inter;
-    free(resultImage);
+        sourceImagePtr++;
+    }
+    
     free(sourceImage);
-    free(positionFieldImage);
-#endif
-//    Bayes( sourceImage, label, priors, 100, separations, dims, 10);
 
-//    nifti_set_filenames(resultImage[0], "test2.nii", 0, 0);
-//	nifti_image_write(resultImage[0]);
+    double voxelsize[3];
+    int dims[3];
+    
+    for (int j=0; j<3; j++) {
+        voxelsize[j] = sourceImage->pixdim[j+1];
+        dims[j] = sourceImage->dim[j+1];
+    }
+
+    Bayes( src, label, priors, probs, voxelsize, dims, 0);
+
+    double slope = 1.0;
+    for (int i = 0; i < sourceImage->nvox; i++)
+      src[i] = (double)label[i];
+
+    if(!write_nifti_double("test2.nii", src, NIFTI_TYPE_FLOAT64, slope, 
+            dims, voxelsize, sourceImage))
+      exit(EXIT_FAILURE);
 
 	return 0;
 }
