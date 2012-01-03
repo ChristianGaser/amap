@@ -46,6 +46,7 @@ void Usage(char *exec)
 int main(int argc, char **argv)
 {
 	
+fprintf(stderr,".");
 	PARAM *param = (PARAM *)calloc(1,sizeof(PARAM));
 	FLAG *flag = (FLAG *)calloc(1,sizeof(FLAG));
 
@@ -116,8 +117,8 @@ int main(int argc, char **argv)
 		}
 	}
 	
-	if(!flag->targetImageFlag || !flag->sourceImageFlag){
-		fprintf(stderr,"Err:\tThe target and the source image have to be defined.\n");
+	if(!flag->targetImageFlag || !flag->sourceImageFlag || !flag->tpmImageFlag){
+		fprintf(stderr,"Err:\tThe target, source, and tpm images have to be defined.\n");
 		PetitUsage(argv[0]);
 		return 1;
 	}
@@ -143,6 +144,7 @@ int main(int argc, char **argv)
 
 	nifti_image **tpmImage = (nifti_image **)calloc(6,sizeof(nifti_image));
     for (int j=0; j<6; j++) {
+fprintf(stderr,".");
         tpmImage[j] = nifti_image_read(param->tpmImageName[j],true);
         if(tpmImage[j]->data == NULL){
     	    fprintf(stderr, "** ERROR Error when reading the source image: %s\n", param->tpmImageName[j]);
@@ -177,20 +179,27 @@ int main(int argc, char **argv)
 							targetHeader,
 							positionFieldImage);
 
+#ifdef tttttt
+fprintf(stderr,".");
     /* allocate the result image */
     unsigned char *priors = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox*6);
-//	nifti_image **resultImage = (nifti_image **)calloc(6,sizeof(nifti_image));
+    nifti_image *resultImage = nifti_copy_nim_info(targetImage);
+fprintf(stderr,".");
+    resultImage = nifti_copy_nim_info(targetHeader);
+    resultImage->cal_min=tpmImage[0]->cal_min;
+    resultImage->cal_max=tpmImage[0]->cal_max;
+    resultImage->scl_slope=tpmImage[0]->scl_slope;
+    resultImage->scl_inter=tpmImage[0]->scl_inter;
+    resultImage->datatype = DT_UINT8;
+    resultImage->nbyper = 1;
+    resultImage->data = (void *)calloc(resultImage->nvox, resultImage->nbyper);
+
+fprintf(stderr,".");
+	unsigned char *resultImagePtr = static_cast<unsigned char *>(resultImage->data);
+	
+fprintf(stderr,".");
     for (int j=0; j<6; j++) {
     
-        nifti_image *resultImage = nifti_copy_nim_info(targetImage);
-        resultImage = nifti_copy_nim_info(targetHeader);
-        resultImage->cal_min=tpmImage[0]->cal_min;
-        resultImage->cal_max=tpmImage[0]->cal_max;
-        resultImage->scl_slope=tpmImage[0]->scl_slope;
-        resultImage->scl_inter=tpmImage[0]->scl_inter;
-        resultImage->datatype = DT_UINT8;
-        resultImage->nbyper = 1;
-        resultImage->data = (void *)calloc(resultImage->nvox, resultImage->nbyper);
         reg_resampleSourceImage<double>(targetHeader,
 							tpmImage[j],
 							resultImage,
@@ -200,13 +209,20 @@ int main(int argc, char **argv)
 							param->sourceBGValue);
 							
         for(int i=0; i<sourceImage->nvox;i++) 
-            priors[i+j*sourceImage->nvox] = resultImage->data[i];
+		    priors[i+j*sourceImage->nvox] = (unsigned char)*resultImagePtr * resultImage->scl_slope + resultImage->scl_inter;
 
     }
 
     unsigned char *label = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox);
     double *src   = (double *)malloc(sizeof(double)*sourceImage->nvox);
-    
+	double *sourceImagePtr = static_cast<double *>(sourceImage->data);
+
+    for(int i=0; i<sourceImage->nvox;i++) 
+        src[i] = (double)*sourceImagePtr * sourceImage->scl_slope + sourceImage->scl_inter;
+    free(resultImage);
+    free(sourceImage);
+    free(positionFieldImage);
+#endif
 //    Bayes( sourceImage, label, priors, 100, separations, dims, 10);
 
 //    nifti_set_filenames(resultImage[0], "test2.nii", 0, 0);
