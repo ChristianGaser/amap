@@ -259,6 +259,93 @@ else
 
 endif
 
+ebtks_headers = \
+    EBTKS/include/Complex.h \
+    EBTKS/include/FileIO.h \
+    EBTKS/include/Histogram.h \
+    EBTKS/include/MPoint.h \
+    EBTKS/include/MString.h \
+    EBTKS/include/MTypes.h \
+    EBTKS/include/Minc.h \
+    EBTKS/include/OpTimer.h \
+    EBTKS/include/OrderedCltn.h \
+    EBTKS/include/Path.h \
+    EBTKS/include/Polynomial.h \
+    EBTKS/include/TrainingSet.h \
+    EBTKS/include/amoeba.h \
+    EBTKS/include/assert.h \
+    EBTKS/include/backProp.h \
+    EBTKS/include/dcomplex.h \
+    EBTKS/include/fcomplex.h \
+    EBTKS/include/matlabSupport.h \
+    EBTKS/include/popen.h \
+    EBTKS/include/trivials.h \
+	EBTKS/templates/Array.h \
+	EBTKS/templates/CachedArray.h \
+	EBTKS/templates/Dictionary.h \
+	EBTKS/templates/Matrix3D.h \
+	EBTKS/templates/Matrix.h \
+	EBTKS/templates/MatrixSupport.h \
+	EBTKS/templates/MatrixTest.h \
+	EBTKS/templates/miscTemplateFunc.h \
+	EBTKS/templates/Pool.h \
+	EBTKS/templates/SimpleArray.h \
+	EBTKS/templates/Stack.h \
+	EBTKS/templates/SimpleArraySpec.cc \
+	EBTKS/templates/MatrixSpec.cc \
+	EBTKS/clapack/f2c.h \
+	EBTKS/clapack/blaswrap.h \
+	EBTKS/templates/ValueMap.h
+
+reg_aladin_headers = \
+    reg-lib/_reg_affineTransformation.h \
+    reg-lib/_reg_bspline.h \
+    reg-lib/_reg_mutualinformation.h \
+    reg-lib/_reg_ssd.h \
+    reg-lib/_reg_blockMatching.h \
+    reg-lib/_reg_bspline_comp.h \
+    reg-lib/_reg_resampling.h \
+    reg-lib/_reg_tools.h
+
+zlib_headers = \
+	zlib/crc32.h \
+	zlib/deflate.h \
+	zlib/inffast.h \
+	zlib/inffixed.h \
+	zlib/inflate.h \
+	zlib/inftrees.h \
+	zlib/trees.h \
+	zlib/zconf.h \
+	zlib/zlib.h \
+	zlib/zutil.h
+
+nifti_headers = \
+    nifti/nifti1_io.h \
+    nifti/nifti1_local.h \
+    nifti/nifti1.h \
+    nifti/znzlib.h
+
+noinst_HEADERS = \
+	$(ebtks_headers) \
+	$(reg_aladin_headers) \
+	$(zlib_headers) \
+	$(nifti_headers) \
+    niilib.h \
+    niiamap.h \
+    niinucorrect.h \
+    niibrainmask.h \
+    niiskullstrip.h \
+    optimizer3d.h \
+    diffeo3d.h \
+    ParseArgv.h \
+    Amap.h \
+    CRemoveBridges.h \
+    vollib.h \
+	Splines/TBSpline.h \
+	Splines/Spline.h 
+
+EXTRA_DIST = $(extra_headers)
+
 m4_files = m4/mni_REQUIRE_LIB.m4 \
     m4/mni_REQUIRE_MNILIBS.m4 \
 	m4/mni_REQUIRE_OPENINVENTOR.m4 \

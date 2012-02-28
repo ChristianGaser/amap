@@ -157,17 +157,19 @@ int main(int argc, char **argv)
 			return NULL;
     }
 
-    nifti_image *positionFieldImage = nifti_copy_nim_info(targetImage);
+    nifti_image *positionFieldImage = nifti_copy_nim_info(sourceImage);
     positionFieldImage->dim[0]=positionFieldImage->ndim=5;
-    positionFieldImage->dim[1]=positionFieldImage->nx=targetImage->nx;
-    positionFieldImage->dim[2]=positionFieldImage->ny=targetImage->ny;
-    positionFieldImage->dim[3]=positionFieldImage->nz=targetImage->nz;
-    positionFieldImage->dim[4]=positionFieldImage->nt=1;positionFieldImage->pixdim[4]=positionFieldImage->dt=1.0;
-    if(flag->twoDimRegistration) positionFieldImage->dim[5]=positionFieldImage->nu=2;
-    else positionFieldImage->dim[5]=positionFieldImage->nu=3;
+    positionFieldImage->dim[1]=positionFieldImage->nx=sourceImage->nx;
+    positionFieldImage->dim[2]=positionFieldImage->ny=sourceImage->ny;
+    positionFieldImage->dim[3]=positionFieldImage->nz=sourceImage->nz;
+    positionFieldImage->dim[4]=positionFieldImage->nt=1;
+    positionFieldImage->dim[5]=positionFieldImage->nu=3;
+    positionFieldImage->dim[6]=positionFieldImage->nv=1;
+    positionFieldImage->dim[7]=positionFieldImage->nw=1;
+    positionFieldImage->pixdim[4]=positionFieldImage->dt=1.0;
     positionFieldImage->pixdim[5]=positionFieldImage->du=1.0;
-    positionFieldImage->dim[6]=positionFieldImage->nv=1;positionFieldImage->pixdim[6]=positionFieldImage->dv=1.0;
-    positionFieldImage->dim[7]=positionFieldImage->nw=1;positionFieldImage->pixdim[7]=positionFieldImage->dw=1.0;
+    positionFieldImage->pixdim[6]=positionFieldImage->dv=1.0;
+    positionFieldImage->pixdim[7]=positionFieldImage->dw=1.0;
     positionFieldImage->nvox=positionFieldImage->nx*positionFieldImage->ny*positionFieldImage->nz*positionFieldImage->nt*positionFieldImage->nu;
     if(sizeof(PrecisionTYPE)==4) positionFieldImage->datatype = NIFTI_TYPE_FLOAT32;
     else positionFieldImage->datatype = NIFTI_TYPE_FLOAT64;
@@ -181,25 +183,23 @@ int main(int argc, char **argv)
 	*affineTransformation = nifti_mat44_inverse(*affineTransformation);
 
     reg_affine_positionField(affineTransformation,
-							targetHeader,
+							sourceImage,
 							positionFieldImage);
 
     /* allocate the result image */
     unsigned char *priors = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox*6);
-    nifti_image *resultImage = nifti_copy_nim_info(targetImage);
-    resultImage = nifti_copy_nim_info(targetHeader);
+    nifti_image *resultImage = nifti_copy_nim_info(sourceImage);
     resultImage->cal_min=tpmImage[0]->cal_min;
     resultImage->cal_max=tpmImage[0]->cal_max;
     resultImage->scl_slope=tpmImage[0]->scl_slope;
     resultImage->scl_inter=tpmImage[0]->scl_inter;
     resultImage->datatype = tpmImage[0]->datatype;
     resultImage->nbyper = tpmImage[0]->nbyper;
-    resultImage->data = (void *)calloc(resultImage->nvox, resultImage->nbyper);
+    resultImage->data = (void *)calloc(sourceImage->nvox, resultImage->nbyper);
 
-	
     for (int j=0; j<6; j++) {
     
-        reg_resampleSourceImage<double>(targetHeader,
+        reg_resampleSourceImage<double>(sourceImage,
 							tpmImage[j],
 							resultImage,
 							positionFieldImage,
@@ -249,7 +249,7 @@ int main(int argc, char **argv)
 
     double slope = 1.0;
     for (int i = 0; i < sourceImage->nvox; i++)
-      src[i] = (double)label[i];
+      src[i] = (double)probs[i];
 
     if(!write_nifti_double("test2.nii", src, NIFTI_TYPE_FLOAT64, slope, 
             dims, voxelsize, sourceImage))

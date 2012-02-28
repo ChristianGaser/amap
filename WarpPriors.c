@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id: WarpPriors.c 75 2009-01-20 21:08:55Z gaser $ 
+ * $Id$ 
  *
  */
 
