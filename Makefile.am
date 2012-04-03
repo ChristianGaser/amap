@@ -12,6 +12,10 @@ else
   AM_CPPFLAGS=$(ZLIBCFLAGS) $(NIFTICFLAGS) $(REGCFLAGS) 
 endif
 
+EXTRA_DIST = \
+	autogen.sh \
+	$(m4_files)
+
 dist_bin_SCRIPTS = \
 	parallelize \
 	parallelize_xserves \
@@ -343,8 +347,6 @@ noinst_HEADERS = \
     vollib.h \
 	Splines/TBSpline.h \
 	Splines/Spline.h 
-
-EXTRA_DIST = $(extra_headers)
 
 m4_files = m4/mni_REQUIRE_LIB.m4 \
     m4/mni_REQUIRE_MNILIBS.m4 \

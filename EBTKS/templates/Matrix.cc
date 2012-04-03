@@ -27,6 +27,10 @@ $State: Exp $
 #endif
 #include "miscTemplateFunc.h"
 
+#ifndef DRAND48
+  #define DRAND48() (double(rand()) / RAND_MAX) 
+#endif
+
 using namespace std;
 
 
@@ -906,7 +910,7 @@ Mat<Type>::randuniform(double min, double max)
   Type *elPtr = _el[0];
   for(unsigned i = _rows; i; i--)
     for(unsigned j = _cols; j; j--)
-      *elPtr++ = Type(drand48() * range + min);
+      *elPtr++ = Type(DRAND48() * range + min);
   
   return *this;
 }

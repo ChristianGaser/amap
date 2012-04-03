@@ -24,7 +24,9 @@ $State: Exp $
 
 using namespace std;
 
-
+#ifndef DRAND48
+  #define DRAND48() (double(rand()) / RAND_MAX) 
+#endif
 
 const int DEFAULT_TRAINING_SET_SIZE = 250;
 
@@ -306,7 +308,7 @@ void
 TrainingSet::shuffle()
 {
   for (unsigned i = 0; i < uEndIndex; i++) {
-    unsigned j = unsigned(drand48()*uEndIndex);
+    unsigned j = unsigned(DRAND48()*uEndIndex);
     if (i != j) {
       void *tempPtr = Contents[i];
       Contents[i] = Contents[j];

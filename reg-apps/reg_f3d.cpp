@@ -31,7 +31,7 @@
 	#include "_reg_tools_gpu.h"
 #endif
 
-#ifdef _WINDOWS
+#ifdef WIN32
     #include <time.h>
 #endif
 

@@ -32,6 +32,10 @@ $State: Exp $
 
 #include "MString.h"
 
+#ifndef DRAND48
+  #define DRAND48() (double(rand()) / RAND_MAX) 
+#endif
+
 using namespace std;
 
 
@@ -167,7 +171,7 @@ BP_ANN::randomize(long seed)
 
     for (i = 0; i < nNodes; i++) {
       nodePtr->out = 0.0;
-      nodePtr->bias = drand48() - 0.5;
+      nodePtr->bias = DRAND48() - 0.5;
       nodePtr->dBias = 0.0;
       nodePtr->delta = 0.0;
       nodePtr++;
@@ -180,7 +184,7 @@ BP_ANN::randomize(long seed)
     nWeights   = _nWeightsForLayer[layerCtr];
 
     for (i = 0; i < nWeights; i++) {
-      weightPtr->value  = drand48() - 0.5;
+      weightPtr->value  = DRAND48() - 0.5;
       weightPtr->delta = 0.0;
       weightPtr++;
     }

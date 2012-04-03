@@ -24,6 +24,11 @@ $State: Exp $
 #include <iostream>		// (bert) changed from iostream.h
 #include <math.h>
 //#include <string>		// (bert) changed from string.h
+
+#ifndef DRAND48
+  #define DRAND48() (double(rand()) / RAND_MAX) 
+#endif
+
 using namespace std;		// (bert) added
 
 /******************
@@ -518,7 +523,7 @@ Array<Type>&
 Array<Type>::shuffle()
 {
   for (unsigned i = 0; i < _size; i++) {
-    unsigned j = unsigned(drand48()*_size);
+    unsigned j = unsigned(DRAND48()*_size);
     if (i != j) {
       Type temp    = _contents[i];
       _contents[i] = _contents[j];

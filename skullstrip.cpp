@@ -26,8 +26,6 @@ bool reg_test_convergence(mat44 *mat)
 mat44 *affineRegistration(PARAM *param, FLAG *flag)
 {
 
-	time_t start; time(&start);
-
 	/* Read the target and source images */
 	nifti_image *targetHeader = nifti_image_read(param->targetImageName,false);
 	if(targetHeader == NULL){
@@ -370,10 +368,5 @@ mat44 *affineRegistration(PARAM *param, FLAG *flag)
 	free(flag);
 	free(param);
 
-	time_t end; time(&end);
-	int minutes=(int)floorf((end-start)/60.0f);
-	int seconds=(int)(end-start - 60*minutes);
-	printf("Registration Performed in %i min %i sec\n", minutes, seconds);
-	printf("Have a good day !\n");
 	return affineTransformation;
 }

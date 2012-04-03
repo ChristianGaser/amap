@@ -27,6 +27,10 @@ $State: Exp $
 
 #include "trivials.h"
 
+#ifndef DRAND48
+  #define DRAND48() (double(rand()) / RAND_MAX) 
+#endif
+
 using namespace std;
 
 #ifdef USE_COMPMAT
@@ -650,7 +654,7 @@ SimpleArray<Type>::randuniform(double min, double max)
   double range = max - min;
 
   for (unsigned i = 0; i < this->_size; i++)
-    setEl(i, Type(drand48() * range + min));
+    setEl(i, Type(DRAND48() * range + min));
   
   return *this;
 }
@@ -1650,7 +1654,7 @@ SimpleArray<Type>::_randomizedPartition(int p, int r)
 
   //int i = (random() / (MAXINT / (r-p+1))) + p;
   // Changed because of problems locating random() on a Sun
-  int i = int(ROUND(drand48() * (r-p+1) + p));
+  int i = int(ROUND(DRAND48() * (r-p+1) + p));
 
 // Swap elements p and i
 

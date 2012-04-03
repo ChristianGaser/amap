@@ -23,7 +23,7 @@ $State: Exp $
 #include <dirent.h>
 #include <fstream>		// (bert) changed from fstream.h
 using namespace std;		// (bert) added
-#include <pwd.h>
+//#include <pwd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -136,15 +136,8 @@ Path::expanded() const
       }
     }
     else {                                      // Expand ~user to full path
-      int slashIndex = this->indexOf('/');
-      MString userName((*this)(1, slashIndex - 1));
-      struct passwd *passWordEntry;
-      if ((passWordEntry = getpwnam(userName.string())) != NULL)
-	newPath = Path(MString(passWordEntry->pw_dir) + (*this)(slashIndex));
-      else {
 	cerr << "Couldn't get password entry!" << endl;
 	assert(0);
-      }
     }
   }
 
