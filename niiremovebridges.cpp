@@ -244,7 +244,7 @@ int  main(
   /* Get arguments */
   if (ParseArgv(&argc, argv, argTable, 0) || (argc < 3)) {
     (void) fprintf(stderr, 
-    "\nUsage: %s wm.nii t1.nii wm_corrected.nii [labelvalue]\n",
+    "\nUsage: %s wm.nii t1.nii wm_corrected.nii\n",
                      argv[0]);
     (void) fprintf(stderr, 
       "       %s -help\n\n", argv[0]);
@@ -320,8 +320,8 @@ int  main(
   
   fprintf(stderr,"Bounding box: x: %d-%d y: %d-%d z: %d-%d\n",xmin,xmax,ymin,ymax,zmin,zmax);
 
-/* not yet working */
-/*  get_largest_cluster(wm, dims); */
+  /* keep only largest cluster */
+  get_largest_cluster(wm, dims); 
 
   /* read t1 */
   t1_ptr = read_nifti_double(t1_filename, &vol_tmp);
@@ -354,6 +354,9 @@ int  main(
   
   CRemoveBridges *bro = new CRemoveBridges();
 
+  for (i = 0; i < vol; i++)
+  		wm_out[i] = wm[i];
+  		
   /* avgWhite,threshold,avgGray */
   bro->remove(wm, t1, wm_out, dims[0],dims[1],dims[2],mu[2],((mu[2]+mu[1])/2.0),mu[1]);
 
