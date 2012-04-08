@@ -35,7 +35,6 @@ extern "C"
 extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
 extern int equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
 extern int write_nifti_double( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
-extern void get_largest_cluster(unsigned char *bw, int dim[3]);
 }
 
 double labelvalue[2] = {-1.0, 127.0};
