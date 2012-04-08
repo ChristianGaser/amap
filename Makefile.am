@@ -134,7 +134,6 @@ reg_tools_SOURCES = \
 niiremovebridges_SOURCES = \
 	niiremovebridges.cpp \
 	CRemoveBridges.cpp \
-    bwlabel.c \
 	$(nifti_SOURCES) \
     $(zlib_SOURCES) \
     ParseArgv.c \

@@ -22,6 +22,11 @@
 #define HUGE 1e15
 #endif
 
+#define UNCHANGED  225
+#define REMOVED 236
+#define ADDED 245
+#define ALTERNATIVE 226
+
 extern "C"
 {
 #include <ParseArgv.h>
@@ -34,14 +39,17 @@ extern void get_largest_cluster(unsigned char *bw, int dim[3]);
 }
 
 double labelvalue[2] = {-1.0, 127.0};
+char *changed_filename = NULL;
 
 static ArgvInfo argTable[] = {
   {"-label", ARGV_FLOAT, (char *) 2, (char *) &labelvalue,
        "range of label to binarize image."},
+  {"-changed", ARGV_STRING, (char *) 1, (char *) &changed_filename, 
+       "Save image with indicated changes (unchanged 255; removed 236; added 245)."},
    {NULL, ARGV_END, NULL, NULL, NULL}
 };
 
-double EstimateKmeans(double *src, int n_classes, double *mean, int ni, int *dims, double max_src)
+double EstimateKmeans(float *src, int n_classes, double *mean, int ni, int *dims, double max_src)
 /* perform k-means algorithm give initial mean estimates */
 {
   int i, j, j0, x, y, z, v;
@@ -142,7 +150,7 @@ double EstimateKmeans(double *src, int n_classes, double *mean, int ni, int *dim
   return(diff);
 }
 
-void Kmeans(double *src, int NI, int n_clusters, int *dims, double *mu)
+void Kmeans(float *src, int NI, int n_clusters, int *dims, double *mu)
 {
   int i, j, l, k, x, y, z;
   double e, emin, eps;
@@ -217,7 +225,7 @@ void Kmeans(double *src, int NI, int n_clusters, int *dims, double *mu)
   
   fprintf(stderr,"Final means: ");
   for (i=0; i<n_clusters; i++) 
-    fprintf(stderr,"%f ",mu[i]); 
+    fprintf(stderr,"%3.1f ",mu[i]); 
   fprintf(stderr,"\n");    
   return;    
 }
@@ -233,12 +241,12 @@ int  main(
   unsigned long nii_lens[MAX_NII_DIMS];
   int       nii_ndims, n_classes;
   int       nifti_file_type;
-  int	      x, y, z, i, dims[3], z_area, y_dims;
+  int	    x, y, z, dims[3], i, z_area, y_dims;
   long	    area, vol;
   char	    *arg_string, *extension;
   unsigned char	*wm, *wm_out;
   char	    *wm_filename, *t1_filename, *wm_out_filename;
-  double    *t1;
+  float    *t1;
   double    *vol_tmp, mu[3], voxelsize[3];
 
   /* Get arguments */
@@ -274,7 +282,7 @@ int  main(
   
   wm  = (unsigned char *)malloc(sizeof(unsigned char)*wm_ptr->nvox);
   wm_out  = (unsigned char *)malloc(sizeof(unsigned char)*wm_ptr->nvox);
-  t1 = (double *)malloc(sizeof(double)*wm_ptr->nvox);
+  t1 = (float *)malloc(sizeof(float)*wm_ptr->nvox);
 
   if((wm == NULL) || (wm_out == NULL) || (t1 == NULL)) {
     fprintf(stderr,"Memory allocation error\n");
@@ -320,9 +328,6 @@ int  main(
   
   fprintf(stderr,"Bounding box: x: %d-%d y: %d-%d z: %d-%d\n",xmin,xmax,ymin,ymax,zmin,zmax);
 
-  /* keep only largest cluster */
-  get_largest_cluster(wm, dims); 
-
   /* read t1 */
   t1_ptr = read_nifti_double(t1_filename, &vol_tmp);
   if(t1_ptr == NULL) {
@@ -344,7 +349,7 @@ int  main(
       y_dims = y*dims[0];
       for (x = xmin; x < xmax; x++) {
         i = z_area + y_dims + x;
-        t1[i] = vol_tmp[i];
+        t1[i] = (float)vol_tmp[i];
       }
     }
   }
@@ -354,22 +359,29 @@ int  main(
   
   CRemoveBridges *bro = new CRemoveBridges();
 
-  for (i = 0; i < vol; i++)
-  		wm_out[i] = wm[i];
-  		
   /* avgWhite,threshold,avgGray */
   bro->remove(wm, t1, wm_out, dims[0],dims[1],dims[2],mu[2],((mu[2]+mu[1])/2.0),mu[1]);
 
-  int un_classeshanged = 225, removed = 236, added = 245, alternative = 226;
+  /* save file with indicated changes */
+  if (changed_filename != NULL) {
+    for (i = 0; i < vol; i++) {
+      vol_tmp[i] = (double)wm_out[i];
+      if (vol_tmp[i] == UNCHANGED) vol_tmp[i] = 255;
+    }
+    if(!write_nifti_double( changed_filename, vol_tmp, DT_UINT8, 1, dims, 
+          voxelsize, wm_ptr))
+      exit(EXIT_FAILURE);
+  }
+  
   int n_changes = 0;
   for (i = 0; i < vol; i++) {
-  	if((wm_out[i] == added) || (wm_out[i] == alternative)) {
+  	if((wm_out[i] == ADDED) || (wm_out[i] == ALTERNATIVE)) {
   		wm_out[i] = 255;
   		n_changes++;
   	}
-  	if(wm_out[i] == un_classeshanged)
+  	if(wm_out[i] == UNCHANGED)
   		wm_out[i] = 255;
-  	if(wm_out[i] == removed) {
+  	if(wm_out[i] == REMOVED) {
   		wm_out[i] = 0;
   		n_changes++;
   	}

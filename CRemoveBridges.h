@@ -1,6 +1,10 @@
 #include <string>
 using namespace std;
 
+#ifndef DIMS
+#define DIMS 256
+#endif
+
 //**********************************************************************
 //general (P)eekable (S)tack/(Q)ueue class implemented as pointered list
 //declaration
@@ -126,7 +130,7 @@ class CRemoveBridges{
   CRemoveBridges();
   ~CRemoveBridges();
   unsigned char remove(unsigned char *preSegData,
-		       double *unSegData,
+		       float *unSegData,
 		       unsigned char *resultData,
 		       int x,
 		       int y,
@@ -140,9 +144,9 @@ class CRemoveBridges{
   int round(double x){ if(x<0) return((int)(x-0.5)); else return((int)(x+0.5)); }
   inline void updateProgress(int newPercentProgress);
  private:
-  unsigned char posObj[256][256][256];
-  unsigned char negObj[256][256][256];
-  double unsegVMRobj[256][256][256];
+  unsigned char posObj[DIMS][DIMS][DIMS];
+  unsigned char negObj[DIMS][DIMS][DIMS];
+  float unsegVMRobj[DIMS][DIMS][DIMS];
   unsigned char vmrHeaderBuffer[6];
 
   int pas[27][17];
@@ -169,9 +173,6 @@ class CRemoveBridges{
   int nVoxInNegObj; 
   int nVoxIncludedInPosObj, nVoxIncludedInNegObj;
   volatile int percentProgress;
-/*   static const double surfaceFillingTimeProportion = .08; */
-/*   static const double choiceMakingTimeProportion = .08; */
-/*   static const double volFloodFillTimeProportion = .84; */
 
   //switches
   int g_choiceHeuristic; //choice heuristic (index)
@@ -189,25 +190,25 @@ class CRemoveBridges{
 
   // METHODS
   void initNegObj();
-  void clearFringeNfluid(unsigned char obj[256][256][256]);
-  void fillFrameWithAir(unsigned char obj[256][256][256]);
-  void determineBoxDimensions(unsigned char obj[256][256][256]);
-  voxT someLowestVox_normST(int zeroRingSkin, unsigned char obj[256][256][256]);
-  void setFrameToCoreST(int zeroRingSkin, unsigned char obj[256][256][256]);
+  void clearFringeNfluid(unsigned char obj[DIMS][DIMS][DIMS]);
+  void fillFrameWithAir(unsigned char obj[DIMS][DIMS][DIMS]);
+  void determineBoxDimensions(unsigned char obj[DIMS][DIMS][DIMS]);
+  voxT someLowestVox_normST(int zeroRingSkin, unsigned char obj[DIMS][DIMS][DIMS]);
+  void setFrameToCoreST(int zeroRingSkin, unsigned char obj[DIMS][DIMS][DIMS]);
   int index(int x, int y, int z){return(x*9+y*3+z);};
   bool in3x3Block(int x, int y, int z){ if(x>=0 && x<3 && y>=0 && y<3 && z>=0 && z<3)return true; else return false; };
   void initPasEasNSas();
-  bool surSelftouchingST(voxT centerVox, unsigned char obj[256][256][256]);
+  bool surSelftouchingST(voxT centerVox, unsigned char obj[DIMS][DIMS][DIMS]);
   inline bool inBlock(voxT vox);
-  inline bool coreVoxAdjacentToST(int skin, voxT vox, unsigned char obj[256][256][256]);
-  inline bool outerObjVoxST(voxT vox, unsigned char obj[256][256][256]);
-  inline bool volSelftouchingST(voxT centerVox, unsigned char obj[256][256][256]);
-  int surFloodfillST(char cSkin, voxT seedVox, unsigned char obj[256][256][256]);
+  inline bool coreVoxAdjacentToST(int skin, voxT vox, unsigned char obj[DIMS][DIMS][DIMS]);
+  inline bool outerObjVoxST(voxT vox, unsigned char obj[DIMS][DIMS][DIMS]);
+  inline bool volSelftouchingST(voxT centerVox, unsigned char obj[DIMS][DIMS][DIMS]);
+  int surFloodfillST(char cSkin, voxT seedVox, unsigned char obj[DIMS][DIMS][DIMS]);
   float deletionDamage(voxT vox);
   float additionDamage(voxT vox);
-  bool uVolFloodfillST(voxT seedVox, psq<cutC*>& listOfCutPs, unsigned char obj[256][256][256]);
-  bool existsCoreAdjacentToST(char skin, voxT& vox, unsigned char obj[256][256][256]);
-  bool cutAllST(psq<cutC*>& listOfCutPs, unsigned char obj[256][256][256]);
+  bool uVolFloodfillST(voxT seedVox, psq<cutC*>& listOfCutPs, unsigned char obj[DIMS][DIMS][DIMS]);
+  bool existsCoreAdjacentToST(char skin, voxT& vox, unsigned char obj[DIMS][DIMS][DIMS]);
+  bool cutAllST(psq<cutC*>& listOfCutPs, unsigned char obj[DIMS][DIMS][DIMS]);
   string englishCutDescriptionElaboration(cutC* cutP);
   string englishCutDescription(cutC* cutP);
   string englishCutListDescription(psq<cutC*>& listOfCutPs);
@@ -223,8 +224,8 @@ class CRemoveBridges{
 		      psq<cutC*>& targetListOfCutPs, choiceC* cChoiceP);
   bool establishCorrespondence(psq<cutC*>& listOfPosCutPs, psq<cutC*>& listOfNegCutPs, psq<choiceC*>& listOfChoicePs);
   float cutSetCost(choiceC* cChoiceP, bool posCutSetCostF);
-  void setTheseCutsTo(psq<cutC*>& listOfCutPs, unsigned char newCid, bool logF, unsigned char obj[256][256][256]);
-  void makeChanges(psq<choiceC*>& listOfChoicePs, unsigned char obj[256][256][256]);
+  void setTheseCutsTo(psq<cutC*>& listOfCutPs, unsigned char newCid, bool logF, unsigned char obj[DIMS][DIMS][DIMS]);
+  void makeChanges(psq<choiceC*>& listOfChoicePs, unsigned char obj[DIMS][DIMS][DIMS]);
 };
 
 

@@ -30,6 +30,10 @@
 #include <string>
 using namespace std;
 
+#ifndef DIMS
+#define DIMS 256
+#endif
+
 //**********************************************************************
 //general (P)eekable (S)tack/(Q)ueue class implemented as pointered list
 //implementation 
@@ -248,11 +252,11 @@ choiceC::~choiceC(){}
 
 CRemoveBridges::CRemoveBridges(){
   // We should have an appropriate constructor
-  maxX = 255;
+  maxX = DIMS-1;
   minX = 0;
-  maxY = 255;
+  maxY = DIMS-1;
   minY = 0;
-  maxZ = 255;
+  maxZ = DIMS-1;
   minZ = 0;
   elaborateCutDescriptionF = true;
   percentProgress = 0;
@@ -262,47 +266,47 @@ CRemoveBridges::~CRemoveBridges(){
 }
 
 void CRemoveBridges::initNegObj(){
-  for (int x(0); x<256; x++)
-    for (int y(0); y<256; y++)
-      for (int z(0); z<256; z++){
+  for (int x(0); x<DIMS; x++)
+    for (int y(0); y<DIMS; y++)
+      for (int z(0); z<DIMS; z++){
         if(posObj[x][y][z]==0) negObj[x][y][z]=63;
         else if(posObj[x][y][z]!=0) negObj[x][y][z]=0;
       }
 }
 
-void CRemoveBridges::clearFringeNfluid(unsigned char obj[256][256][256]){
-  for (int x(0); x<256; x++)
-    for (int y(0); y<256; y++)
-      for (int z(0); z<256; z++)
+void CRemoveBridges::clearFringeNfluid(unsigned char obj[DIMS][DIMS][DIMS]){
+  for (int x(0); x<DIMS; x++)
+    for (int y(0); y<DIMS; y++)
+      for (int z(0); z<DIMS; z++)
 	obj[x][y][z]=obj[x][y][z]&63;
 }
 
-void CRemoveBridges::fillFrameWithAir(unsigned char obj[256][256][256]){
-  for (int x(0); x<256; x++)
-    for (int y(0); y<256; y++){
+void CRemoveBridges::fillFrameWithAir(unsigned char obj[DIMS][DIMS][DIMS]){
+  for (int x(0); x<DIMS; x++)
+    for (int y(0); y<DIMS; y++){
       obj[0][x][y]=0;
-      obj[255][x][y]=0;
+      obj[DIMS-1][x][y]=0;
       obj[x][0][y]=0;
-      obj[x][255][y]=0;
+      obj[x][DIMS-1][y]=0;
       obj[x][y][0]=0;
-      obj[x][y][255]=0;
+      obj[x][y][DIMS-1]=0;
     }
 }
 
-void CRemoveBridges::determineBoxDimensions(unsigned char obj[256][256][256]){
+void CRemoveBridges::determineBoxDimensions(unsigned char obj[DIMS][DIMS][DIMS]){
 
   maxX=0;
-  minX=255;
+  minX=DIMS-1;
   maxY=0;
-  minY=255;
+  minY=DIMS-1;
   maxZ=0;
-  minZ=255;
+  minZ=DIMS-1;
 
   nVoxInPosObj=0;
 
-  for (int x(0); x<256; x++)
-    for (int y(0); y<256; y++)
-      for (int z(0); z<256; z++)
+  for (int x(0); x<DIMS; x++)
+    for (int y(0); y<DIMS; y++)
+      for (int z(0); z<DIMS; z++)
 	if(obj[x][y][z]){
 	  maxX= (x+1>maxX)?x+1:maxX;
 	  maxY= (y+1>maxY)?y+1:maxY;
@@ -319,7 +323,7 @@ void CRemoveBridges::determineBoxDimensions(unsigned char obj[256][256][256]){
   nVoxInNegObj=nVoxInBlock-nVoxInPosObj;
 }
 
-voxT CRemoveBridges::someLowestVox_normST(int zeroRingSkin, unsigned char obj[256][256][256]){
+voxT CRemoveBridges::someLowestVox_normST(int zeroRingSkin, unsigned char obj[DIMS][DIMS][DIMS]){
   //sets core voxels to priority zeroRingSkin and returns one zeroRingSkin-priority voxel
   voxT vox;
   
@@ -339,7 +343,7 @@ voxT CRemoveBridges::someLowestVox_normST(int zeroRingSkin, unsigned char obj[25
   return vox;
 }
 
-void CRemoveBridges::setFrameToCoreST(int zeroRingSkin, unsigned char obj[256][256][256]){
+void CRemoveBridges::setFrameToCoreST(int zeroRingSkin, unsigned char obj[DIMS][DIMS][DIMS]){
 //to be called from a separate thread
   int x,y,z;
 
@@ -412,19 +416,12 @@ void CRemoveBridges::initPasEasNSas(){
 
 
 
-bool CRemoveBridges::surSelftouchingST(voxT centerVox, unsigned char obj[256][256][256]){
+bool CRemoveBridges::surSelftouchingST(voxT centerVox, unsigned char obj[DIMS][DIMS][DIMS]){
   //to be called from a separate thread
   unsigned char connex[27];
   int start(-1);
   int i;
 	
-  /*int maxX(255);
-    int minX(0);
-    int maxY(255);
-    int minY(0);
-    int maxZ(255);
-    int minZ(0);*/
-
   int xx,yy,zz;
 
   for (int x=0; x<3; x++){
@@ -449,7 +446,7 @@ bool CRemoveBridges::surSelftouchingST(voxT centerVox, unsigned char obj[256][25
   //LABELS in connex[]
   //air						0
   //object (former fluid)		128
-  //fluid						255
+  //fluid						511
   //fringe					1
 
   if(start==-1) //no former fluid (here object) connected to centerVox =>not selftouching
@@ -488,7 +485,7 @@ inline bool CRemoveBridges::inBlock(voxT vox){
   else
     return false;
 }
-inline bool CRemoveBridges::coreVoxAdjacentToST(int skin, voxT vox, unsigned char obj[256][256][256]){
+inline bool CRemoveBridges::coreVoxAdjacentToST(int skin, voxT vox, unsigned char obj[DIMS][DIMS][DIMS]){
   //is vox a core-vox bordering on skin?
   int x=vox.x; int y=vox.y; int z=vox.z;
   
@@ -502,7 +499,7 @@ inline bool CRemoveBridges::coreVoxAdjacentToST(int skin, voxT vox, unsigned cha
   else
     return false;
 }
-inline bool CRemoveBridges::outerObjVoxST(voxT vox, unsigned char obj[256][256][256]){
+inline bool CRemoveBridges::outerObjVoxST(voxT vox, unsigned char obj[DIMS][DIMS][DIMS]){
   //is vox an obj-vox bordering on air?
   int x=vox.x; int y=vox.y; int z=vox.z;
   
@@ -514,7 +511,7 @@ inline bool CRemoveBridges::outerObjVoxST(voxT vox, unsigned char obj[256][256][
     return false;
 }
 
-inline bool CRemoveBridges::volSelftouchingST(voxT centerVox, unsigned char obj[256][256][256]){
+inline bool CRemoveBridges::volSelftouchingST(voxT centerVox, unsigned char obj[DIMS][DIMS][DIMS]){
  //to be called from a separate thread
 
   //old definition
@@ -578,7 +575,7 @@ inline bool CRemoveBridges::volSelftouchingST(voxT centerVox, unsigned char obj[
   //LABELS in connex[]
   //air						0
   //object (former fluid)		128
-  //fluid						255
+  //fluid						511
   //fringe					1
   
   if(start==-1) //no former fluid (here object) connected to centerVox =>not selftouching
@@ -623,7 +620,7 @@ inline bool CRemoveBridges::volSelftouchingST(voxT centerVox, unsigned char obj[
 }
 
 
-int CRemoveBridges::surFloodfillST(char cSkin, voxT seedVox, unsigned char obj[256][256][256]){
+int CRemoveBridges::surFloodfillST(char cSkin, voxT seedVox, unsigned char obj[DIMS][DIMS][DIMS]){
   //to be called from a separate thread
   
   //returns # of surface-rings that exist with the skin marked here included in the
@@ -631,8 +628,8 @@ int CRemoveBridges::surFloodfillST(char cSkin, voxT seedVox, unsigned char obj[2
   
   clearFringeNfluid(obj);
 
-  arrayFringeQueueC prevSelftouchingFringe(256,65536); //<= 16MB*3 (256^3 voxels, 3 bytes/voxel)
-  arrayFringeQueueC immaculateFringe(256,65536);
+  arrayFringeQueueC prevSelftouchingFringe(DIMS,65536); //<= 16MB*3 (256^3 voxels, 3 bytes/voxel)
+  arrayFringeQueueC immaculateFringe(DIMS,65536);
 
   immaculateFringe.push(seedVox);
   int fringeSize(1);
@@ -704,7 +701,7 @@ float CRemoveBridges::deletionDamage(voxT vox){
   // averageGrayMatterIntensity: grayMatterDeletionDamage (negative)
   // thresholdIntensity: thresholdVoxDeletionDamage (0)
   // averageWhiteMatterIntensity: whiteMatterDeletionDamage (positive)
-  // 255: whitestMatterDeletionDamage (positive)
+  // 511: whitestMatterDeletionDamage (positive)
     
   const float airDeletionDamage = -10.0;
   const float grayMatterDeletionDamage = -1.0;
@@ -723,7 +720,7 @@ float CRemoveBridges::deletionDamage(voxT vox){
     r_svd=thresholdVoxDeletionDamage+(intensity-g_thresholdIntensity)/(g_averageWhiteIntensity-g_thresholdIntensity)*(whiteMatterDeletionDamage-thresholdVoxDeletionDamage);
   
   else if(g_averageWhiteIntensity<=intensity) //white matter to totally white
-    r_svd=whiteMatterDeletionDamage+(intensity-g_averageWhiteIntensity)/(255-g_averageWhiteIntensity)*(whitestMatterDeletionDamage-whiteMatterDeletionDamage);
+    r_svd=whiteMatterDeletionDamage+(intensity-g_averageWhiteIntensity)/(511-g_averageWhiteIntensity)*(whitestMatterDeletionDamage-whiteMatterDeletionDamage);
   
   r_svd+=1.0; //punish change
   
@@ -742,7 +739,7 @@ float CRemoveBridges::additionDamage(voxT vox){
   //averageGrayMatterIntensity	grayMatterAdditionDamage (positive)
   //thresholdIntensity		thresholdVoxAdditionDamage (0)
   //averageWhiteMatterIntensity	whiteMatterAdditionDamage (negative)
-  //255				whitestMatterAdditionDamage (negative)
+  //511				whitestMatterAdditionDamage (negative)
 
   const float airAdditionDamage = 10.0;
   const float grayMatterAdditionDamage = 1.0;
@@ -762,7 +759,7 @@ float CRemoveBridges::additionDamage(voxT vox){
     r_svd=thresholdVoxAdditionDamage+(intensity-g_thresholdIntensity)/(g_averageWhiteIntensity-g_thresholdIntensity)*(whiteMatterAdditionDamage-thresholdVoxAdditionDamage);
   
   else if(g_averageWhiteIntensity<=intensity) //white matter to totally white
-    r_svd=whiteMatterAdditionDamage+(intensity-g_averageWhiteIntensity)/(255-g_averageWhiteIntensity)*(whitestMatterAdditionDamage-whiteMatterAdditionDamage);
+    r_svd=whiteMatterAdditionDamage+(intensity-g_averageWhiteIntensity)/(511-g_averageWhiteIntensity)*(whitestMatterAdditionDamage-whiteMatterAdditionDamage);
   
   r_svd+=1.0; //punish change
   
@@ -771,7 +768,7 @@ float CRemoveBridges::additionDamage(voxT vox){
 }
 
 
-bool CRemoveBridges::uVolFloodfillST(voxT seedVox, psq<cutC*>& listOfCutPs, unsigned char obj[256][256][256]){
+bool CRemoveBridges::uVolFloodfillST(voxT seedVox, psq<cutC*>& listOfCutPs, unsigned char obj[DIMS][DIMS][DIMS]){
 
   //returns true if successful.
   //no volume-rings (=bridges!) exist in the fluid marked in obj[][][].
@@ -925,7 +922,7 @@ bool CRemoveBridges::uVolFloodfillST(voxT seedVox, psq<cutC*>& listOfCutPs, unsi
   }
 }
 
-bool CRemoveBridges::existsCoreAdjacentToST(char skin, voxT& vox, unsigned char obj[256][256][256]){
+bool CRemoveBridges::existsCoreAdjacentToST(char skin, voxT& vox, unsigned char obj[DIMS][DIMS][DIMS]){
   for (; vox.x<maxX; vox.x++){
     for (; vox.y<maxY; vox.y++){
       for (; vox.z<maxZ; vox.z++){
@@ -941,7 +938,7 @@ bool CRemoveBridges::existsCoreAdjacentToST(char skin, voxT& vox, unsigned char 
 
 
 //normal and inverse cutting
-bool CRemoveBridges::cutAllST(psq<cutC*>& listOfCutPs, unsigned char obj[256][256][256]){
+bool CRemoveBridges::cutAllST(psq<cutC*>& listOfCutPs, unsigned char obj[DIMS][DIMS][DIMS]){
   initPasEasNSas();
   char cSkin=1;
   voxT seedVox;
@@ -983,7 +980,7 @@ string CRemoveBridges::englishCutDescriptionElaboration(cutC* cutP){
   voxT cVox;
   string voxelTypeS, actionTypeS;
   float damage;
-  char buff[256];
+  char buff[DIMS];
 
   //compute centroid
   cutP->cutContour.resetPeek();
@@ -1059,7 +1056,7 @@ string CRemoveBridges::englishCutDescription(cutC* cutP){
   centroidY/=double(nVoxels);
   centroidZ/=double(nVoxels);
 
-  char buff[256];
+  char buff[DIMS];
   sprintf(buff, "\t\t%d voxels doing %f damage at centroid: (%d,%d,%d).\n", 
 	  nVoxels, cutP->damage, round(centroidZ), round(centroidX), round(centroidY));
   r_description = r_description+buff;
@@ -1076,7 +1073,7 @@ string CRemoveBridges::englishCutListDescription(psq<cutC*>& listOfCutPs){
   cutC* cCutP; //current cut pointer
 			
   int cCutI=1;
-  char buff[256];
+  char buff[DIMS];
 
   listOfCutPs.resetPeek();
   while(listOfCutPs.peekNext(cCutP)){
@@ -1091,7 +1088,7 @@ string CRemoveBridges::englishChoiceListDescription(psq<choiceC*>& listOfChoiceP
 	
   choiceC* cChoiceP;
   int cChoiceI = 1;
-  char buff[256];
+  char buff[DIMS];
 
   r_description = r_description+"_________________________________\n";
 	
@@ -1396,7 +1393,7 @@ float CRemoveBridges::cutSetCost(choiceC* cChoiceP, bool posCutSetCostF){
   return -999.0; 
 }
 
-void CRemoveBridges::setTheseCutsTo(psq<cutC*>& listOfCutPs, unsigned char newCid, bool logF, unsigned char obj[256][256][256]){
+void CRemoveBridges::setTheseCutsTo(psq<cutC*>& listOfCutPs, unsigned char newCid, bool logF, unsigned char obj[DIMS][DIMS][DIMS]){
   //makes NEGATIVE cuts by setting cidAir-voxels to cidAdded
   cutC* cCutP;
   
@@ -1419,8 +1416,8 @@ void CRemoveBridges::setTheseCutsTo(psq<cutC*>& listOfCutPs, unsigned char newCi
 }
 
 	
-void CRemoveBridges::makeChanges(psq<choiceC*>& listOfChoicePs, unsigned char obj[256][256][256]){
-  char buff[256];
+void CRemoveBridges::makeChanges(psq<choiceC*>& listOfChoicePs, unsigned char obj[DIMS][DIMS][DIMS]){
+  char buff[DIMS];
   sprintf(buff,"\n_______________________________\nCHANGES CHOSEN (by heuristic %d)\n",g_choiceHeuristic);
   logFileS=logFileS+buff;
 	
@@ -1446,7 +1443,7 @@ void CRemoveBridges::makeChanges(psq<choiceC*>& listOfChoicePs, unsigned char ob
 
 
 unsigned char CRemoveBridges::remove(unsigned char *preSegData,
-																		 double *unSegData,
+																		 float *unSegData,
 																		 unsigned char *resultData,
 																		 int x, int y, int z,
 																		 float averageWhiteIntensity, 
@@ -1460,9 +1457,9 @@ unsigned char CRemoveBridges::remove(unsigned char *preSegData,
   unsigned char voxelIntensity;
 	
   //Orientation shouldn't matter as long as it's returned in the same manner
-  for (i=0;i<256;i++){
-    for (j=0;j<256;j++){	
-      for (k=0;k<256;k++){			
+  for (i=0;i<DIMS;i++){
+    for (j=0;j<DIMS;j++){	
+      for (k=0;k<DIMS;k++){			
 				if (i<x && j<y && k<z){
 					posObj[i][j][k]=preSegData[k+j*z+i*z*y];
 					if(posObj[i][j][k]!=0) posObj[i][j][k]=63;
@@ -1520,9 +1517,9 @@ unsigned char CRemoveBridges::remove(unsigned char *preSegData,
   makeChanges(listOfChoicePs, posObj);
   showMessage("Changes made!"); //monitoring
 
-  for (i=0;i<256;i++){
-    for (j=0;j<256;j++){	
-      for (k=0;k<256;k++){	
+  for (i=0;i<DIMS;i++){
+    for (j=0;j<DIMS;j++){	
+      for (k=0;k<DIMS;k++){	
 				if (i<x && j<y && k<z){
 					voxelIntensity = posObj[i][j][k];
 					if(voxelIntensity!=cidAdded && voxelIntensity!=cidRemoved 

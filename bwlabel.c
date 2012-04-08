@@ -296,7 +296,7 @@ int translate_labels(unsigned int    *il,     /* Map of initial labels. */
 
 void get_largest_cluster(unsigned char *bw, int dim[3])
 {
-   int            n, i, j, count[1000], max_count = 1e-10, nl = 0;
+   int            n, i, j, count[1000], max_count = -1e10, nl = 0;
    unsigned int   conn = 26;
    unsigned int   ttn = 0;
    unsigned int   *il = NULL;
