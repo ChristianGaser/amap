@@ -19,7 +19,7 @@
     #include <time.h>
 #endif
 
-#define PrecisionTYPE float
+#define PrecisionTYPE double
 
 typedef struct{
 	char *targetImageName;

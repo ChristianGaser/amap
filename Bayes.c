@@ -196,7 +196,7 @@ void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned ch
         }
       } 
 
-      if ((subit==1) && (j>0)) WarpPriors(prob, priors, flow, dims, 6, 0, subsample_warp);
+      if ((subit==1) && (j>0)) WarpPriors(prob, priors, flow, dims, Kb, 0, subsample_warp);
           
       for (k=0; k<K; k++) {
         mg[k] = (mom0[k]+TINY)/(mgm[lkp[k]]+TINY);

@@ -186,36 +186,36 @@ int main(int argc, char **argv)
 							sourceImage,
 							positionFieldImage);
 
+
     /* allocate the result image */
     unsigned char *priors = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox*6);
     nifti_image *resultImage = nifti_copy_nim_info(sourceImage);
-    resultImage->cal_min=tpmImage[0]->cal_min;
-    resultImage->cal_max=tpmImage[0]->cal_max;
-    resultImage->scl_slope=tpmImage[0]->scl_slope;
-    resultImage->scl_inter=tpmImage[0]->scl_inter;
+    resultImage->cal_min=0;
+    resultImage->cal_max=0;
+    resultImage->scl_slope=1.0;
+    resultImage->scl_inter=0.0;
     resultImage->datatype = tpmImage[0]->datatype;
     resultImage->nbyper = tpmImage[0]->nbyper;
-    resultImage->data = (void *)calloc(sourceImage->nvox, resultImage->nbyper);
+    resultImage->data = (void *)calloc(resultImage->nvox, resultImage->nbyper);
 
     for (int j=0; j<6; j++) {
     
-        reg_resampleSourceImage<double>(sourceImage,
+        reg_resampleSourceImage<PrecisionTYPE>(sourceImage,
 							tpmImage[j],
 							resultImage,
 							positionFieldImage,
                             NULL,
-							3,
-							param->sourceBGValue);
+							1,
+							0);
 							
-  	    unsigned char *resultImagePtr = static_cast<unsigned char *>(resultImage->data);
+  	    short *resultImagePtr = static_cast<short *>(resultImage->data);
         for(int i=0; i<sourceImage->nvox;i++) {
-		    priors[i+j*sourceImage->nvox] = (unsigned char)*resultImagePtr;
-            resultImagePtr++;
+		    priors[i+j*sourceImage->nvox] = (unsigned char)(*resultImagePtr/128.0);
+		    resultImagePtr++;
         }
 
     }
 
-    free(resultImage);
     free(positionFieldImage);
 
     unsigned char *label = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox);
@@ -234,8 +234,6 @@ int main(int argc, char **argv)
         src[i] = (double)*sourceImagePtr * sourceImage->scl_slope + sourceImage->scl_inter;
         sourceImagePtr++;
     }
-    
-    free(sourceImage);
 
     double voxelsize[3];
     int dims[3];
@@ -249,11 +247,14 @@ int main(int argc, char **argv)
 
     double slope = 1.0;
     for (int i = 0; i < sourceImage->nvox; i++)
-      src[i] = (double)probs[i];
+      src[i] = (double)label[i];
 
-    if(!write_nifti_double("test2.nii", src, NIFTI_TYPE_FLOAT64, slope, 
+    if(!write_nifti_double("test0.nii", src, NIFTI_TYPE_FLOAT32, slope, 
             dims, voxelsize, sourceImage))
       exit(EXIT_FAILURE);
+
+    free(resultImage);
+    free(sourceImage);
 
 	return 0;
 }
