@@ -124,8 +124,8 @@ int main(int argc, char **argv)
 	}
 	
 	param->levelNumber=3;
-//	param->maxIteration=5;
-	param->maxIteration=1;
+	param->maxIteration=5;
+//	param->maxIteration=1;
 	param->level2Perform=param->levelNumber;
 	param->level2Perform=param->level2Perform<param->levelNumber?param->level2Perform:param->levelNumber;
 	

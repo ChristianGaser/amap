@@ -103,7 +103,7 @@ main( int argc, char **argv )
   /* if no valid extension was found use .nii */
   if (extension == NULL) {
     fprintf(stdout,"Use .nii as extension for %s.\n",output_filename);
-    (void) sprintf( extension, ".nii");;
+    strcpy( extension, ".nii");
   }
 
   if (iters_nu <= 0)
