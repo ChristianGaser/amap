@@ -591,7 +591,7 @@ nifti_image
   }
   
   /* read as double format */
-  *image = (double *)malloc(sizeof(double)*nii_ptr->nvox);
+  *image = (double *)malloc(sizeof(double)*nii_ptr->nvox*nii_ptr->nt);
   
   /* check for memory */
   if(image == NULL) {
@@ -658,7 +658,7 @@ nifti_image
   }
   
   /* read as float format */
-  *image = (float *)malloc(sizeof(float)*nii_ptr->nvox);
+  *image = (float *)malloc(sizeof(float)*nii_ptr->nvox*nii_ptr->nt);
   
   /* check for memory */
   if(image == NULL) {

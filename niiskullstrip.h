@@ -25,7 +25,7 @@ typedef struct{
 	char *targetImageName;
 	char *sourceImageName;
 	char *outputResultName;
-	char **tpmImageName;
+	char *tpmImageName;
 
 	int maxIteration;
 

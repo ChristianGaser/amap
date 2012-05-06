@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 	
 	PARAM *param = (PARAM *)calloc(1,sizeof(PARAM));
 	FLAG *flag = (FLAG *)calloc(1,sizeof(FLAG));
-	char **tpmImageName = (char **)calloc(1000,sizeof(char));
+	double *tpm;
 	
 	flag->affineFlag=1;
 	flag->rigidFlag=1;
@@ -73,9 +73,8 @@ int main(int argc, char **argv)
 			flag->sourceImageFlag=1;
 		}
 		else if(strcmp(argv[i], "-tpm") == 0){
-		    for(int j=0; j<6; j++)
-		        tpmImageName[j]=argv[++i];
-	        flag->tpmImageFlag=1;
+			param->tpmImageName=argv[++i];
+			flag->tpmImageFlag=1;
 		}
 		else if(strcmp(argv[i], "-result") == 0){
 			param->outputResultName=argv[++i];
@@ -142,15 +141,15 @@ int main(int argc, char **argv)
     	return NULL;
     }
 
-	nifti_image **tpmImage = (nifti_image **)calloc(6,sizeof(nifti_image));
-    for (int j=0; j<6; j++) {
-        tpmImage[j] = nifti_image_read(tpmImageName[j],true);
-        if(tpmImage[j]->data == NULL){
-    	    fprintf(stderr, "** ERROR Error when reading the source image: %s\n", tpmImageName[j]);
-    	    return NULL;
-        }
+    nifti_image *tpmImage = read_nifti_double(param->tpmImageName,&tpm);
+    if(tpmImage->data == NULL){
+    	fprintf(stderr, "** ERROR Error when reading the source image: %s\n", param->tpmImageName);
+    	return NULL;
     }
     
+    tpmImage->dim[0]=tpmImage->ndim=4;
+    tpmImage->dim[4]=tpmImage->nt=1;
+
     nifti_image *targetImage = nifti_image_read(param->targetImageName,true);		
     if(targetImage->data == NULL){
 			fprintf(stderr, "** ERROR Error when reading the target image: %s\n", param->targetImageName);
@@ -194,20 +193,30 @@ int main(int argc, char **argv)
     resultImage->cal_max=0;
     resultImage->scl_slope=1.0;
     resultImage->scl_inter=0.0;
-    resultImage->datatype = tpmImage[0]->datatype;
-    resultImage->nbyper = tpmImage[0]->nbyper;
+    resultImage->datatype = tpmImage->datatype;
+    resultImage->nbyper = tpmImage->nbyper;
     resultImage->data = (void *)calloc(resultImage->nvox, resultImage->nbyper);
 
+    short *tpmImagePtr = static_cast<short *>(tpmImage->data);
     for (int j=0; j<6; j++) {
     
+        for(int i=0; i<tpmImage->nvox;i++) {
+		    *tpmImagePtr = (short)round(tpm[i+j*tpmImage->nvox]*32768);
+		    tpmImagePtr++;
+        }
+
         reg_resampleSourceImage<PrecisionTYPE>(sourceImage,
-							tpmImage[j],
+							tpmImage,
 							resultImage,
 							positionFieldImage,
                             NULL,
 							1,
 							0);
 							
+        for(int i=0; i<tpmImage->nvox;i++) {
+		    tpmImagePtr--;
+        }
+
   	    short *resultImagePtr = static_cast<short *>(resultImage->data);
         for(int i=0; i<sourceImage->nvox;i++) {
 		    priors[i+j*sourceImage->nvox] = (unsigned char)(*resultImagePtr/128.0);
@@ -215,6 +224,9 @@ int main(int argc, char **argv)
         }
 
     }
+
+			nifti_set_filenames(tpmImage, "test2.nii", 0, 0);
+			nifti_image_write(tpmImage);
 
     free(positionFieldImage);
 
