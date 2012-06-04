@@ -31,7 +31,7 @@
 using namespace std;
 
 #ifndef DIMS
-#define DIMS 256
+#define DIMS 512
 #endif
 
 //**********************************************************************

@@ -37,7 +37,7 @@ extern int equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
 extern int write_nifti_double( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 }
 
-double labelvalue[2] = {-1.0, 127.0};
+double labelvalue[2] = {0, 1};
 char *changed_filename = NULL;
 
 static ArgvInfo argTable[] = {
@@ -307,7 +307,7 @@ int  main(
       for (x = 0; x < dims[0]; x++) {
         i = z_area + y_dims + x;
         wm[i] = 0;
-        if ((vol_tmp[i] >= labelvalue[0]) && (vol_tmp[i] <= labelvalue[1]))
+        if ((vol_tmp[i] > labelvalue[0]) && (vol_tmp[i] < labelvalue[1]))
           wm[i] = 255;
         else wm[i] = 0;
         /* find bounding box of wm image */
