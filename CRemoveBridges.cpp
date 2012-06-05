@@ -30,10 +30,6 @@
 #include <string>
 using namespace std;
 
-#ifndef DIMS
-#define DIMS 512
-#endif
-
 //**********************************************************************
 //general (P)eekable (S)tack/(Q)ueue class implemented as pointered list
 //implementation 

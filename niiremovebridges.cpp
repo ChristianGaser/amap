@@ -299,7 +299,7 @@ int  main(
   vol  = area*dims[2];
 
   /* load wm image as uint8 and find bounding box */
-  int xmin = 255, xmax = 0, ymin = 255, ymax = 0, zmin = 255, zmax = 0; 
+  int xmin = DIMS-1, xmax = 0, ymin = DIMS-1, ymax = 0, zmin = DIMS-1, zmax = 0; 
   for (z = 0; z < dims[2]; z++) {
     z_area = z*area;
     for (y = 0; y < dims[1]; y++) {
@@ -307,7 +307,7 @@ int  main(
       for (x = 0; x < dims[0]; x++) {
         i = z_area + y_dims + x;
         wm[i] = 0;
-        if ((vol_tmp[i] > labelvalue[0]) && (vol_tmp[i] < labelvalue[1]))
+        if ((vol_tmp[i] >= labelvalue[0]) && (vol_tmp[i] <= labelvalue[1]))
           wm[i] = 255;
         else wm[i] = 0;
         /* find bounding box of wm image */
