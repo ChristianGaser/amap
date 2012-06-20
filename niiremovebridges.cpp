@@ -32,9 +32,9 @@ extern "C"
 #include <ParseArgv.h>
 #include "nifti/nifti1_io.h"
 #include "nifti/nifti1_local.h"
-extern nifti_image *read_nifti_double( const char *input_filename, double *image[]);
+extern nifti_image *read_nifti_float( const char *input_filename, float *image[]);
 extern int equal_image_dimensions(nifti_image *nii_ptr, nifti_image *nii_ptr2);
-extern int write_nifti_double( const char *output_filename, double image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
+extern int write_nifti_float( const char *output_filename, float image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 }
 
 double labelvalue[2] = {0, 1};
@@ -241,12 +241,13 @@ int  main(
   int       nii_ndims, n_classes;
   int       nifti_file_type;
   int	    x, y, z, dims[3], i, z_area, y_dims;
+  int       n_added, n_removed;
   long	    area, vol;
   char	    *arg_string, *extension;
   unsigned char	*wm, *wm_out;
   char	    *wm_filename, *t1_filename, *wm_out_filename;
-  float    *t1;
-  double    *vol_tmp, mu[3], voxelsize[3];
+  float     *t1, *vol_tmp;
+  double     mu[3], voxelsize[3];
 
   /* Get arguments */
   if (ParseArgv(&argc, argv, argTable, 0) || (argc < 3)) {
@@ -272,7 +273,7 @@ int  main(
   }
 
   /* read data */
-  wm_ptr = read_nifti_double(wm_filename, &vol_tmp);
+  wm_ptr = read_nifti_float(wm_filename, &vol_tmp);
   
   if(wm_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", wm_filename);
@@ -328,7 +329,7 @@ int  main(
   fprintf(stderr,"Bounding box: x: %d-%d y: %d-%d z: %d-%d\n",xmin,xmax,ymin,ymax,zmin,zmax);
 
   /* read t1 */
-  t1_ptr = read_nifti_double(t1_filename, &vol_tmp);
+  t1_ptr = read_nifti_float(t1_filename, &vol_tmp);
   if(t1_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", t1_filename);
     return(EXIT_FAILURE);
@@ -363,32 +364,33 @@ int  main(
 
   /* save file with indicated changes */
   if (changed_filename != NULL) {
+    
     for (i = 0; i < vol; i++) {
       vol_tmp[i] = (double)wm_out[i];
       if (vol_tmp[i] == UNCHANGED) vol_tmp[i] = 255;
     }
-    if(!write_nifti_double( changed_filename, vol_tmp, DT_UINT8, 1, dims, 
+    if(!write_nifti_float( changed_filename, vol_tmp, DT_UINT8, 1, dims, 
           voxelsize, wm_ptr))
       exit(EXIT_FAILURE);
   }
   
-  int n_changes = 0;
+  n_added = 0; n_removed = 0;
   for (i = 0; i < vol; i++) {
   	if((wm_out[i] == ADDED) || (wm_out[i] == ALTERNATIVE)) {
   		wm_out[i] = 255;
-  		n_changes++;
+  		n_added++;
   	}
   	if(wm_out[i] == UNCHANGED)
   		wm_out[i] = 255;
   	if(wm_out[i] == REMOVED) {
   		wm_out[i] = 0;
-  		n_changes++;
+  		n_removed++;
   	}
   }
-  fprintf(stderr,"%d voxels changed\n",n_changes);
+  fprintf(stderr,"%04d voxels added\n%04d voxels removed\n",n_added, n_removed);
   
-  for (i = 0; i < vol; i++) vol_tmp[i] = (double)wm_out[i];
-  if(!write_nifti_double( wm_out_filename, vol_tmp, DT_UINT8, 1, dims, 
+  for (i = 0; i < vol; i++) vol_tmp[i] = (float)wm_out[i];
+  if(!write_nifti_float( wm_out_filename, vol_tmp, DT_UINT8, 1, dims, 
           voxelsize, wm_ptr))
     exit(EXIT_FAILURE);
 
