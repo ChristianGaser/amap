@@ -595,7 +595,7 @@ morph_open_double(double *vol, int dims[3], int niter, double th)
 
 /* First order hold resampling - trilinear interpolation */
 void 
-subsample_double(double *in, double *out, int dim_in[3], int dim_out[3])
+subsample_double(double *in, double *out, int dim_in[3], int dim_out[3], int offset_in, int offset_out)
 {
   int i, x, y, z;
   double k111,k112,k121,k122,k211,k212,k221,k222;
@@ -613,14 +613,14 @@ subsample_double(double *in, double *out, int dim_in[3], int dim_out[3])
       yi = 1.0+(double)y/samp[1];
       for (x=0; x<dim_out[0]; x++) {
         xi = 1.0+(double)x/samp[0];
-        i = z*dim_out[0]*dim_out[1] + y*dim_out[0] + x;
+        i = z*dim_out[0]*dim_out[1] + y*dim_out[0] + x + offset_out;
 
         if (zi>=0 && zi<dim_in[2] && yi>=0 && yi<dim_in[1] && xi>=0 && xi<dim_in[0])  {
           xcoord = (int)floor(xi); dx1=xi-(double)xcoord; dx2=1.0-dx1;
           ycoord = (int)floor(yi); dy1=yi-(double)ycoord; dy2=1.0-dy1;
           zcoord = (int)floor(zi); dz1=zi-(double)zcoord; dz2=1.0-dz1;
 
-          off1 = xcoord-1 + dim_in[0]*(ycoord-1 + dim_in[1]*(zcoord-1));
+          off1 = xcoord-1 + dim_in[0]*(ycoord-1 + dim_in[1]*(zcoord-1)) + offset_in;
           k222 = (double)in[off1]; k122 = (double)in[off1+1]; off2 = off1+dim_in[0];
           k212 = (double)in[off2]; k112 = (double)in[off2+1]; off1+= dim_in[0]*dim_in[1];
           k221 = (double)in[off1]; k121 = (double)in[off1+1]; off2 = off1+dim_in[0];
@@ -636,39 +636,79 @@ subsample_double(double *in, double *out, int dim_in[3], int dim_out[3])
 }
 
 /* First order hold resampling - trilinear interpolation */
-void 
-subsample_float(float *in, float *out, int dim_in[3], int dim_out[3])
+void subsample_uint8(unsigned char *in, float *out, int dim_in[3], int dim_out[3], int offset_in, int offset_out)
 {
   int i, x, y, z;
-  float k111,k112,k121,k122,k211,k212,k221,k222;
-  float dx1, dx2, dy1, dy2, dz1, dz2, xi, yi, zi, samp[3];
+  double k111,k112,k121,k122,k211,k212,k221,k222;
+  double dx1, dx2, dy1, dy2, dz1, dz2, xi, yi, zi, samp[3];
   int off1, off2, xcoord, ycoord, zcoord;
 
   for (i=0; i<3; i++) {
-    if(dim_out[i] > dim_in[i]) samp[i] = ceil((float)dim_out[i]/(float)dim_in[i]);
-    else                       samp[i] = 1.0/(ceil((float)dim_in[i]/(float)dim_out[i]));
+    if(dim_out[i] > dim_in[i]) samp[i] = ceil((double)dim_out[i]/(double)dim_in[i]);
+    else                       samp[i] = 1.0/(ceil((double)dim_in[i]/(double)dim_out[i]));
   }
   
   for (z=0; z<dim_out[2]; z++) {
-    zi = 1.0+(float)z/samp[2];
+    zi = 1.0+(double)z/samp[2];
     for (y=0; y<dim_out[1]; y++) {
-      yi = 1.0+(float)y/samp[1];
+      yi = 1.0+(double)y/samp[1];
       for (x=0; x<dim_out[0]; x++) {
-        xi = 1.0+(float)x/samp[0];
-        i = z*dim_out[0]*dim_out[1] + y*dim_out[0] + x;
+        xi = 1.0+(double)x/samp[0];
+        i = z*dim_out[0]*dim_out[1] + y*dim_out[0] + x + offset_out;
 
         if (zi>=0 && zi<dim_in[2] && yi>=0 && yi<dim_in[1] && xi>=0 && xi<dim_in[0])  {
-          xcoord = (int)floor(xi); dx1=xi-(float)xcoord; dx2=1.0-dx1;
-          ycoord = (int)floor(yi); dy1=yi-(float)ycoord; dy2=1.0-dy1;
-          zcoord = (int)floor(zi); dz1=zi-(float)zcoord; dz2=1.0-dz1;
+          xcoord = (int)floor(xi); dx1=xi-(double)xcoord; dx2=1.0-dx1;
+          ycoord = (int)floor(yi); dy1=yi-(double)ycoord; dy2=1.0-dy1;
+          zcoord = (int)floor(zi); dz1=zi-(double)zcoord; dz2=1.0-dz1;
 
-          off1 = xcoord-1 + dim_in[0]*(ycoord-1 + dim_in[1]*(zcoord-1));
-          k222 = (float)in[off1]; k122 = (float)in[off1+1]; off2 = off1+dim_in[0];
-          k212 = (float)in[off2]; k112 = (float)in[off2+1]; off1+= dim_in[0]*dim_in[1];
-          k221 = (float)in[off1]; k121 = (float)in[off1+1]; off2 = off1+dim_in[0];
-          k211 = (float)in[off2]; k111 = (float)in[off2+1];
+          off1 = xcoord-1 + dim_in[0]*(ycoord-1 + dim_in[1]*(zcoord-1)) + offset_in;
+          k222 = (double)in[off1]; k122 = (double)in[off1+1]; off2 = off1+dim_in[0];
+          k212 = (double)in[off2]; k112 = (double)in[off2+1]; off1+= dim_in[0]*dim_in[1];
+          k221 = (double)in[off1]; k121 = (double)in[off1+1]; off2 = off1+dim_in[0];
+          k211 = (double)in[off2]; k111 = (double)in[off2+1];
 
-          out[i] = ((((k222*dx2 + k122*dx1)*dy2 + (k212*dx2 + k112*dx1)*dy1))*dz2
+          out[i] = (float)((((k222*dx2 + k122*dx1)*dy2 + (k212*dx2 + k112*dx1)*dy1))*dz2
+                         + (((k221*dx2 + k121*dx1)*dy2 + (k211*dx2 + k111*dx1)*dy1))*dz1);
+                 
+        } else out[i] = 0;
+      }
+    }
+  }
+}
+
+/* First order hold resampling - trilinear interpolation */
+void subsample_float(float *in, float *out, int dim_in[3], int dim_out[3], int offset_in, int offset_out)
+{
+  int i, x, y, z;
+  double k111,k112,k121,k122,k211,k212,k221,k222;
+  double dx1, dx2, dy1, dy2, dz1, dz2, xi, yi, zi, samp[3];
+  int off1, off2, xcoord, ycoord, zcoord;
+
+  for (i=0; i<3; i++) {
+    if(dim_out[i] > dim_in[i]) samp[i] = ceil((double)dim_out[i]/(double)dim_in[i]);
+    else                       samp[i] = 1.0/(ceil((double)dim_in[i]/(double)dim_out[i]));
+  }
+  
+  for (z=0; z<dim_out[2]; z++) {
+    zi = 1.0+(double)z/samp[2];
+    for (y=0; y<dim_out[1]; y++) {
+      yi = 1.0+(double)y/samp[1];
+      for (x=0; x<dim_out[0]; x++) {
+        xi = 1.0+(double)x/samp[0];
+        i = z*dim_out[0]*dim_out[1] + y*dim_out[0] + x + offset_out;
+
+        if (zi>=0 && zi<dim_in[2] && yi>=0 && yi<dim_in[1] && xi>=0 && xi<dim_in[0])  {
+          xcoord = (int)floor(xi); dx1=xi-(double)xcoord; dx2=1.0-dx1;
+          ycoord = (int)floor(yi); dy1=yi-(double)ycoord; dy2=1.0-dy1;
+          zcoord = (int)floor(zi); dz1=zi-(double)zcoord; dz2=1.0-dz1;
+
+          off1 = xcoord-1 + dim_in[0]*(ycoord-1 + dim_in[1]*(zcoord-1)) + offset_in;
+          k222 = (double)in[off1]; k122 = (double)in[off1+1]; off2 = off1+dim_in[0];
+          k212 = (double)in[off2]; k112 = (double)in[off2+1]; off1+= dim_in[0]*dim_in[1];
+          k221 = (double)in[off1]; k121 = (double)in[off1+1]; off2 = off1+dim_in[0];
+          k211 = (double)in[off2]; k111 = (double)in[off2+1];
+
+          out[i] = (float)((((k222*dx2 + k122*dx1)*dy2 + (k212*dx2 + k112*dx1)*dy1))*dz2
                          + (((k221*dx2 + k121*dx1)*dy2 + (k211*dx2 + k111*dx1)*dy1))*dz1);
                  
         } else out[i] = 0;
@@ -856,9 +896,9 @@ smooth_subsample_double(double *vol, int dims[3], double separations[3], double 
   nvol_samp  = dims_samp[0]*dims_samp[1]*dims_samp[2];
   vol_samp  = (double *)malloc(sizeof(double)*nvol_samp);
 
-  subsample_double(vol, vol_samp, dims, dims_samp);    
+  subsample_double(vol, vol_samp, dims, dims_samp, 0, 0);    
   smooth_double(vol_samp, dims_samp, separations_samp, s, use_mask);
-  subsample_double(vol_samp, vol, dims_samp, dims);    
+  subsample_double(vol_samp, vol, dims_samp, dims, 0, 0);    
 
   free(vol_samp);
 }
@@ -879,9 +919,9 @@ smooth_subsample_float(float *vol, int dims[3], double separations[3], double s[
   nvol_samp  = dims_samp[0]*dims_samp[1]*dims_samp[2];
   vol_samp  = (float *)malloc(sizeof(float)*nvol_samp);
 
-  subsample_float(vol, vol_samp, dims, dims_samp);    
+  subsample_float(vol, vol_samp, dims, dims_samp, 0, 0);    
   smooth_float(vol_samp, dims_samp, separations_samp, s, use_mask);
-  subsample_float(vol_samp, vol, dims_samp, dims);    
+  subsample_float(vol_samp, vol, dims_samp, dims, 0, 0);    
 
   free(vol_samp);
 }

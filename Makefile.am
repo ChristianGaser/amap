@@ -172,7 +172,7 @@ niisanlm_SOURCES = \
 	
 niiskullstrip_SOURCES = \
 	niiskullstrip.cpp \
-	skullstrip.cpp \
+	affineRegistration.cpp \
 	Bayes.c \
 	WarpPriors.c \
 	diffeo3d.c \
@@ -181,6 +181,7 @@ niiskullstrip_SOURCES = \
 	$(nifti_SOURCES) \
 	$(zlib_SOURCES) \
 	niilib.c \
+	ptr4Dlib.cpp \
 	reg-lib/_reg_resampling.cpp \
 	reg-lib/_reg_affineTransformation.cpp \
 	reg-lib/_reg_blockMatching.cpp \

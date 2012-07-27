@@ -1,6 +1,13 @@
+/*
+ * Christian Gaser
+ * $Id$ 
+ *
+ */
+
 #include "niiskullstrip.h"
 
 #define CONVERGENCE_EPS 0.00001
+
 bool reg_test_convergence(mat44 *mat)
 {
 	bool convergence=true;

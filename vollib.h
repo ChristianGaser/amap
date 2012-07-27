@@ -37,10 +37,13 @@ void
 morph_open_double(double *vol, int dims[3], int niter, double th);
 
 void 
-subsample_double(double *in, double *out, int dim_in[3], int dim_out[3]);
+subsample_double(double *in, double *out, int dim_in[3], int dim_out[3], int offset_in, int offset_out);
 
 void 
-subsample_float(float *in, float *out, int dim_in[3], int dim_out[3]);
+subsample_float(float *in, float *out, int dim_in[3], int dim_out[3], int offset_in, int offset_out);
+
+void 
+subsample_uint8(unsigned char *in, float *out, int dim_in[3], int dim_out[3], int offset_in, int offset_out);
 
 void
 smooth_double(double *vol, int dims[3], double separations[3], double s[3], int use_mask);
