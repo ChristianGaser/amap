@@ -1774,7 +1774,7 @@ double initialise_objfun_mn(int dm[], float f[], float g[], float t0[], float J0
 double initialise_objfun2(int dm[], float f[], float g[], float t0[], float J0[], float jd[], float b[], float A[])
 {
     int j, m = dm[0]*dm[1]*dm[2];
-    double ssl = 0.0, dt = 1.0;
+    double ssl = 0.0;
     
     for(j=0; j<m; j++)
     {

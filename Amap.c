@@ -195,7 +195,7 @@ void ComputeInitialPveLabel(float *src, unsigned char *label, unsigned char *pro
 {
   int x, y, z, z_area, y_dims, index, label_value, off;
   int i, ix, iy, iz, ind, ind2, nix, niy, niz, narea, nvol;
-  long area, vol;
+  int area, vol;
   double val, sub_1, mean[MAX_NC], var[MAX_NC], d_pve[MAX_NC];
   
   area = dims[0]*dims[1];
@@ -325,7 +325,7 @@ void ICM(unsigned char *prob, unsigned char *label, int n_classes, int *dims, do
 {
   
   int i, iter, x, y, z, z_area, y_dims, index, sum_voxel;
-  long area, vol;
+  int area, vol;
   double rel_changed, mrf_probability[MAX_NC], voxelsize_squared[3];
   double exponent[MAX_NC], sum_voxelsize = 0.0;
   unsigned char new_label;

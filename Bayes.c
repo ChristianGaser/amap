@@ -19,13 +19,13 @@ void WarpPriors(unsigned char *prob, unsigned char *priors, float *flow, int *di
 void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned char *prob, double *separations, int *dims, int correct_nu)
 {
   int i, j, k, l, k1, subit, subsample_warp, kmax, k2;
-  int z_area, y_dims, count, subsample, masked_smoothing;
+  int count, subsample, masked_smoothing;
   double ll = -HUGE, llr=0.0, *nu, fwhm[3], *meaninvcov, *resmean;
   double mn[MAXK], vr[MAXK], mg[MAXK], mn2[MAXK], vr2[MAXK], mg2[MAXK];
   double mnt[MAXK], vrt[MAXK];
   double mom0[MAXK], mom1[MAXK], mom2[MAXK], mgm[MAXK];
   double q[MAXK], bt[MAXK], b[MAXK], qt[MAXK];
-  double tol1 = 1e-3, bias_fwhm, sum, sq, qmax, s, psum, p1, oll, val_nu;
+  double tol1 = 1e-3, bias_fwhm, sum, sq, qmax, s, psum, p1, oll;
   float *flow;
   
   int area = dims[0]*dims[1];
@@ -45,8 +45,8 @@ void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned ch
 
   bias_fwhm = 30.0;
 
-  subsample_warp = ROUND(9.0/(separations[0]+separations[1]+separations[2]));
-  subsample_warp=1;
+  subsample_warp = (int)round(9.0/(separations[0]+separations[1]+separations[2]));
+  subsample_warp = 1;
   fprintf(stderr,"subsample by factor %d\n",subsample_warp);
 
   if (do_warp) {
@@ -281,7 +281,6 @@ void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned ch
         s += qt[k1];
 
       qmax = -HUGE;
-      kmax;
       psum = 0.0;
       for (k1=0; k1<Kb; k1++) {
         p1 = qt[k1]/s;
