@@ -100,9 +100,10 @@ unsigned int do_initial_labelling(unsigned char  *bw,   /* Binary map */
          for (r=0; r<dim[0]; r++)
          {
             nr_set = 0;
-            if (bw[index(r,c,sl,dim)])
+            if (bw[index(r,c,sl,dim)] > 0)
             {
                nabo[0] = check_previous_slice(il,r,c,sl,dim,conn,*tt,ttn);
+                  
                if (nabo[0]) {nr_set += 1;}
                /*
                   For six(surface)-connectivity
@@ -296,11 +297,12 @@ int translate_labels(unsigned int    *il,     /* Map of initial labels. */
 
 void get_largest_cluster(unsigned char *bw, int dim[3])
 {
-   int            n, i, j, count[1000], max_count = -1e10, nl = 0;
+   int            n, i, j, count[1000],max_count = -1, nl = 0;
    unsigned int   conn = 26;
    unsigned int   ttn = 0;
    unsigned int   *il = NULL;
    unsigned int   *tt = NULL;
+   unsigned char   *bw_bak = NULL;
    unsigned char  ind_max = 0;
    double         *l = NULL;
 
@@ -309,11 +311,15 @@ void get_largest_cluster(unsigned char *bw, int dim[3])
    /* Allocate memory for initial labelling map. */
    l  = (double *) malloc(n*sizeof(double));
    il = (unsigned int *) malloc(n*sizeof(unsigned int));
+   bw_bak = (unsigned char *) malloc(n*sizeof(unsigned char));
 
-   if((l == NULL) || (il == NULL)) {
+   if((l == NULL) || (il == NULL) || (bw_bak == NULL)) {
      fprintf(stderr,"Memory allocation error\n");
      exit(EXIT_FAILURE);
    }
+
+   /* rescue bw */
+   for (i=0; i<n; i++) bw_bak[i] = bw[i];
 
    for (i=0; i<n; i++) if(bw[i]>0) bw[i] = 1;
 
@@ -338,11 +344,14 @@ void get_largest_cluster(unsigned char *bw, int dim[3])
      }
    }
    
-   for (i=0; i<n; i++)  if((unsigned char)l[i] != ind_max) bw[i] = 0;
+   for (i=0; i<n; i++)
+     if((unsigned char)l[i] != ind_max) bw[i] = 0;
+     else bw[i] = bw_bak[i];
 
    free(il);
    free(tt);
    free(l);
+   free(bw_bak);
    
    return;
 }

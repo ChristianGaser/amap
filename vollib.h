@@ -18,6 +18,25 @@
 #define isfinite(x) ((x) * (x) >= 0.) /* check for NaNs */
 #endif
 
+#ifndef MAX
+#define MAX(A,B) ((A) > (B) ? (A) : (B))
+#endif
+
+#ifndef MIN
+#define MIN(A,B) ((A) < (B) ? (A) : (B))
+#endif
+
+#ifndef isnan
+#define isnan(a) ((a)!=(a)) 
+#endif
+
+#define index(A,B,C,DIM) ((C)*DIM[0]*DIM[1] + (B)*DIM[0] + (A))
+
+#define GM     0
+#define WM     1
+#define CSF    2
+#define SKULL2 4
+
 void
 morph_erode_uint8(unsigned char *vol, int dims[3], int niter, int th);
 
@@ -56,5 +75,14 @@ smooth_subsample_double(double *vol, int dims[3], double separations[3], double 
 
 void
 smooth_subsample_float(float *vol, int dims[3], double separations[3], double s[3], int use_mask, int samp);
+
+void
+cleanup(unsigned char *probs, unsigned char *mask, int dims[4], int strength, double scale);
+
+void 
+median3_uint8(unsigned char *D, int *dims);
+
+void
+get_largest_cluster(unsigned char *bw, int dim[3]);
 
 #endif

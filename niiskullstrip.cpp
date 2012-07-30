@@ -29,7 +29,7 @@ void Usage(char *exec)
 	printf("\t-ln <int>\t\tNumber of level to perform [3]\n");
 	printf("\t-lp <int>\t\tOnly perform the first levels [ln]\n");
 	
-	printf("\t-nac\t\t\tUse the nifti header origins to initialise the translation\n");
+	printf("\t-noOrigin\t\t\tDo not use the nifti header origins to initialise the translation\n");
 	
 	printf("\t-bgi <int> <int> <int>\tForce the background value during\n\t\t\t\tresampling to have the same value as this voxel in the source image [none]\n");
 
@@ -46,11 +46,11 @@ int main(int argc, char **argv)
 	FLAG *flag = (FLAG *)calloc(1,sizeof(FLAG));
 	float *tpm;
 	
-	flag->affineFlag=1;
-	flag->rigidFlag=1;
-	param->block_percent_to_use=50;
-	param->inlier_lts=50;
-    flag->alignCenterFlag=1;
+	flag->affineFlag = 1;
+	flag->rigidFlag = 1;
+	param->block_percent_to_use = 50;
+	param->inlier_lts = 50;
+    flag->alignCenterFlag = 0;
 
 	/* read the input parameter */
 	for(int i=1;i<argc;i++){
@@ -83,8 +83,8 @@ int main(int argc, char **argv)
 		else if(strcmp(argv[i], "-affDirect") == 0){
 			flag->rigidFlag=0;
 		}
-		else if(strcmp(argv[i], "-nac") == 0){
-			flag->alignCenterFlag=0;
+		else if(strcmp(argv[i], "-noOrigin") == 0){
+			flag->alignCenterFlag=1;
 		}
 		else if(strcmp(argv[i], "-bgi") == 0){
 			param->backgroundIndex[0]=atoi(argv[++i]);
@@ -178,10 +178,10 @@ int main(int argc, char **argv)
 
     /* allocate the result image */
     nifti_image *resultImage = nifti_copy_nim_info(sourceImage);
-    resultImage->cal_min=0;
-    resultImage->cal_max=0;
-    resultImage->scl_slope=1.0;
-    resultImage->scl_inter=0.0;
+    resultImage->cal_min = 0;
+    resultImage->cal_max = 0;
+    resultImage->scl_slope = 1.0;
+    resultImage->scl_inter = 0.0;
     resultImage->datatype = tpmImage->datatype;
     resultImage->nbyper = tpmImage->nbyper;
     resultImage->data = (void *)calloc(resultImage->nvox, resultImage->nbyper);
@@ -221,41 +221,20 @@ int main(int argc, char **argv)
         voxelsize[j] = sourceImage->pixdim[j+1];
         dims[j] = sourceImage->dim[j+1];
     }
-
+    
     double slope = 1.0;
-    for (int i = 0; i < sourceImage->nvox; i++)
-      src[i] = (double)priors[i];
 
-    if(!write_nifti_double("test0.nii", src, NIFTI_TYPE_FLOAT32, slope, 
-            dims, voxelsize, sourceImage))
-      exit(EXIT_FAILURE);
-
-return 1;
-//    Bayes( src, label, priors, probs, voxelsize, dims, 1);
-
-    for (int i = 0; i < sourceImage->nvox; i++)
-      src[i] = (double)label[i];
-
-    if(!write_nifti_double("test0.nii", src, NIFTI_TYPE_FLOAT32, slope, 
-            dims, voxelsize, sourceImage))
-      exit(EXIT_FAILURE);
-
-
-    if(!write_nifti_double("test1.nii", src, NIFTI_TYPE_FLOAT32, slope, 
-            dims, voxelsize, sourceImage))
-      exit(EXIT_FAILURE);
+    Bayes(src, label, priors, probs, voxelsize, dims, 1);
+    
+    int cleanup_strength = 1;
+    double scale = 3.0/(sourceImage->dx + sourceImage->dy + sourceImage->dz);
+    
+    cleanup(probs, label, dims, cleanup_strength, scale);
 
     for (int i = 0; i < sourceImage->nvox; i++)
       src[i] = (double)priors[i];
 
-    if(!write_nifti_double("test2.nii", src, NIFTI_TYPE_FLOAT32, slope, 
-            dims, voxelsize, sourceImage))
-      exit(EXIT_FAILURE);
-
-    for (int i = 0; i < sourceImage->nvox; i++)
-      src[i] = (double)probs[i];
-
-    if(!write_nifti_double("test3.nii", src, NIFTI_TYPE_FLOAT32, slope, 
+    if(!write_nifti_double("test0.nii", src, NIFTI_TYPE_FLOAT32, slope, 
             dims, voxelsize, sourceImage))
       exit(EXIT_FAILURE);
 

@@ -19,7 +19,7 @@
     #include <time.h>
 #endif
 
-#define PrecisionTYPE float
+#define PrecisionTYPE double
 
 typedef struct{
 	char *targetImageName;
@@ -81,6 +81,7 @@ void ptr_to_double_4D(nifti_image *image, double *vol4d, int index_nt);
 
 extern "C" {
 #include "niilib.h"
+#include "vollib.h"
 void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned char *prob, double *separations, int *dims, int correct_nu);
 }
 

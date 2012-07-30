@@ -925,3 +925,142 @@ smooth_subsample_float(float *vol, int dims[3], double separations[3], double s[
 
   free(vol_samp);
 }
+
+void
+cleanup(unsigned char *probs, unsigned char *mask, int dims[3], int strength, double scale)
+{
+  
+  int niter, iter, vol, th, th_erode, th_dilate, th_final, i;
+  int n_initial_openings = MAX(1,round(scale*strength));
+  double sum;
+  double filt[3] = {0.75, 1.0, 0.75};
+  
+  niter = 45;
+  th_final  =  13;   /* final threshold for masking 0.05*255.0 */
+  th_erode  = 153;   /* initial threshold for erosion 0.6*255.0 */
+  if (strength == 1) th_dilate = 38;   /* threshold for dilation 0.15*255.0 */
+  else               th_dilate = 51;   /* threshold for dilation 0.20*255.0 */
+  
+  vol = dims[0]*dims[1]*dims[2];
+
+  /* init mask with WM values that are larger than GM and CSF and threshold for erosion */
+  for( i = 0;  i < vol;  ++i )
+    if ((probs[i + WM*vol] > probs[i + GM*vol]) && (probs[i + WM*vol] > probs[i + CSF*vol]) && (probs[i + WM*vol] > th_erode))
+      mask[i] = probs[i + WM*vol];
+    else mask[i] = 0;
+
+
+  /* use only largest cluster */
+/* not yet working   get_largest_cluster(mask, dims); */
+  
+  /* mask computed from gm and wm */
+  /* erosions and conditional dilations */
+  for (iter=0; iter < niter; iter++) {
+  
+    /*  start with 2 iterations of erosions*/
+    if( iter < 2 ) th = th_erode;
+    else           th = th_dilate;
+    
+    /* mask = (mask>th).*(white+gray) */
+    for( i = 0;  i < vol;  ++i ) {
+      if( mask[i] > th ) {
+        sum = (double)probs[i + GM*vol] + (double)probs[i + WM*vol];
+        mask[i] = (unsigned char)MIN(sum, 255);
+      } else  mask[i] = 0;		    
+    }
+
+    /* convolve mask with filter width of 3 voxel */
+    convxyz_uint8(mask,filt,filt,filt,3,3,3,-1,-1,-1,mask,dims);
+  }
+  
+  for( i = 0;  i < vol;  ++i ) {
+    /* mask = ((mask>th_final).*(WM+WM))>th_final */
+    sum = (((double)mask[i] > th_final)*(double)probs[i + GM*vol] + (double)probs[i + WM*vol]) > th_final;
+    mask[i] = (unsigned char)sum;
+  }
+
+  morph_open_uint8(  mask, dims, n_initial_openings, 0);
+  morph_dilate_uint8(mask, dims, 1, 0);
+  morph_close_uint8( mask, dims, round(scale*10), 0);
+
+  /* remove sinus sagittalis */
+  for (i = 0; i < vol; i++)
+    mask[i] = mask[i] && ( (probs[i + SKULL2*vol] < probs[i + GM*vol]) ||
+                           (probs[i + SKULL2*vol] < probs[i + WM*vol]) ||
+                           (probs[i + SKULL2*vol] < probs[i + CSF*vol]) );
+
+
+  /* fill holes that may remain */
+  morph_close_uint8(mask, dims, round(scale*2), 0);
+}
+
+/* qicksort */
+void
+swap_uint8(unsigned char *a, unsigned char *b)
+{
+  float t=*a; *a=*b; *b=t;
+}
+
+void
+sort_uint8(unsigned char arr[], int start, int end)
+{
+  if (end > start + 1)
+  {
+    unsigned char piv = arr[start];
+    int l = start + 1, r = end;
+    while (l < r)
+    {
+      if (arr[l] <= piv) l++;
+      else swap_uint8(&arr[l], &arr[--r]);
+    }
+    swap_uint8(&arr[--l], &arr[start]);
+    sort_uint8(arr, start, l);
+    sort_uint8(arr, r, end);
+  }
+}
+
+
+/* simple median function for uint8 */
+void 
+median3_uint8(unsigned char *D, int *dims)
+{
+
+  /* indices of the neighbor Ni (index distance) and euclidean distance NW */
+  unsigned char NV[27];
+  int i,j,k,ind,ni,x,y,z,n;
+  unsigned char *M;
+        
+  /* output */
+  M = (unsigned char *)malloc(sizeof(unsigned char)*dims[0]*dims[1]*dims[2]);
+
+  /* filter process */
+  for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) {
+    ind = index(x,y,z,dims);
+    n = 0;
+    /* go through all elements in a 3x3x3 box */
+    for (i=-1;i<=1;i++) for (j=-1;j<=1;j++) for (k=-1;k<=1;k++) {
+      /* check borders */ 
+      if ( ((x+i)>=0) && ((x+i)<dims[0]) && ((y+j)>=0) && ((y+j)<dims[1]) && ((z+k)>=0) && ((z+k)<dims[2])) {
+        ni = index(x+i,y+j,z+k,dims);
+        /* check masks and NaN or Infinities */
+        if (isnan(D[ni]) || D[ni]==FLT_MAX || D[ind]==-FLT_MAX ) ni = ind;
+        NV[n] = D[ni];
+        n++;
+      }
+    }
+    /* get correct n */
+    n--;
+    /* sort and get the median by finding the element in the middle of the sorting */
+    sort_uint8(NV,0,n);
+    M[ind] = NV[(int)(n/2)];
+  }
+   
+  for (i=0;i<dims[0]*dims[1]*dims[2];i++) D[i] = M[i];
+  
+  free(M);
+  
+}
+
+
+
+
