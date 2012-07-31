@@ -138,7 +138,7 @@ main( int argc, char **argv )
   }
   
   /* read data */
-  src_ptr = read_nifti_float(input_filename, &src);
+  src_ptr = read_nifti_float(input_filename, &src, 0);
   
   if(src_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n",input_filename);
@@ -158,7 +158,7 @@ main( int argc, char **argv )
   if (mask_filename != NULL) {
       
     /* read volume */
-    mask_ptr = read_nifti_float(mask_filename, &buffer_vol);
+    mask_ptr = read_nifti_float(mask_filename, &buffer_vol, 0);
     if(mask_ptr == NULL) {
       fprintf(stderr,"Error reading %s.\n", mask_filename);
       return(EXIT_FAILURE);

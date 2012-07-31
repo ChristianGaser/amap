@@ -12,6 +12,8 @@
 #ifndef _REG_TOOLS_H
 #define _REG_TOOLS_H
 
+#define NDEBUG 1
+
 #include "nifti1_io.h"
 #include <fstream>
 #include <limits>

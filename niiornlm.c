@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
   outfile = argv[2];
   
   /* read first image to get image parameters */
-  nii_ptr = read_nifti_double(infile, &input);
+  nii_ptr = read_nifti_double(infile, &input, 0);
   if(nii_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", infile);
     return(EXIT_FAILURE);

@@ -21,18 +21,13 @@ void Usage(char *exec)
 	printf("\t-target <filename>\tFilename of the target image (mandatory)\n");
 	printf("\t-source <filename>\tFilename of the source image (mandatory)\n");
 	printf("* * OPTIONS * *\n");
-	printf("\t-affDirect\t\tDirectly optimize 12 DoF affine [default is rigid initially then affine]\n");
     printf("\t-tmask <filename>\tFilename of a mask image in the target space\n");
-	printf("\t-maxit <int>\t\tNumber of iteration per level [5]\n");
+	printf("\t-result <filename>\tFilename of the resampled image [outputResult.nii]\n");
 	printf("\t-smooT <float>\t\tSmooth the target image using the specified sigma (mm) [0]\n");
 	printf("\t-smooS <float>\t\tSmooth the source image using the specified sigma (mm) [0]\n");
 	printf("\t-ln <int>\t\tNumber of level to perform [3]\n");
 	printf("\t-lp <int>\t\tOnly perform the first levels [ln]\n");
-	
-	printf("\t-noOrigin\t\t\tDo not use the nifti header origins to initialise the translation\n");
-	
-	printf("\t-bgi <int> <int> <int>\tForce the background value during\n\t\t\t\tresampling to have the same value as this voxel in the source image [none]\n");
-
+		
 	printf("\t-%%v <int>\t\tPercentage of block to use [50]\n");
 	printf("\t-%%i <int>\t\tPercentage of inlier for the LTS [50]\n");
 	printf("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
@@ -50,7 +45,7 @@ int main(int argc, char **argv)
 	flag->rigidFlag = 1;
 	param->block_percent_to_use = 50;
 	param->inlier_lts = 50;
-    flag->alignCenterFlag = 0;
+    flag->alignCenterFlag = 1;
 
 	/* read the input parameter */
 	for(int i=1;i<argc;i++){
@@ -72,6 +67,26 @@ int main(int argc, char **argv)
 			param->tpmImageName=argv[++i];
 			flag->tpmImageFlag=1;
 		}
+        else if(strcmp(argv[i], "-tmask") == 0){
+            param->targetMaskName=argv[++i];
+            flag->targetMaskFlag=1;
+        }
+		else if(strcmp(argv[i], "-result") == 0){
+			param->outputResultName=argv[++i];
+			flag->outputResultFlag=1;
+		}
+		else if(strcmp(argv[i], "-maxit") == 0){
+			param->maxIteration=atoi(argv[++i]);
+			flag->maxIterationFlag=1;
+		}
+		else if(strcmp(argv[i], "-ln") == 0){
+			param->levelNumber=atoi(argv[++i]);
+			flag->levelNumberFlag=1;
+		}
+		else if(strcmp(argv[i], "-lp") == 0){
+			param->level2Perform=atoi(argv[++i]);
+			flag->level2PerformFlag=1;
+		}
 		else if(strcmp(argv[i], "-smooT") == 0){
 			param->targetSigmaValue=(float)(atof(argv[++i]));
 			flag->targetSigmaFlag=1;
@@ -82,15 +97,6 @@ int main(int argc, char **argv)
 		}
 		else if(strcmp(argv[i], "-affDirect") == 0){
 			flag->rigidFlag=0;
-		}
-		else if(strcmp(argv[i], "-noOrigin") == 0){
-			flag->alignCenterFlag=1;
-		}
-		else if(strcmp(argv[i], "-bgi") == 0){
-			param->backgroundIndex[0]=atoi(argv[++i]);
-			param->backgroundIndex[1]=atoi(argv[++i]);
-			param->backgroundIndex[2]=atoi(argv[++i]);
-			flag->backgroundIndexFlag=1;
 		}
 		else if(strcmp(argv[i], "-%v") == 0){
 			param->block_percent_to_use=atoi(argv[++i]);
@@ -111,10 +117,13 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	
-	param->levelNumber=3;
-	param->maxIteration=5;
-//	param->maxIteration=1;
-	param->level2Perform=param->levelNumber;
+	if(!flag->levelNumberFlag) param->levelNumber=3;
+	
+	/* Read the maximum number of iteration */
+	if(!flag->maxIterationFlag) param->maxIteration=5;
+
+	if(!flag->level2PerformFlag) param->level2Perform=param->levelNumber;
+
 	param->level2Perform=param->level2Perform<param->levelNumber?param->level2Perform:param->levelNumber;
 	
 	/* Read the target and source images */
@@ -123,12 +132,14 @@ int main(int argc, char **argv)
     	fprintf(stderr, "** ERROR Error when reading the source image: %s\n", param->sourceImageName);
     	return NULL;
     }
+	reg_changeDatatype<PrecisionTYPE>(sourceImage);
 
-    nifti_image *tpmImage = read_nifti_float(param->tpmImageName,&tpm);
+    nifti_image *tpmImage = read_nifti_float(param->tpmImageName,&tpm,true);
     if(tpmImage->data == NULL){
     	fprintf(stderr, "** ERROR Error when reading the source image: %s\n", param->tpmImageName);
     	return NULL;
     }
+	reg_changeDatatype<PrecisionTYPE>(tpmImage);
 
     /* check number of classes */
     if(tpmImage->nt != 6){
@@ -136,15 +147,12 @@ int main(int argc, char **argv)
     	return NULL;
     }
 
-    /* ensure that nvox is that of a 3D image */
-    tpmImage->nvox  /= tpmImage->nt;
-    tpmImage->dim[0] = tpmImage->ndim = 4;
-
     nifti_image *targetImage = nifti_image_read(param->targetImageName,true);		
     if(targetImage->data == NULL){
 			fprintf(stderr, "** ERROR Error when reading the target image: %s\n", param->targetImageName);
 			return NULL;
     }
+	reg_changeDatatype<PrecisionTYPE>(targetImage);
 
     nifti_image *positionFieldImage = nifti_copy_nim_info(sourceImage);
     positionFieldImage->dim[0]=positionFieldImage->ndim=5;
@@ -184,13 +192,13 @@ int main(int argc, char **argv)
     resultImage->scl_inter = 0.0;
     resultImage->datatype = tpmImage->datatype;
     resultImage->nbyper = tpmImage->nbyper;
-    resultImage->data = (void *)calloc(resultImage->nvox, resultImage->nbyper);
+    resultImage->data = (void *)malloc(resultImage->nvox*resultImage->nbyper);
 
     unsigned char *priors = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox*tpmImage->nt);
 
     for (int j=0; j<tpmImage->nt; j++) {
     
-        float_to_ptr_4D(tpmImage, tpm, j);
+        float_to_ptr_4D(tpmImage, tpm, j);            
 
         reg_resampleSourceImage<PrecisionTYPE>(sourceImage,
 							tpmImage,
@@ -232,9 +240,16 @@ int main(int argc, char **argv)
     cleanup(probs, label, dims, cleanup_strength, scale);
 
     for (int i = 0; i < sourceImage->nvox; i++)
-      src[i] = (double)priors[i];
+      if(label[i] == 0) src[i] = 0;
 
     if(!write_nifti_double("test0.nii", src, NIFTI_TYPE_FLOAT32, slope, 
+            dims, voxelsize, sourceImage))
+      exit(EXIT_FAILURE);
+
+    for (int i = 0; i < sourceImage->nvox; i++)
+      src[i] = (double)label[i];
+
+    if(!write_nifti_double("test1.nii", src, NIFTI_TYPE_FLOAT32, slope, 
             dims, voxelsize, sourceImage))
       exit(EXIT_FAILURE);
 

@@ -29,6 +29,8 @@
 #define NUM_BLOCKS_TO_COMPARE_2D 49
 #define NUM_BLOCKS_TO_COMPARE_1D 7
 
+#define NDEBUG 1
+
 /**
 *
 * Main algorithm of Ourselin et al.

@@ -15,17 +15,18 @@
 #include "_reg_blockMatching.h"
 #include "_reg_tools.h"
 
-#ifdef _WINDOWS
+#ifdef _W32
     #include <time.h>
 #endif
 
-#define PrecisionTYPE double
+#define PrecisionTYPE float
 
 typedef struct{
 	char *targetImageName;
 	char *sourceImageName;
 	char *outputResultName;
 	char *tpmImageName;
+    char *targetMaskName;
 
 	int maxIteration;
 
@@ -48,6 +49,7 @@ typedef struct{
 	bool levelNumberFlag;
 	bool level2PerformFlag;
 	bool outputResultFlag;
+    bool targetMaskFlag;
 
 	bool maxIterationFlag;
 

@@ -75,7 +75,7 @@ main( int argc, char **argv )
   }
   
   /* read data and scale it to 0..255 */
-  src_ptr = read_nifti_float(input_filename, &src);
+  src_ptr = read_nifti_float(input_filename, &src, 0);
   if(src_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", input_filename);
     return(EXIT_FAILURE);

@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
   }
   
   /* read first image to get image parameters */
-  nii_ptr = read_nifti_double(infiles[0], &input);
+  nii_ptr = read_nifti_double(infiles[0], &input, 0);
   if(nii_ptr == NULL) {
     fprintf(stderr,"Error reading %s.\n", infiles[0]);
     return(EXIT_FAILURE);
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
   /* read remaining images and check for image parameters */
   for (i=1; i<nfiles; i++) {
     fprintf(stdout,"%3d: %s\n",i+1, infiles[i]);
-    nii_ptr2 = read_nifti_double(infiles[i], &input);
+    nii_ptr2 = read_nifti_double(infiles[i], &input, 0);
     if(nii_ptr2 == NULL) {
       fprintf(stderr,"Error reading %s.\n", infiles[i]);
       return(EXIT_FAILURE);

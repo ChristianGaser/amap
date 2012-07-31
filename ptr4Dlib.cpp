@@ -167,7 +167,7 @@ double_to_ptr_4D(nifti_image *image, double *vol4d, int index_nt)
 			double_to_ptr_4D2<int>(image, vol4d, index_nt);
 			break;
 		case NIFTI_TYPE_FLOAT32:
-			double_to_ptr_4D2<double>(image, vol4d, index_nt);
+			double_to_ptr_4D2<float>(image, vol4d, index_nt);
 			break;
 		case NIFTI_TYPE_FLOAT64:
 			double_to_ptr_4D2<double>(image, vol4d, index_nt);

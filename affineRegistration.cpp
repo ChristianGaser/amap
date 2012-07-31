@@ -7,6 +7,7 @@
 #include "niiskullstrip.h"
 
 #define CONVERGENCE_EPS 0.00001
+#define NDEBUG 1
 
 bool reg_test_convergence(mat44 *mat)
 {
@@ -91,6 +92,24 @@ mat44 *affineRegistration(PARAM *param, FLAG *flag)
 		affineTransformation->m[2][3]=sourceRealPosition[2]-targetRealPosition[2];
 	}
 	
+    /* read and binarise the target mask image */
+    nifti_image *targetMaskImage=NULL;
+    if(flag->targetMaskFlag){
+        targetMaskImage = nifti_image_read(param->targetMaskName,true);
+        if(targetMaskImage == NULL){
+            fprintf(stderr,"* ERROR Error when reading the target mask image: %s\n",param->targetMaskName);
+            return NULL;
+        }
+        /* check the dimension */
+        for(int i=1; i<=targetHeader->dim[0]; i++){
+            if(targetHeader->dim[i]!=targetMaskImage->dim[i]){
+                fprintf(stderr,"* ERROR The target image and its mask do not have the same dimension\n");
+                return NULL;
+            }
+        }
+        reg_tool_binarise_image(targetMaskImage);
+    }
+
 	/* *********************************** */
 	/* DISPLAY THE REGISTRATION PARAMETERS */
 	/* *********************************** */
@@ -133,6 +152,10 @@ mat44 *affineRegistration(PARAM *param, FLAG *flag)
         // All the blocks are used during the first level
         int maxNumberOfIterationToPerform=param->maxIteration;
         int percentageOfBlockToUse=param->block_percent_to_use;
+        if(level==0){
+            maxNumberOfIterationToPerform*=2;
+            percentageOfBlockToUse=100;
+        }
 
         /* declare the target mask array */
         int *targetMask;
@@ -140,6 +163,11 @@ mat44 *affineRegistration(PARAM *param, FLAG *flag)
 
         /* downsample the input images if appropriate */
         nifti_image *tempMaskImage=NULL;
+        if(flag->targetMaskFlag){
+            tempMaskImage = nifti_copy_nim_info(targetMaskImage);
+            tempMaskImage->data = (void *)malloc(tempMaskImage->nvox * tempMaskImage->nbyper);
+            memcpy(tempMaskImage->data, targetMaskImage->data, tempMaskImage->nvox*tempMaskImage->nbyper);
+        }
 
         for(int l=level; l<param->levelNumber-1; l++){
             int ratio = (int)powf(2.0f,param->levelNumber-param->levelNumber+l+1.0f);
@@ -156,11 +184,20 @@ mat44 *affineRegistration(PARAM *param, FLAG *flag)
             if((targetHeader->nz/ratio) < 32) targetDownsampleAxis[3]=false;
             reg_downsampleImage<PrecisionTYPE>(targetImage, 1, targetDownsampleAxis);
 
+            if(flag->targetMaskFlag){
+                reg_downsampleImage<PrecisionTYPE>(tempMaskImage, 0, targetDownsampleAxis);
+            }
         }
         targetMask = (int *)malloc(targetImage->nvox*sizeof(int));
-        for(unsigned int i=0; i<targetImage->nvox; i++)
-            targetMask[i]=i;
-        activeVoxelNumber=targetImage->nvox;
+        if(flag->targetMaskFlag){
+            reg_tool_binaryImage2int(tempMaskImage, targetMask, activeVoxelNumber);
+            nifti_image_free(tempMaskImage);
+        }
+        else{
+            for(unsigned int i=0; i<targetImage->nvox; i++)
+                targetMask[i]=i;
+            activeVoxelNumber=targetImage->nvox;
+        }
 
 
 		/* smooth the input image if appropriate */
@@ -189,7 +226,7 @@ mat44 *affineRegistration(PARAM *param, FLAG *flag)
         if(sizeof(PrecisionTYPE)==4) positionFieldImage->datatype = NIFTI_TYPE_FLOAT32;
         else positionFieldImage->datatype = NIFTI_TYPE_FLOAT64;
         positionFieldImage->nbyper = sizeof(PrecisionTYPE);
-            positionFieldImage->data = (void *)calloc(positionFieldImage->nvox, positionFieldImage->nbyper);
+        positionFieldImage->data = (void *)calloc(positionFieldImage->nvox, positionFieldImage->nbyper);
 		
 		/* allocate the result image */
 		nifti_image *resultImage = nifti_copy_nim_info(targetImage);
@@ -237,6 +274,14 @@ mat44 *affineRegistration(PARAM *param, FLAG *flag)
         else printf("Block size = [4 4 4]\n");
 		printf("Block number = [%i %i %i]\n", blockMatchingParams.blockNumber[0],
 			blockMatchingParams.blockNumber[1], blockMatchingParams.blockNumber[2]);
+#ifndef NDEBUG
+		if(targetImage->sform_code>0)
+			reg_mat44_disp(&targetImage->sto_xyz, (char *)"[DEBUG] Target image matrix (sform sto_xyz)");
+		else reg_mat44_disp(&targetImage->qto_xyz, (char *)"[DEBUG] Target image matrix (qform qto_xyz)");
+		if(sourceImage->sform_code>0)
+			reg_mat44_disp(&sourceImage->sto_xyz, (char *)"[DEBUG] Source image matrix (sform sto_xyz)");
+		else reg_mat44_disp(&sourceImage->qto_xyz, (char *)"[DEBUG] Source image matrix (qform qto_xyz)");
+#endif
 		printf("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n");
 		reg_mat44_disp(affineTransformation, (char *)"Initial affine transformation:");
 
@@ -270,6 +315,11 @@ mat44 *affineRegistration(PARAM *param, FLAG *flag)
 							    RIGID);
 				// the affine transformation is updated
 				*affineTransformation = reg_mat44_mul( affineTransformation, &(updateAffineMatrix));
+#ifndef NDEBUG
+				printf("[DEBUG] -Rigid- iteration %i - ",iteration);
+				reg_mat44_disp(&updateAffineMatrix, (char *)"[DEBUG] updateMatrix");
+				reg_mat44_disp(affineTransformation, (char *)"[DEBUG] updated affine");
+#endif
 	
 				if(reg_test_convergence(&updateAffineMatrix)) break;
 				iteration++;
@@ -306,6 +356,11 @@ mat44 *affineRegistration(PARAM *param, FLAG *flag)
 	
 				// the affine transformation is updated
 				*affineTransformation = reg_mat44_mul( affineTransformation, &(updateAffineMatrix));
+#ifndef NDEBUG
+                printf("[DEBUG] -Affine- iteration %i - ",iteration);
+				reg_mat44_disp(&updateAffineMatrix, (char *)"[DEBUG] updateMatrix");
+				reg_mat44_disp(affineTransformation, (char *)"[DEBUG] updated affine");
+#endif
 				if(reg_test_convergence(&updateAffineMatrix)) break;
 				iteration++;
 			}
@@ -358,6 +413,10 @@ mat44 *affineRegistration(PARAM *param, FLAG *flag)
                             NULL,
 							3,
 							param->sourceBGValue);
+			if(flag->outputResultFlag) {
+			    nifti_set_filenames(resultImage, param->outputResultName, 0, 0);
+			    nifti_image_write(resultImage);
+			}
 
 		}
 		nifti_image_free(positionFieldImage);
@@ -365,6 +424,15 @@ mat44 *affineRegistration(PARAM *param, FLAG *flag)
 		nifti_image_free(targetImage);
 		nifti_image_free(sourceImage);
 		reg_mat44_disp(affineTransformation, (char *)"Final affine transformation:");
+#ifndef NDEBUG
+		mat33 tempMat;
+		for(int i=0; i<3; i++){
+			for(int j=0; j<3; j++){
+				tempMat.m[i][j] = affineTransformation->m[i][j];
+			}
+		}
+		printf("[DEBUG] Matrix determinant %g\n", nifti_mat33_determ	(tempMat));
+#endif
 		printf("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n\n");
         
 	}

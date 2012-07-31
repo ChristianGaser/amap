@@ -32,9 +32,9 @@ int
 write_nifti_float( const char *output_filename, float image[], int data_type, double slope, int dim[], double vox[], nifti_image *in_ptr);
 
 nifti_image
-*read_nifti_double( const char *input_filename, double *image[]);
+*read_nifti_double( const char *input_filename, double *image[], int read_data);
 
 nifti_image
-*read_nifti_float( const char *input_filename, float *image[]);
+*read_nifti_float( const char *input_filename, float *image[], int read_data);
 
 #endif

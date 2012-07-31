@@ -578,7 +578,7 @@ write_nifti_float( const char *output_filename, float image[], int data_type, do
 }
 
 nifti_image
-*read_nifti_double( const char *input_filename, double *image[])
+*read_nifti_double( const char *input_filename, double *image[], int read_data)
 {
   nifti_image *nii_ptr;
   double tmp;
@@ -639,13 +639,20 @@ nifti_image
       else
         (*image)[i] = (nii_ptr->scl_slope * tmp) + nii_ptr->scl_inter;
     }  
-    free(nii_ptr->data);
     
+    /* ensure that nvox is that of a 3D image */
+    if (nii_ptr->nt > 1) {
+      nii_ptr->nvox  /= nii_ptr->nt;
+      nii_ptr->dim[0] = nii_ptr->ndim = 4;
+    }
+    
+    if(!read_data) free(nii_ptr->data);
+
     return(nii_ptr);
 }
 
 nifti_image
-*read_nifti_float( const char *input_filename, float *image[])
+*read_nifti_float( const char *input_filename, float *image[], int read_data)
 {
   nifti_image *nii_ptr;
   float tmp;
@@ -706,7 +713,14 @@ nifti_image
       else
         (*image)[i] = ((float)nii_ptr->scl_slope * tmp) + (float)nii_ptr->scl_inter;
     }  
-    free(nii_ptr->data);
+    
+    /* ensure that nvox is that of a 3D image */
+    if (nii_ptr->nt > 1) {
+      nii_ptr->nvox  /= nii_ptr->nt;
+      nii_ptr->dim[0] = nii_ptr->ndim = 4;
+    }
+    
+    if(!read_data) free(nii_ptr->data);
     
     return(nii_ptr);
 }
