@@ -475,7 +475,7 @@ convxyz_int32(signed int *iVol, double filtx[], double filty[], double filtz[],
 }
 
 void
-morph_erode_uint8(unsigned char *vol, int dims[3], int niter, int th)
+morph_erode_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
 {
   double filt[3]={1,1,1};
   int i,j;
@@ -493,7 +493,7 @@ morph_erode_uint8(unsigned char *vol, int dims[3], int niter, int th)
 
 
 void
-morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, int th)
+morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
 {
   double filt[3]={1,1,1};
   int i,x,y,z,j,band,dims2[3];
@@ -531,14 +531,14 @@ morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, int th)
 }
 
 void
-morph_close_uint8(unsigned char *vol, int dims[3], int niter, int th)
+morph_close_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
 {
   morph_dilate_uint8(vol, dims, niter, th);
   morph_erode_uint8(vol, dims, niter, 0);  
 }
 
 void
-morph_open_uint8(unsigned char *vol, int dims[3], int niter, int th)
+morph_open_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
 {
   morph_erode_uint8(vol, dims, niter, th);
   morph_dilate_uint8(vol, dims, niter, 0);
@@ -981,7 +981,7 @@ cleanup(unsigned char *probs, unsigned char *mask, int dims[3], int strength, do
 
   morph_open_uint8(  mask, dims, n_initial_openings, 0);
   morph_dilate_uint8(mask, dims, 1, 0);
-  morph_close_uint8( mask, dims, round(scale*10), 0);
+  morph_close_uint8( mask, dims, round(scale*5), 0);
 
   /* remove sinus sagittalis */
   for (i = 0; i < vol; i++)

@@ -38,16 +38,16 @@
 #define SKULL2 4
 
 void
-morph_erode_uint8(unsigned char *vol, int dims[3], int niter, int th);
+morph_erode_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th);
 
 void
-morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, int th);
+morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th);
 
 void
-morph_close_uint8(unsigned char *vol, int dims[3], int niter, int th);
+morph_close_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th);
 
 void
-morph_open_uint8(unsigned char *vol, int dims[3], int niter, int th);
+morph_open_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th);
 
 void
 morph_close_double(double *vol, int dims[3], int niter, double th);
