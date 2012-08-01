@@ -241,9 +241,8 @@ int main(int argc, char **argv)
     Bayes(src, label, priors, probs, voxelsize, dims, 1);
     
     int cleanup_strength = 2;
-    double scale = 3.0/(sourceImage->dx + sourceImage->dy + sourceImage->dz);
     
-    cleanup(probs, label, dims, cleanup_strength, scale, 1);
+    cleanup(probs, label, dims, voxelsize, cleanup_strength, 1);
     
 int n_pure_classes = 3;
 int iters_amap = 200;
@@ -280,14 +279,16 @@ double max_vol = -1e15, offset, mean[6];
     if(pve==6) Pve6(src, probs, label, mean, dims);
     if(pve==5) Pve5(src, probs, label, mean, dims);
 
+    int order_tissue[3] = {1, 2, 0};
+    unsigned char temp[3];
     for (int i = 0; i < sourceImage->nvox; i++) {
-      unsigned char temp[3];
-      tempp = probs[i+sourceImage->nvox*GM];
-      probs[i+sourceImage->nvox*GM] = probs[i+sourceImage->nvox*WM];
-      probs[i+sourceImage->nvox*WM] = tempp;
+      for (int j = 0; j < 3; j++)
+        temp[j] = probs[i+sourceImage->nvox*j];
+      for (int j = 0; j < 3; j++)
+        probs[i+sourceImage->nvox*j] = temp[order_tissue[j]];
     }
 
-    cleanup(probs, label, dims, cleanup_strength, scale, 0);
+    cleanup(probs, label, dims, voxelsize, cleanup_strength, 0);
 
     for (int i = 0; i < sourceImage->nvox; i++)
       src[i] = (float)label[i];

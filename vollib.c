@@ -474,6 +474,195 @@ convxyz_int32(signed int *iVol, double filtx[], double filty[], double filtz[],
   return(0);
 }
 
+/* estimate minimum of A and its index in A */
+void
+pmin(float A[], int sA, float *minimum, int *index)
+{
+  int i; 
+  *minimum=FLT_MAX; *index=0; /* printf("%d ",sizeof(A)/8); */
+  for(i=0;i<sA;i++) {
+    if ((A[i]>0) && (*minimum>A[i]))
+    { 
+      *minimum = A[i]; 
+      *index   = i;
+    }
+  }
+}
+
+/* estimate x,y,z position of index i in an array size sx,sxy=sx*sy... */
+void
+ind2sub(int i,int *x,int *y, int *z, int sxy, int sy) {
+  *z = (int)floor( (double)i / (double)sxy ) +1; 
+   i = i % (sxy);
+  *y = (int)floor( (double)i / (double)sy ) +1;        
+  *x = i % sy + 1;
+}
+
+void
+vbdist(float *V, int *dims, double *voxelsize) 
+{
+  
+  /* main informations about input data (size, dimensions, ...) */
+  const int     nL = dims[0]*dims[1]*dims[2];
+  const int     x  = dims[0];
+  const int     y  = dims[1];
+  const int     xy = x*y;
+
+  float s1 = (float)voxelsize[0],s2 = (float)voxelsize[1],s3 = (float)voxelsize[2];
+  const float   s12  = sqrt( s1*s1  + s2*s2); /* xy - voxel size */
+  const float   s13  = sqrt( s1*s1  + s3*s3); /* xz - voxel size */
+  const float   s23  = sqrt( s2*s2  + s3*s3); /* yz - voxel size */
+  const float   s123 = sqrt(s12*s12 + s3*s3); /* xyz - voxel size */
+  
+  /* indices of the neighbor Ni (index distance) and euclidean distance NW */
+  const int   NI[] = {  0, -1,-x+1, -x,-x-1,  -xy+1,-xy,-xy-1,  -xy+x+1,-xy+x,-xy+x-1,  -xy-x+1,-xy-x,-xy-x-1};  
+  const float ND[] = {0.0, s1, s12, s2, s12,    s13, s3,  s13,     s123,  s23,   s123,     s123,  s23,   s123};
+  const int   sN = sizeof(NI)/4;    
+  float       DN[sN],DI[sN];
+  float       DNm = FLT_MAX;
+  double      mod;
+  int i, n, ni, DNi = 0;
+
+  
+  /* data */
+  float         *D;
+  unsigned int  *I;
+  
+  D = (float *)malloc(sizeof(float)*nL);
+  I = (unsigned int *)malloc(sizeof(unsigned int)*nL);
+  
+  
+  /* intitialisiation */
+  for (i=0;i<nL;i++) 
+  {
+    if (V[i]>0.5) D[i]=0.0; else D[i]=FLT_MAX; 
+    I[i]=(unsigned int)i;
+  }
+
+  int u,v,w,nu,nv,nw; 
+  for (i=0;i<nL;i++) 
+  {
+    if (D[i]>0)
+    {
+      ind2sub(i,&u,&v,&w,xy,x);
+      
+      /* read neighbor values */
+      for (n=0;n<sN;n++)
+      {
+        ni = i + NI[n];
+        ind2sub(ni,&nu,&nv,&nw,xy,x);
+        if ( (ni<0) || (ni>=nL) || (abs(nu-u)>1) || (abs(nv-v)>1) || (abs(nw-w)>1) ) ni=i;
+        DN[n] = D[ni] + ND[n];
+      }
+
+      /* find minimum distance within the neighborhood */
+      pmin(DN,sN,&DNm,&DNi);
+
+      /* update values */
+      if (DNi>0) {
+        I[i] = (unsigned int)  I[i+NI[DNi]];
+        D[i] = DNm; 
+        ind2sub((int)I[i],&nu,&nv,&nw,xy,x); 
+        D[i] = sqrt(pow((float)(u-nu)*s1,2) + pow((float)(v-nv)*s2,2) + pow((float)(w-nw)*s3,2));
+      }
+    }
+  }
+  
+  for (i=nL-1;i>0;i--)
+  {
+    if (D[i]>0)
+    {
+      ind2sub(i,&u,&v,&w,xy,x);
+
+      /* read neighbour values */
+      for (n=0;n<sN;n++)
+      {
+        ni = i - NI[n];
+        ind2sub(ni,&nu,&nv,&nw,xy,x);
+        if ( (ni<0) || (ni>=nL) || (abs(nu-u)>1) || (abs(nv-v)>1) || (abs(nw-w)>1) ) ni=i;
+        DN[n] = D[ni] + ND[n];
+      }
+
+      /* find minimum distance within the neighborhood */
+      pmin(DN,sN,&DNm,&DNi);
+
+      /* update values */
+      if (DNi>0) {
+        I[i] = (unsigned int)  I[i-NI[DNi]];
+        D[i] = DNm; 
+        ind2sub((int)I[i],&nu,&nv,&nw,xy,x); 
+        D[i] = sqrt(pow((float)(u-nu)*s1,2) + pow((float)(v-nv)*s2,2) + pow((float)(w-nw)*s3,2));
+      }
+    }
+  }
+
+  for (i=0;i<nL;i++) 
+    V[i] = D[i];
+    
+  free(D);
+  free(I);
+}
+
+void
+distclose_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter, double th)
+{
+  float *buffer;
+  int i;
+
+  buffer = (float *)malloc(sizeof(float)*dims[0]*dims[1]*dims[2]);
+
+  if(buffer == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    buffer[i] = (float) (vol[i] > th);
+        
+  vbdist(buffer, dims, voxelsize);
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    buffer[i] = buffer[i] > niter;
+
+  vbdist(buffer, dims, voxelsize);
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    buffer[i] = buffer[i] > niter;
+
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    vol[i] = (unsigned char)round(buffer[i]);
+    
+  free(buffer);
+}
+
+void
+distopen_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter, double th)
+{
+  float *buffer;
+  int i;
+
+  buffer = (float *)malloc(sizeof(float)*dims[0]*dims[1]*dims[2]);
+
+  if(buffer == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    buffer[i] = 1.0 - (float)(vol[i] > th);
+        
+  vbdist(buffer, dims, voxelsize);
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    buffer[i] = buffer[i] > niter;
+
+  vbdist(buffer, dims, voxelsize);
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    buffer[i] = buffer[i] < niter;
+
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    vol[i] = (unsigned char)round(buffer[i]);
+    
+  free(buffer);
+}
+
 void
 morph_erode_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
 {
@@ -965,9 +1154,10 @@ smooth_subsample_float(float *vol, int dims[3], double separations[3], double s[
 }
 
 void
-cleanup(unsigned char *probs, unsigned char *mask, int *dims, int strength, double scale, int initial_cleanup)
+cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize, int strength, int initial_cleanup)
 {
   
+  double scale = 3.0/(voxelsize[0] + voxelsize[1] + voxelsize[2]);
   int niter, iter, vol, th, th_erode, th_dilate, th_final, i;
   int n_initial_openings = MAX(1,round(scale*strength));
   double sum;
@@ -1031,8 +1221,7 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, int strength, doub
 
     /* fill holes that may remain */
     morph_close_uint8(mask, dims, round(scale*2), 0);
-  } else
-    morph_close_uint8( mask, dims, round(scale*10), 0);
+  } else distclose_uint8( mask, dims, voxelsize, round(scale*10), 0);
 
 }
 
@@ -1102,7 +1291,4 @@ median3_uint8(unsigned char *D, int *dims)
   free(M);
   
 }
-
-
-
 

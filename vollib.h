@@ -77,7 +77,7 @@ void
 smooth_subsample_float(float *vol, int dims[3], double separations[3], double s[3], int use_mask, int samp);
 
 void
-cleanup(unsigned char *probs, unsigned char *mask, int dims[4], int strength, double scale, int initial_cleanup);
+cleanup(unsigned char *probs, unsigned char *mask, int dims[3], double voxelsize[3], int strength, int initial_cleanup);
 
 void 
 median3_uint8(unsigned char *D, int *dims);

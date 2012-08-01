@@ -170,27 +170,6 @@ niisanlm_SOURCES = \
 	sanlm_float.c \
 	niilib.c
 	
-niiskullstrip_SOURCES = \
-	niiskullstrip.cpp \
-	affineRegistration.cpp \
-	Amap.c \
-	Kmeans.c \
-	MrfPrior.c \
-	Pve.c \
-	Bayes.c \
-	WarpPriors.c \
-	diffeo3d.c \
-	optimizer3d.c \
-	vollib.c \
-	$(nifti_SOURCES) \
-	$(zlib_SOURCES) \
-	niilib.c \
-	ptr4Dlib.cpp \
-	reg-lib/_reg_resampling.cpp \
-	reg-lib/_reg_affineTransformation.cpp \
-	reg-lib/_reg_blockMatching.cpp \
-	reg-lib/_reg_tools.cpp
-
 if EBTKS
     niiamap_SOURCES = \
 	  niiamap.c \
@@ -205,6 +184,29 @@ if EBTKS
 	  niilib.c \
 	  vollib.c \
 	  ParseArgv.c
+
+  niiskullstrip_SOURCES = \
+      niiskullstrip.cpp \
+	  affineRegistration.cpp \
+	  Amap.c \
+	  Kmeans.c \
+	  MrfPrior.c \
+	  Pve.c \
+	  Bayes.c \
+	  WarpPriors.c \
+	  diffeo3d.c \
+	  optimizer3d.c \
+	  vollib.c \
+	  $(nifti_SOURCES) \
+	  $(ebtks_SOURCES) \
+      $(splines_SOURCES) \
+	  $(zlib_SOURCES) \
+	  niilib.c \
+	  ptr4Dlib.cpp \
+	  reg-lib/_reg_resampling.cpp \
+	  reg-lib/_reg_affineTransformation.cpp \
+	  reg-lib/_reg_blockMatching.cpp \
+	  reg-lib/_reg_tools.cpp
 
   niinucorrect_SOURCES = \
 	  niinucorrect.c \
@@ -243,6 +245,27 @@ else
 	  niilib.c \
 	  vollib.c \
 	  ParseArgv.c
+
+niiskullstrip_SOURCES = \
+	niiskullstrip.cpp \
+	affineRegistration.cpp \
+	Amap.c \
+	Kmeans.c \
+	MrfPrior.c \
+	Pve.c \
+	Bayes.c \
+	WarpPriors.c \
+	diffeo3d.c \
+	optimizer3d.c \
+	vollib.c \
+	$(nifti_SOURCES) \
+	$(zlib_SOURCES) \
+	niilib.c \
+	ptr4Dlib.cpp \
+	reg-lib/_reg_resampling.cpp \
+	reg-lib/_reg_affineTransformation.cpp \
+	reg-lib/_reg_blockMatching.cpp \
+	reg-lib/_reg_tools.cpp
 
   niinucorrect_SOURCES = \
 	  niinucorrect.c \
