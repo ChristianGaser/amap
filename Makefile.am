@@ -173,6 +173,10 @@ niisanlm_SOURCES = \
 niiskullstrip_SOURCES = \
 	niiskullstrip.cpp \
 	affineRegistration.cpp \
+	Amap.c \
+	Kmeans.c \
+	MrfPrior.c \
+	Pve.c \
 	Bayes.c \
 	WarpPriors.c \
 	diffeo3d.c \

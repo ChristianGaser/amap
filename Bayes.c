@@ -16,11 +16,12 @@
 
 void WarpPriors(unsigned char *prob, unsigned char *priors, float *flow, int *dims, int n_loops, int n_classes, int samp);
 
-void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned char *prob, double *separations, int *dims, int correct_nu)
+void Bayes(float *src, unsigned char *label, unsigned char *priors, unsigned char *prob, double *separations, int *dims, int correct_nu)
 {
   int i, j, k, l, k1, subit, subsample_warp, kmax, k2;
   int count, subsample, masked_smoothing;
-  double ll = -HUGE, llr=0.0, *nu, fwhm[3], *meaninvcov, *resmean;
+  double ll = -HUGE, llr=0.0, fwhm[3];
+  float *nu, *meaninvcov, *resmean;
   double mn[MAXK], vr[MAXK], mg[MAXK], mn2[MAXK], vr2[MAXK], mg2[MAXK];
   double mnt[MAXK], vrt[MAXK];
   double mom0[MAXK], mom1[MAXK], mom2[MAXK], mgm[MAXK];
@@ -56,14 +57,14 @@ void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned ch
   }
   
   if (correct_nu) {
-    nu         = (double *)malloc(sizeof(double)*vol);
-    meaninvcov = (double *)malloc(sizeof(double)*vol);
-    resmean    = (double *)malloc(sizeof(double)*vol);
+    nu         = (float *)malloc(sizeof(float)*vol);
+    meaninvcov = (float *)malloc(sizeof(float)*vol);
+    resmean    = (float *)malloc(sizeof(float)*vol);
   }
 
   for (i=0; i<vol; i++) {
-    min_src = MIN(src[i], min_src);
-    max_src = MAX(src[i], max_src);
+    min_src = MIN((double)src[i], min_src);
+    max_src = MAX((double)src[i], max_src);
   }
 
   /* fill areas where no prior is defined with background */
@@ -78,7 +79,7 @@ void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned ch
   for (i = 0; i < 65536; i++) histo[i] = 0;
   for (i=0; i<vol; i++) {
     if (src[i] == 0) continue;
-    histo[(int)ROUND(65535.0*(src[i]-min_src)/(max_src-min_src))]++;
+    histo[(int)ROUND(65535.0*((double)src[i]-min_src)/(max_src-min_src))]++;
   }
 
   /* find values between 0.1% and 99.9% quartile */
@@ -130,7 +131,7 @@ void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned ch
           meaninvcov[i] = resmean[i] = nu[i] = 0.0;
         }
 
-        if((src[i]>mn_thresh) && (src[i]<mx_thresh)) {
+        if(((double)src[i]>mn_thresh) && ((double)src[i]<mx_thresh)) {
           s = TINY;
           k2 = 0;
           for (k1=0; k1<Kb; k1++) {
@@ -147,7 +148,7 @@ void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned ch
           }
 
           for (k=0; k<K; k++)
-            q[k] = mg[k]*bt[lkp[k]]*exp(SQR(src[i]-mn[k])/(-2*vr[k]))/(SQRT2PI*sqrt(vr[k]));
+            q[k] = mg[k]*bt[lkp[k]]*exp(SQR((double)src[i]-mn[k])/(-2*vr[k]))/(SQRT2PI*sqrt(vr[k]));
           
           /* prepare prob for warping */
           sq = TINY;
@@ -169,7 +170,7 @@ void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned ch
           if (correct_nu) {
           /* don't use all classes */
             for (k1=1; k1<Kb-1; k1++) {
-              double tempf   = qt[k1]/sq/vrt[k1];
+              float tempf   = qt[k1]/sq/vrt[k1];
               resmean[i]    += tempf*(src[i] - mnt[k1]/ngauss[k1]);
               meaninvcov[i] += tempf;
             }
@@ -193,9 +194,9 @@ void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned ch
 
           ll += log10(sq);
           for (k=0; k<K; k++) {
-            p1 = q[k]/sq;   mom0[k] += p1;
-            p1 *= src[i];   mom1[k] += p1;
-            p1 *= src[i];   mom2[k] += p1;
+            p1 = q[k]/sq;           mom0[k] += p1;
+            p1 *= (double)src[i];   mom1[k] += p1;
+            p1 *= (double)src[i];   mom2[k] += p1;
           }      
         }
       } 
@@ -239,10 +240,10 @@ void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned ch
       subsample = subsample_warp;
       masked_smoothing = 0;
 
-      smooth_subsample_double(meaninvcov, dims, separations, fwhm, masked_smoothing, subsample);
-      smooth_subsample_double(resmean, dims, separations, fwhm, masked_smoothing, subsample);
+      smooth_subsample_float(meaninvcov, dims, separations, fwhm, masked_smoothing, subsample);
+      smooth_subsample_float(resmean, dims, separations, fwhm, masked_smoothing, subsample);
       
-      double numean = 0.0;
+      float numean = 0.0;
       for (i = 0; i < vol; i++) {
         if (meaninvcov[i] != 0) 
           nu[i] = (resmean[i]/meaninvcov[i]) - 1.0;
@@ -271,7 +272,7 @@ void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned ch
         b[k] = bt[lkp[k]]*mg[k];
 
       for (k=0; k<K; k++) { 
-        p1 = exp(SQR(src[i]-mn[k])/(-2*vr[k]))/(SQRT2PI*sqrt(vr[k]));
+        p1 = exp(SQR((double)src[i]-mn[k])/(-2*vr[k]))/(SQRT2PI*sqrt(vr[k]));
         qt[lkp[k]] += p1*b[k];
       }
       

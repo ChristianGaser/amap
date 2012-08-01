@@ -25,6 +25,7 @@ typedef struct{
 	char *targetImageName;
 	char *sourceImageName;
 	char *outputResultName;
+	char *outputMaskName;
 	char *tpmImageName;
     char *targetMaskName;
 
@@ -49,6 +50,7 @@ typedef struct{
 	bool levelNumberFlag;
 	bool level2PerformFlag;
 	bool outputResultFlag;
+	bool outputMaskFlag;
     bool targetMaskFlag;
 
 	bool maxIterationFlag;
@@ -75,16 +77,23 @@ template <class DTYPE>
 void double_to_ptr_4D2(nifti_image *image, double *vol4d, int index_nt);
 void double_to_ptr_4D(nifti_image *image, double *vol4d, int index_nt);
 template <class DTYPE> 
+void float_to_ptr_4D2(nifti_image *image, float *vol4d, int index_nt);
+void float_to_ptr_4D(nifti_image *image, float *vol4d, int index_nt);
+template <class DTYPE> 
 void ptr_to_uint8_4D2(nifti_image *image, unsigned char *vol4d, int index_nt);
 void ptr_to_uint8_4D(nifti_image *image, unsigned char *vol4d, int index_nt);
 template <class DTYPE> 
 void ptr_to_double_4D2(nifti_image *image, double *vol4d, int index_nt);
 void ptr_to_double_4D(nifti_image *image, double *vol4d, int index_nt);
+template <class DTYPE> 
+void ptr_to_float_4D2(nifti_image *image, float *vol4d, int index_nt);
+void ptr_to_float_4D(nifti_image *image, float *vol4d, int index_nt);
 
 extern "C" {
 #include "niilib.h"
 #include "vollib.h"
-void Bayes(double *src, unsigned char *label, unsigned char *priors, unsigned char *prob, double *separations, int *dims, int correct_nu);
+#include "Amap.h"
+void Bayes(float *src, unsigned char *label, unsigned char *priors, unsigned char *prob, double *separations, int *dims, int correct_nu);
 }
 
 #endif

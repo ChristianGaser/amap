@@ -531,6 +531,44 @@ morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
 }
 
 void
+morph_dilate_double(double *vol, int dims[3], int niter, double th)
+{
+  double filt[3]={1,1,1};
+  int i,x,y,z,j,band,dims2[3];
+  double *buffer;
+
+  /* add band with zeros to image to avoid clipping */  
+  band = niter;
+  band = 0;
+  for (i=0;i<3;i++) dims2[i] = dims[i] + 2*band;
+  
+  buffer = (double *)malloc(sizeof(double)*dims2[0]*dims2[1]*dims2[2]);
+
+  if(buffer == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+  }
+
+  memset(buffer,0,sizeof(double)*dims2[0]*dims2[1]*dims2[2]);
+  
+  /* threshold input */
+  for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
+    buffer[((z+band)*dims2[0]*dims2[1])+((y+band)*dims2[0])+x+band] = (vol[(z*dims[0]*dims[1])+(y*dims[0])+x]>th);
+
+  for (i=0;i<niter;i++) {
+    convxyz_double(buffer,filt,filt,filt,3,3,3,-1,-1,-1,buffer,dims);
+    for (j=0;j<dims2[2]*dims2[1]*dims2[0];j++)
+      buffer[j] = (buffer[j]>0);
+  }
+  
+  /* return image */
+  for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
+    vol[(z*dims[0]*dims[1])+(y*dims[0])+x] = buffer[((z+band)*dims[0]*dims[1])+((y+band)*dims[0])+x+band];
+  
+  free(buffer);
+}
+
+void
 morph_close_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
 {
   morph_dilate_uint8(vol, dims, niter, th);
@@ -927,7 +965,7 @@ smooth_subsample_float(float *vol, int dims[3], double separations[3], double s[
 }
 
 void
-cleanup(unsigned char *probs, unsigned char *mask, int dims[3], int strength, double scale)
+cleanup(unsigned char *probs, unsigned char *mask, int *dims, int strength, double scale, int initial_cleanup)
 {
   
   int niter, iter, vol, th, th_erode, th_dilate, th_final, i;
@@ -938,8 +976,7 @@ cleanup(unsigned char *probs, unsigned char *mask, int dims[3], int strength, do
   niter = 45;
   th_final  =  13;   /* final threshold for masking 0.05*255.0 */
   th_erode  = 153;   /* initial threshold for erosion 0.6*255.0 */
-  if (strength == 1) th_dilate = 38;   /* threshold for dilation 0.15*255.0 */
-  else               th_dilate = 51;   /* threshold for dilation 0.20*255.0 */
+  th_dilate = (strength + 1)*16; /* threshold for dilation */
   
   vol = dims[0]*dims[1]*dims[2];
 
@@ -973,25 +1010,30 @@ cleanup(unsigned char *probs, unsigned char *mask, int dims[3], int strength, do
     convxyz_uint8(mask,filt,filt,filt,3,3,3,-1,-1,-1,mask,dims);
   }
   
+
   for( i = 0;  i < vol;  ++i ) {
-    /* mask = ((mask>th_final).*(WM+WM))>th_final */
+    /* mask = ((mask>th_final).*(GM+WM))>th_final */
     sum = (((double)mask[i] > th_final)*(double)probs[i + GM*vol] + (double)probs[i + WM*vol]) > th_final;
     mask[i] = (unsigned char)sum;
   }
 
   morph_open_uint8(  mask, dims, n_initial_openings, 0);
-  morph_dilate_uint8(mask, dims, 1, 0);
-  morph_close_uint8( mask, dims, round(scale*5), 0);
+  
+  if(initial_cleanup) {
+    morph_dilate_uint8(mask, dims, 2, 0);
+    morph_close_uint8( mask, dims, round(scale*5), 0);
+    /* remove sinus sagittalis */
+    for (i = 0; i < vol; i++)
+      mask[i] = mask[i] && ( (probs[i + SKULL2*vol] < probs[i + GM*vol]) ||
+                             (probs[i + SKULL2*vol] < probs[i + WM*vol]) ||
+                             (probs[i + SKULL2*vol] < probs[i + CSF*vol]) );
 
-  /* remove sinus sagittalis */
-  for (i = 0; i < vol; i++)
-    mask[i] = mask[i] && ( (probs[i + SKULL2*vol] < probs[i + GM*vol]) ||
-                           (probs[i + SKULL2*vol] < probs[i + WM*vol]) ||
-                           (probs[i + SKULL2*vol] < probs[i + CSF*vol]) );
 
+    /* fill holes that may remain */
+    morph_close_uint8(mask, dims, round(scale*2), 0);
+  } else
+    morph_close_uint8( mask, dims, round(scale*10), 0);
 
-  /* fill holes that may remain */
-  morph_close_uint8(mask, dims, round(scale*2), 0);
 }
 
 /* qicksort */

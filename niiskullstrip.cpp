@@ -20,6 +20,8 @@ void Usage(char *exec)
 	printf("Usage:\t%s -target <filename> -source <filename> [OPTIONS].\n",exec);
 	printf("\t-target <filename>\tFilename of the target image (mandatory)\n");
 	printf("\t-source <filename>\tFilename of the source image (mandatory)\n");
+	printf("\t-tpm <filename>\tFilename of the 4D tissue probability image (TPM) image (mandatory)\n");
+	printf("\t-output <filename>\tFilename of the output image (mandatory)\n");
 	printf("* * OPTIONS * *\n");
     printf("\t-tmask <filename>\tFilename of a mask image in the target space\n");
 	printf("\t-result <filename>\tFilename of the resampled image [outputResult.nii]\n");
@@ -75,6 +77,10 @@ int main(int argc, char **argv)
 			param->outputResultName=argv[++i];
 			flag->outputResultFlag=1;
 		}
+		else if(strcmp(argv[i], "-output") == 0){
+			param->outputMaskName=argv[++i];
+			flag->outputMaskFlag=1;
+		}
 		else if(strcmp(argv[i], "-maxit") == 0){
 			param->maxIteration=atoi(argv[++i]);
 			flag->maxIterationFlag=1;
@@ -111,8 +117,8 @@ int main(int argc, char **argv)
 		}
 	}
 	
-	if(!flag->targetImageFlag || !flag->sourceImageFlag || !flag->tpmImageFlag){
-		fprintf(stderr,"Err:\tThe target, source, and tpm images have to be defined.\n");
+	if(!flag->targetImageFlag || !flag->sourceImageFlag || !flag->tpmImageFlag || !flag->outputMaskFlag){
+		fprintf(stderr,"Err:\tThe target, source, tpm, and output images have to be defined.\n");
 		PetitUsage(argv[0]);
 		return 1;
 	}
@@ -218,9 +224,9 @@ int main(int argc, char **argv)
 
     unsigned char *label = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox);
     unsigned char *probs = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox*tpmImage->nt);
-    double *src          = (double *)malloc(sizeof(double)*sourceImage->nvox);
+    float *src           = (float *)malloc(sizeof(float)*sourceImage->nvox);
     
-    ptr_to_double_4D(sourceImage, src, 0);
+    ptr_to_float_4D(sourceImage, src, 0);
 
     double voxelsize[3];
     int dims[3];
@@ -234,22 +240,59 @@ int main(int argc, char **argv)
 
     Bayes(src, label, priors, probs, voxelsize, dims, 1);
     
-    int cleanup_strength = 1;
+    int cleanup_strength = 2;
     double scale = 3.0/(sourceImage->dx + sourceImage->dy + sourceImage->dz);
     
-    cleanup(probs, label, dims, cleanup_strength, scale);
+    cleanup(probs, label, dims, cleanup_strength, scale, 1);
+    
+int n_pure_classes = 3;
+int iters_amap = 200;
+int subsample = 16;
+int iters_nu = 20;
+int iters_ICM = 50;
+int pve = 5;
+int thresh_kmeans_int = 128;
+int thresh = 0;
+unsigned char *mask;
+double weight_MRF = 0.15;
+double max_vol = -1e15, offset, mean[6];
+#ifdef SPLINESMOOTH
+  double bias_fwhm = 500.0;
+#else
+  double bias_fwhm = 60.0;
+#endif
+
+  for(int i = 0; i < sourceImage->nvox; i++) {
+    if (label[i] == 0) src[i] = 0.0;
+    max_vol = MAX(src[i], max_vol);
+  }
+
+  offset = 0.2*max_vol;
+
+    mask = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox);
+    for (int i=0; i<sourceImage->nvox; i++)
+      mask[i] = (src[i]>0) ? 255 : 0;
+
+    max_vol = Kmeans( src, label, mask, 25, n_pure_classes, voxelsize, dims, thresh, thresh_kmeans_int, iters_nu, KMEANS, bias_fwhm);
+    max_vol = Kmeans( src, label, mask, 25, n_pure_classes, voxelsize, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE,  bias_fwhm);
+    free(mask);
+    Amap( src, label, probs, mean, n_pure_classes, iters_amap, subsample, dims, pve, weight_MRF, voxelsize, iters_ICM, offset);
+    if(pve==6) Pve6(src, probs, label, mean, dims);
+    if(pve==5) Pve5(src, probs, label, mean, dims);
+
+    for (int i = 0; i < sourceImage->nvox; i++) {
+      unsigned char temp[3];
+      tempp = probs[i+sourceImage->nvox*GM];
+      probs[i+sourceImage->nvox*GM] = probs[i+sourceImage->nvox*WM];
+      probs[i+sourceImage->nvox*WM] = tempp;
+    }
+
+    cleanup(probs, label, dims, cleanup_strength, scale, 0);
 
     for (int i = 0; i < sourceImage->nvox; i++)
-      if(label[i] == 0) src[i] = 0;
+      src[i] = (float)label[i];
 
-    if(!write_nifti_double("test0.nii", src, NIFTI_TYPE_FLOAT32, slope, 
-            dims, voxelsize, sourceImage))
-      exit(EXIT_FAILURE);
-
-    for (int i = 0; i < sourceImage->nvox; i++)
-      src[i] = (double)label[i];
-
-    if(!write_nifti_double("test1.nii", src, NIFTI_TYPE_FLOAT32, slope, 
+    if(!write_nifti_float(param->outputMaskName, src, NIFTI_TYPE_UINT8, slope, 
             dims, voxelsize, sourceImage))
       exit(EXIT_FAILURE);
 
