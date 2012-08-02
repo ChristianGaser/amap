@@ -624,7 +624,7 @@ distclose_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter,
   
   /* threshold input */
   for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
-    buffer[index(x+band,y+band,z+band,dims)] = (float)(vol[index(x,y,z,dims)]>th);
+    buffer[index(x+band,y+band,z+band,dims2)] = (float)(vol[index(x,y,z,dims)]>th);
         
   vbdist(buffer, dims2, voxelsize);
   for (i=0;i<dims2[2]*dims2[1]*dims2[0];i++)
@@ -636,7 +636,7 @@ distclose_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter,
 
   /* return image */
   for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
-    vol[index(x,y,z,dims)] = (unsigned char)round(buffer[index(x+band,y+band,z+band,dims)]);
+    vol[index(x,y,z,dims)] = (unsigned char)round(buffer[index(x+band,y+band,z+band,dims2)]);
     
   free(buffer);
 }
@@ -746,14 +746,14 @@ morph_close_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
   
   /* threshold input */
   for (x=0;x<dims[0];x++) for (y=0;y<dims[1];y++) for (z=0;z<dims[2];z++) 
-    buffer[index(x+band,y+band,z+band,dims)] = (vol[index(x,y,z,dims)]>th);
+    buffer[index(x+band,y+band,z+band,dims2)] = (vol[index(x,y,z,dims)]>th);
         
   morph_dilate_uint8(buffer, dims2, niter, 0);
   morph_erode_uint8(buffer, dims2, niter, 0);  
 
   /* return image */
   for (x=0;x<dims[0];x++) for (y=0;y<dims[1];y++) for (z=0;z<dims[2];z++) 
-    vol[index(x,y,z,dims)] = buffer[index(x+band,y+band,z+band,dims)];
+    vol[index(x,y,z,dims)] = buffer[index(x+band,y+band,z+band,dims2)];
     
   free(buffer);
 }
@@ -1205,7 +1205,6 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
   
   if(initial_cleanup) {
     morph_dilate_uint8(mask, dims, 2, 0);
-//    morph_close_uint8( mask, dims, round(scale*15), 0);
     morph_close_uint8( mask, dims, round(scale*5), 0);
     /* remove sinus sagittalis */
     for (i = 0; i < vol; i++)
@@ -1216,7 +1215,7 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
 
     /* fill holes that may remain */
     morph_close_uint8(mask, dims, round(scale*2), 0);
-  } else distclose_uint8( mask, dims, voxelsize, round(scale*0), 0);
+  } else  distclose_uint8( mask, dims, voxelsize, round(scale*5), 0);
 
 }
 

@@ -132,6 +132,7 @@ int main(int argc, char **argv)
 
 	param->level2Perform=param->level2Perform<param->levelNumber?param->level2Perform:param->levelNumber;
 	
+
 	/* Read the target and source images */
     nifti_image *sourceImage = nifti_image_read(param->sourceImageName,true);
     if(sourceImage->data == NULL){
