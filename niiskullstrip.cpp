@@ -240,7 +240,7 @@ int main(int argc, char **argv)
 
     Bayes(src, label, priors, probs, voxelsize, dims, 1);
     
-    int cleanup_strength = 2;
+    int cleanup_strength = 1;
     
     cleanup(probs, label, dims, voxelsize, cleanup_strength, 1);
     

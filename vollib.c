@@ -607,28 +607,36 @@ void
 distclose_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter, double th)
 {
   float *buffer;
-  int i;
+  int i,x,y,z,j,band,dims2[3];
 
-  buffer = (float *)malloc(sizeof(float)*dims[0]*dims[1]*dims[2]);
+  /* add band with zeros to image to avoid clipping */  
+  band = niter;
+  for (i=0;i<3;i++) dims2[i] = dims[i] + 2*band;
+
+  buffer = (float *)malloc(sizeof(float)*dims2[0]*dims2[1]*dims2[2]);
 
   if(buffer == NULL) {
     fprintf(stderr,"Memory allocation error\n");
     exit(EXIT_FAILURE);
   }
   
-  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
-    buffer[i] = (float) (vol[i] > th);
+  memset(buffer,0,sizeof(float)*dims2[0]*dims2[1]*dims2[2]);
+  
+  /* threshold input */
+  for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
+    buffer[index(x+band,y+band,z+band,dims)] = (float)(vol[index(x,y,z,dims)]>th);
         
-  vbdist(buffer, dims, voxelsize);
-  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+  vbdist(buffer, dims2, voxelsize);
+  for (i=0;i<dims2[2]*dims2[1]*dims2[0];i++)
     buffer[i] = buffer[i] > niter;
 
-  vbdist(buffer, dims, voxelsize);
-  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+  vbdist(buffer, dims2, voxelsize);
+  for (i=0;i<dims2[2]*dims2[1]*dims2[0];i++)
     buffer[i] = buffer[i] > niter;
 
-  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
-    vol[i] = (unsigned char)round(buffer[i]);
+  /* return image */
+  for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
+    vol[index(x,y,z,dims)] = (unsigned char)round(buffer[index(x+band,y+band,z+band,dims)]);
     
   free(buffer);
 }
@@ -637,7 +645,7 @@ void
 distopen_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter, double th)
 {
   float *buffer;
-  int i;
+  int i,j;
 
   buffer = (float *)malloc(sizeof(float)*dims[0]*dims[1]*dims[2]);
 
@@ -646,8 +654,9 @@ distopen_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter, 
     exit(EXIT_FAILURE);
   }
   
+  /* threshold input */
   for (i=0;i<dims[2]*dims[1]*dims[0];i++)
-    buffer[i] = 1.0 - (float)(vol[i] > th);
+    buffer[i] = 1.0 - (float)(vol[i]>th);
         
   vbdist(buffer, dims, voxelsize);
   for (i=0;i<dims[2]*dims[1]*dims[0];i++)
@@ -657,9 +666,10 @@ distopen_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter, 
   for (i=0;i<dims[2]*dims[1]*dims[0];i++)
     buffer[i] = buffer[i] < niter;
 
+  /* return image */
   for (i=0;i<dims[2]*dims[1]*dims[0];i++)
     vol[i] = (unsigned char)round(buffer[i]);
-    
+
   free(buffer);
 }
 
@@ -685,83 +695,67 @@ void
 morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
 {
   double filt[3]={1,1,1};
-  int i,x,y,z,j,band,dims2[3];
-  unsigned char *buffer;
+  int i, j;
 
-  /* add band with zeros to image to avoid clipping */  
-  band = niter;
-  band = 0;
-  for (i=0;i<3;i++) dims2[i] = dims[i] + 2*band;
-  
-  buffer = (unsigned char *)malloc(sizeof(unsigned char)*dims2[0]*dims2[1]*dims2[2]);
-
-  if(buffer == NULL) {
-    fprintf(stderr,"Memory allocation error\n");
-    exit(EXIT_FAILURE);
-  }
-
-  memset(buffer,0,sizeof(unsigned char)*dims2[0]*dims2[1]*dims2[2]);
-  
   /* threshold input */
-  for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
-    buffer[((z+band)*dims2[0]*dims2[1])+((y+band)*dims2[0])+x+band] = (vol[(z*dims[0]*dims[1])+(y*dims[0])+x]>th);
+  for (j=0; j<dims[0]*dims[1]*dims[2]; j++) 
+    vol[j] = vol[j]>th;
 
   for (i=0;i<niter;i++) {
-    convxyz_uint8(buffer,filt,filt,filt,3,3,3,-1,-1,-1,buffer,dims);
-    for (j=0;j<dims2[2]*dims2[1]*dims2[0];j++)
-      buffer[j] = (buffer[j]>0);
+    convxyz_uint8(vol,filt,filt,filt,3,3,3,-1,-1,-1,vol,dims);
+    for (j=0; j<dims[0]*dims[1]*dims[2]; j++) 
+      vol[j] = (vol[j]>0);
   }
-  
-  /* return image */
-  for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
-    vol[(z*dims[0]*dims[1])+(y*dims[0])+x] = buffer[((z+band)*dims[0]*dims[1])+((y+band)*dims[0])+x+band];
-  
-  free(buffer);
 }
 
 void
 morph_dilate_double(double *vol, int dims[3], int niter, double th)
 {
   double filt[3]={1,1,1};
-  int i,x,y,z,j,band,dims2[3];
-  double *buffer;
-
-  /* add band with zeros to image to avoid clipping */  
-  band = niter;
-  band = 0;
-  for (i=0;i<3;i++) dims2[i] = dims[i] + 2*band;
-  
-  buffer = (double *)malloc(sizeof(double)*dims2[0]*dims2[1]*dims2[2]);
-
-  if(buffer == NULL) {
-    fprintf(stderr,"Memory allocation error\n");
-    exit(EXIT_FAILURE);
-  }
-
-  memset(buffer,0,sizeof(double)*dims2[0]*dims2[1]*dims2[2]);
+  int i,j;
   
   /* threshold input */
-  for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
-    buffer[((z+band)*dims2[0]*dims2[1])+((y+band)*dims2[0])+x+band] = (vol[(z*dims[0]*dims[1])+(y*dims[0])+x]>th);
+  for (j=0; j<dims[0]*dims[1]*dims[2]; j++) 
+    vol[j] = vol[j]>th;
 
   for (i=0;i<niter;i++) {
-    convxyz_double(buffer,filt,filt,filt,3,3,3,-1,-1,-1,buffer,dims);
-    for (j=0;j<dims2[2]*dims2[1]*dims2[0];j++)
-      buffer[j] = (buffer[j]>0);
+    convxyz_double(vol,filt,filt,filt,3,3,3,-1,-1,-1,vol,dims);
+  for (j=0; j<dims[0]*dims[1]*dims[2]; j++) 
+      vol[j] = (vol[j]>0);
   }
-  
-  /* return image */
-  for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
-    vol[(z*dims[0]*dims[1])+(y*dims[0])+x] = buffer[((z+band)*dims[0]*dims[1])+((y+band)*dims[0])+x+band];
-  
-  free(buffer);
 }
 
 void
 morph_close_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
 {
-  morph_dilate_uint8(vol, dims, niter, th);
-  morph_erode_uint8(vol, dims, niter, 0);  
+  unsigned char *buffer;
+  int i,x,y,z,j,band,dims2[3];
+
+  /* add band with zeros to image to avoid clipping */  
+  band = niter;
+  for (i=0;i<3;i++) dims2[i] = dims[i] + 2*band;
+
+  buffer = (unsigned char *)malloc(sizeof(unsigned char)*dims2[0]*dims2[1]*dims2[2]);
+
+  if(buffer == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  memset(buffer,0,sizeof(unsigned char)*dims2[0]*dims2[1]*dims2[2]);
+  
+  /* threshold input */
+  for (x=0;x<dims[0];x++) for (y=0;y<dims[1];y++) for (z=0;z<dims[2];z++) 
+    buffer[index(x+band,y+band,z+band,dims)] = (vol[index(x,y,z,dims)]>th);
+        
+  morph_dilate_uint8(buffer, dims2, niter, 0);
+  morph_erode_uint8(buffer, dims2, niter, 0);  
+
+  /* return image */
+  for (x=0;x<dims[0];x++) for (y=0;y<dims[1];y++) for (z=0;z<dims[2];z++) 
+    vol[index(x,y,z,dims)] = buffer[index(x+band,y+band,z+band,dims)];
+    
+  free(buffer);
 }
 
 void
@@ -1178,7 +1172,7 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
 
 
   /* use only largest cluster */
-/* not yet working   get_largest_cluster(mask, dims); */
+//  get_largest_cluster(mask, dims);
   
   /* mask computed from gm and wm */
   /* erosions and conditional dilations */
@@ -1207,10 +1201,11 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
     mask[i] = (unsigned char)sum;
   }
 
-  morph_open_uint8(  mask, dims, n_initial_openings, 0);
+  morph_open_uint8(mask, dims, n_initial_openings, 0);
   
   if(initial_cleanup) {
     morph_dilate_uint8(mask, dims, 2, 0);
+//    morph_close_uint8( mask, dims, round(scale*15), 0);
     morph_close_uint8( mask, dims, round(scale*5), 0);
     /* remove sinus sagittalis */
     for (i = 0; i < vol; i++)
@@ -1221,7 +1216,7 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
 
     /* fill holes that may remain */
     morph_close_uint8(mask, dims, round(scale*2), 0);
-  } else distclose_uint8( mask, dims, voxelsize, round(scale*10), 0);
+  } else distclose_uint8( mask, dims, voxelsize, round(scale*0), 0);
 
 }
 

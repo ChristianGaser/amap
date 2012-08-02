@@ -67,7 +67,7 @@ int translate_labels(unsigned int    *il,     /* Map of initial labels. */
                         int             dim[3],  /* Dimensions of il. */
                         unsigned int    *tt,     /* Translation table. */
                         unsigned int    ttn,     /* Size of translation table. */
-                        double          *l);     /* Final map of labels. */
+                        unsigned int    *l);     /* Final map of labels. */
 
 
 
@@ -256,19 +256,19 @@ int translate_labels(unsigned int    *il,     /* Map of initial labels. */
                         int             dim[3],  /* Dimensions of il. */
                         unsigned int    *tt,     /* Translation table. */
                         unsigned int    ttn,     /* Size of translation table. */
-                        double          *l)      /* Final map of labels. */
+                        unsigned int    *l)      /* Final map of labels. */
 {
    int            n=0;
    int            i=0;
    unsigned int   ml=0;
-   double         cl = 0.0;
-   double         *fl = NULL;
+   unsigned int   cl = 0;
+   unsigned int   *fl = NULL;
 
    n = dim[0]*dim[1]*dim[2];
 
    for (i=0; i<ttn; i++) {ml = MAX(ml,tt[i]);}
 
-   fl = (double *) malloc(ml*sizeof(double)); 
+   fl = (unsigned int *) malloc(ml*sizeof(unsigned int)); 
    if(fl == NULL) {
      fprintf(stderr,"Memory allocation error\n");
      exit(EXIT_FAILURE);
@@ -280,7 +280,7 @@ int translate_labels(unsigned int    *il,     /* Map of initial labels. */
       {
          if (!fl[tt[il[i]-1]-1])
          {
-            cl += 1.0; 
+            cl ++; 
             fl[tt[il[i]-1]-1] = cl;
          }
          l[i] = fl[tt[il[i]-1]-1];
@@ -297,21 +297,24 @@ int translate_labels(unsigned int    *il,     /* Map of initial labels. */
 
 void get_largest_cluster(unsigned char *bw, int dim[3])
 {
-   int            n, i, j, count[1000],max_count = -1, nl = 0;
+   int            n, i, j, count[1000], max_count = -1, nl = 0;
    unsigned int   conn = 26;
    unsigned int   ttn = 0;
    unsigned int   *il = NULL;
    unsigned int   *tt = NULL;
    unsigned char   *bw_bak = NULL;
-   unsigned char  ind_max = 0;
-   double         *l = NULL;
+   unsigned int    ind_max = 0;
+   unsigned int    *l = NULL;
 
    n = dim[0]*dim[1]*dim[2];
 
    /* Allocate memory for initial labelling map. */
-   l  = (double *) malloc(n*sizeof(double));
+   l  = (unsigned int *) malloc(n*sizeof(unsigned int));
    il = (unsigned int *) malloc(n*sizeof(unsigned int));
    bw_bak = (unsigned char *) malloc(n*sizeof(unsigned char));
+
+   memset(l, 0,n*sizeof(unsigned int));
+   memset(il,0,n*sizeof(unsigned int));
 
    if((l == NULL) || (il == NULL) || (bw_bak == NULL)) {
      fprintf(stderr,"Memory allocation error\n");
@@ -339,15 +342,15 @@ void get_largest_cluster(unsigned char *bw, int dim[3])
    {
      if (count[j] > max_count)
      {
-       ind_max = (unsigned char)j;
+       ind_max = j;
        max_count = count[j];
      }
    }
    
    for (i=0; i<n; i++)
-     if((unsigned char)l[i] != ind_max) bw[i] = 0;
+     if(l[i] != ind_max) bw[i] = 0;
      else bw[i] = bw_bak[i];
-
+     
    free(il);
    free(tt);
    free(l);

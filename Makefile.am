@@ -176,6 +176,7 @@ if EBTKS
 	  Amap.c \
 	  Kmeans.c \
 	  Pve.c \
+	  bwlabel.c \
 	  MrfPrior.c \
 	  sanlm.c \
 	  $(nifti_SOURCES) \
@@ -193,6 +194,7 @@ if EBTKS
 	  MrfPrior.c \
 	  Pve.c \
 	  Bayes.c \
+	  bwlabel.c \
 	  WarpPriors.c \
 	  diffeo3d.c \
 	  optimizer3d.c \
@@ -239,6 +241,7 @@ else
 	  Amap.c \
 	  Kmeans.c \
 	  Pve.c \
+	  bwlabel.c \
 	  MrfPrior.c \
 	  sanlm.c \
 	  $(nifti_SOURCES) \
@@ -254,6 +257,7 @@ niiskullstrip_SOURCES = \
 	MrfPrior.c \
 	Pve.c \
 	Bayes.c \
+    bwlabel.c \
 	WarpPriors.c \
 	diffeo3d.c \
 	optimizer3d.c \

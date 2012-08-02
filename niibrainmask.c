@@ -6,6 +6,7 @@
 
 #include "ParseArgv.h"
 #include "niilib.h"
+#include "vollib.h"
 #include "niibrainmask.h"
 #include "Amap.h"
 #include "niiamap.h"
