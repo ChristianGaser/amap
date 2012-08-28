@@ -148,7 +148,7 @@ parallelize_xserves ()
       j=$(($i+1))
       echo job ${j}/"$NUMBER_OF_SERVERS":
       echo $COMMAND ${ARG_LIST[$i]}
-      ssh ${x} "bash -c $COMMAND ${ARG_LIST[$i]}"
+      bash -c "ssh ${x} $COMMAND ${ARG_LIST[$i]}"
     fi
     ((i++))
   done
