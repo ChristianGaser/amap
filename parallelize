@@ -9,6 +9,7 @@ COMMAND=""
 TEST=""
 CPUINFO=/proc/cpuinfo
 ARCH=`uname`
+LOGDIR=$PWD
 time=`date "+%Y%b%d_%H%M"`
 
 ########################################################
@@ -46,6 +47,11 @@ parse_args ()
         --processes* | -p*)
             exit_if_empty "$optname" "$optarg"
             NUMBER_OF_JOBS=$optarg
+            shift
+            ;;
+        --logdir* | -l*)
+            exit_if_empty "$optname" "$optarg"
+            LOGDIR=$optarg
             shift
             ;;
         --test* | -t*)
@@ -182,7 +188,7 @@ parallelize ()
   done
 
   time=`date "+%Y%b%d_%H%M"`
-  log=parallelize_${time}.log
+  log=${LOGDIR}/parallelize_${HOSTNAME}_${time}.log
   if [ "${TEST}" == "" ]; then
     echo Check $log for logging information
     echo > $log
@@ -220,6 +226,7 @@ USAGE:
    -p   number of parallel jobs (=number of processors)
    -c   command that should be parallelized
    -t   do not call command, but print files to be processed
+   -l   directory where log-file will be saved
 
    Only one filename or pattern is allowed. This can be either a single file or a pattern
    with wildcards to process multiple files. Optionally you can set number of processes,
@@ -229,7 +236,7 @@ PURPOSE:
    Parallelize a job or command
 
 OUTPUT:
-   parallelize_${time}.log with current data and time in name as log-file
+   parallelize_${HOSTNAME}_${time}.log with current data and time in name as log-file
 
 EXAMPLE
    parallelize -c "niismooth -v -fwhm 8" sTRIO*.nii

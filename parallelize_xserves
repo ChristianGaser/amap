@@ -148,7 +148,7 @@ parallelize_xserves ()
       j=$(($i+1))
       echo job ${j}/"$NUMBER_OF_SERVERS":
       echo $COMMAND ${ARG_LIST[$i]}
-      bash -c "ssh ${x} $COMMAND ${ARG_LIST[$i]}"
+      ssh ${x} "bash -c $COMMAND ${ARG_LIST[$i]}"
     fi
     ((i++))
   done
@@ -164,7 +164,7 @@ help ()
 cat <<__EOM__
 
 USAGE:
-  parallize [-s server] -c command_to_parallelize_xserves filename|filepattern
+  parallelize_xserves [-s server] -c command_to_parallelize_xserves filename|filepattern
   
    -c   command that should be parallelized
    -s   server list
@@ -190,7 +190,8 @@ EXAMPLE
 
    parallelize_xserves -c "/Volumes/UltraMax/bin/parallelize -c /Volumes/UltraMax/niismooth" /Volumes/UltraMax/IXI-database/raw/rp1IXI*nii
 
-   parallelize_xserves -s "141.35.68.68 141.35.68.71 141.35.68.73 141.35.68.74 141.35.68.75" -c "/Volumes/UltraMax/bin/parallelize -c /Volumes/UltraMax/subjects/recon-all-cg-no_skullstripping" /Volumes/UltraMax/MEDI_50_50/data/[MU]*.img
+   parallelize_xserves -s "141.35.68.68 141.35.68.71 141.35.68.73 141.35.68.74 141.35.68.75" -c "/Volumes/UltraMax/bin/parallelize -l /Volumes/UltraMax -c /Volumes/UltraMax/subjects/recon-all-cg-no_skullstripping" /Volumes/UltraMax/MEDI_50_50/data/[MU]*.img
+   recon-all files in /Volumes/UltraMax/MEDI_50_50/data/[MU]*.img and save log-files in /Volumes/UltraMax
 
 This script was written by Christian Gaser (christian.gaser@uni-jena.de).
 This is ${version}.

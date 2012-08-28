@@ -647,6 +647,8 @@ distopen_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter, 
   float *buffer;
   int i,j;
 
+  if (niter == 0); return;
+  
   buffer = (float *)malloc(sizeof(float)*dims[0]*dims[1]*dims[2]);
 
   if(buffer == NULL) {
@@ -731,6 +733,8 @@ morph_close_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
   unsigned char *buffer;
   int i,x,y,z,j,band,dims2[3];
 
+  if (niter == 0); return;
+
   /* add band with zeros to image to avoid clipping */  
   band = niter;
   for (i=0;i<3;i++) dims2[i] = dims[i] + 2*band;
@@ -761,6 +765,8 @@ morph_close_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
 void
 morph_open_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
 {
+  if (niter == 0); return;
+
   morph_erode_uint8(vol, dims, niter, th);
   morph_dilate_uint8(vol, dims, niter, 0);
 }
@@ -770,6 +776,8 @@ morph_close_double(double *vol, int dims[3], int niter, double th)
 {
   unsigned char *buffer;
   int i;
+
+  if (niter == 0); return;
 
   buffer = (unsigned char *)malloc(sizeof(unsigned char)*dims[0]*dims[1]*dims[2]);
 
@@ -794,6 +802,8 @@ morph_open_double(double *vol, int dims[3], int niter, double th)
 {
   unsigned char *buffer;
   int i;
+
+  if (niter == 0); return;
 
   buffer = (unsigned char *)malloc(sizeof(unsigned char)*dims[0]*dims[1]*dims[2]);
 
