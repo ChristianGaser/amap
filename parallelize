@@ -37,7 +37,7 @@ parse_args ()
   while [ $# -gt 0 ]
   do
     optname="`echo $1 | sed 's,=.*,,'`"
-    optarg="`echo $2 | sed 's,^[^=]*=,,'`"
+    optarg="$2"
     case "$1" in
         --command* | -c*)
             exit_if_empty "$optname" "$optarg"
@@ -221,7 +221,7 @@ help ()
 cat <<__EOM__
 
 USAGE:
-  parallelize [-p number_of_processes] [-t] -c command_to_parallelize filename|filepattern
+  parallelize [-p number_of_processes] [-l log_folder] [-t] -c command_to_parallelize filename|filepattern
   
    -p   number of parallel jobs (=number of processors)
    -c   command that should be parallelized
@@ -240,11 +240,11 @@ OUTPUT:
 
 EXAMPLE
    parallelize -c "niismooth -v -fwhm 8" sTRIO*.nii
-   Parallelize smoothing with fwhm of 8mm for all files sTRIO*.nii. Use
-   verbose mode to see diagnostic output.
+     Parallelize smoothing with fwhm of 8mm for all files sTRIO*.nii. Use
+     verbose mode to see diagnostic output.
    
    parallelize -c gunzip *.zip
-   Parallelize unzipping of all zip-files in current folder. 
+     Parallelize unzipping of all zip-files in current folder. 
 
 This script was written by Christian Gaser (christian.gaser@uni-jena.de).
 This is ${version}.
