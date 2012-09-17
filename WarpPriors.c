@@ -42,7 +42,7 @@ void WarpPriors(unsigned char *prob, unsigned char *priors, float *flow, int *di
 
   /* define grid dimensions */
   for(j=0; j<3; j++) dims_samp[j] = (int) ceil((dims[j]-1)/((double) samp))+1;
-  
+
   /* find grid point conversion factor */
   samp_1 = 1.0/((double) samp);
 
@@ -90,14 +90,26 @@ void WarpPriors(unsigned char *prob, unsigned char *priors, float *flow, int *di
   }
   
   /* subsample priors and probabilities to lower resolution */
-  for (i = 0; i < n_classes; i++) {
-    subsample_uint8(priors, f, dims, dims_samp, i*vol, i*vol_samp);    
-    subsample_uint8(prob  , g, dims, dims_samp, i*vol, i*vol_samp);    
+  if (samp==1) {
+      for (i = 0; i < vol*n_classes; i++) {
+        f[i] = priors[i];
+        g[i] = prob[i];
+      }
+  } else {
+    for (i = 0; i < n_classes; i++) {
+      subsample_uint8(priors, f, dims, dims_samp, i*vol, i*vol_samp);    
+      subsample_uint8(prob  , g, dims, dims_samp, i*vol, i*vol_samp);   
+    } 
   }
 
   /* subsample initial flow field to lower resolution */
-  for (i = 0; i < 3; i++) {
-    subsample_float(flow, v, dims, dims_samp, i*vol, i*vol_samp);    
+  if (samp==1) {
+      for (i = 0; i < vol*3; i++)
+        v[i] = flow[i];
+  } else {
+    for (i = 0; i < 3; i++) {
+      subsample_float(flow, v, dims, dims_samp, i*vol, i*vol_samp);    
+    }
   }
 
   /* scale subsampled probabilities to a maximum of 0.5 */
@@ -131,8 +143,13 @@ void WarpPriors(unsigned char *prob, unsigned char *priors, float *flow, int *di
   
   /* upsample flow field */
   flow2  = (float *)malloc(sizeof(float)*3*vol);
-  for (i = 0; i < 3; i++) {
-    subsample_float(v, flow2, dims_samp, dims, i*vol, i*vol_samp);    
+  if (samp==1) {
+      for (i = 0; i < vol*3; i++) 
+        flow2[i] = v[i];
+  } else {
+    for (i = 0; i < 3; i++) {
+      subsample_float(v, flow2, dims_samp, dims, i*vol, i*vol_samp);    
+    }
   }
 
   free(v);
@@ -155,7 +172,7 @@ void WarpPriors(unsigned char *prob, unsigned char *priors, float *flow, int *di
 
   /* apply deformation field to priors */
   for (i = 0; i < vol; i++) {
-    sampn(dims, priors_float, n_classes, vol, flow[i]-1.0, flow[i+vol]-1.0, flow[i+(2*vol)]-1.0, buf);
+    sampn(dims, priors_float, n_classes, vol, (double)flow[i]-1.0, (double)flow[i+vol]-1.0, (double)flow[i+(2*vol)]-1.0, buf);
     for (j = 0; j < n_classes; j++) priors[i + (j*vol)] = (unsigned char)MIN(255,ROUND(buf[j]));
   }
 

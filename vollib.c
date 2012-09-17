@@ -914,7 +914,7 @@ void subsample_float(float *in, float *out, int dim_in[3], int dim_out[3], int o
   double k111,k112,k121,k122,k211,k212,k221,k222;
   double dx1, dx2, dy1, dy2, dz1, dz2, xi, yi, zi, samp[3];
   int off1, off2, xcoord, ycoord, zcoord;
-
+    
   for (i=0; i<3; i++) {
     if(dim_out[i] > dim_in[i]) samp[i] = ceil((double)dim_out[i]/(double)dim_in[i]);
     else                       samp[i] = 1.0/(ceil((double)dim_in[i]/(double)dim_out[i]));
@@ -1180,10 +1180,10 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
       mask[i] = probs[i + WM*vol];
     else mask[i] = 0;
 
-
   /* use only largest cluster */
-//  get_largest_cluster(mask, dims);
+  get_largest_cluster(mask, dims);
   
+if (1==9) {
   /* mask computed from gm and wm */
   /* erosions and conditional dilations */
   for (iter=0; iter < niter; iter++) {
@@ -1214,8 +1214,8 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
   morph_open_uint8(mask, dims, n_initial_openings, 0);
   
   if(initial_cleanup) {
-    morph_dilate_uint8(mask, dims, 2, 0);
-    morph_close_uint8( mask, dims, round(scale*5), 0);
+    morph_dilate_uint8(mask, dims, round(scale*2), 0);
+    morph_close_uint8( mask, dims, round(scale*10), 0);
     /* remove sinus sagittalis */
     for (i = 0; i < vol; i++)
       mask[i] = mask[i] && ( (probs[i + SKULL2*vol] < probs[i + GM*vol]) ||
@@ -1226,7 +1226,7 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
     /* fill holes that may remain */
     morph_close_uint8(mask, dims, round(scale*2), 0);
   } else  distclose_uint8( mask, dims, voxelsize, round(scale*5), 0);
-
+}
 }
 
 /* qicksort */

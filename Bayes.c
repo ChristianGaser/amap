@@ -201,6 +201,9 @@ void Bayes(float *src, unsigned char *label, unsigned char *priors, unsigned cha
         }
       } 
       
+n_loops = 3;
+if (do_warp && (subit==0) && (j==1)) fprintf(stderr,"n_loops: %d\n",n_loops);
+
       if (do_warp && (subit==0) && (j==1)) WarpPriors(prob, priors, flow, dims, n_loops, Kb, subsample_warp);
           
       for (k=0; k<K; k++) {
@@ -311,9 +314,7 @@ void Bayes(float *src, unsigned char *label, unsigned char *priors, unsigned cha
     free(nu);
     free(meaninvcov);
     free(resmean);
-  }
-//  for (i=0; i<vol; i++) src[i] = nu[i];
-  
+  }  
     
   return;
 }  

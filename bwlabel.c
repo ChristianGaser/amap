@@ -297,18 +297,19 @@ int translate_labels(unsigned int    *il,     /* Map of initial labels. */
 
 void get_largest_cluster(unsigned char *bw, int dim[3])
 {
-   int            n, i, j, count[1000], max_count = -1, nl = 0;
+   int            n, i, j, *count, max_count = -1, nl = 0;
+   int            ind_max = 0;
    unsigned int   conn = 26;
    unsigned int   ttn = 0;
    unsigned int   *il = NULL;
    unsigned int   *tt = NULL;
    unsigned char   *bw_bak = NULL;
-   unsigned int    ind_max = 0;
    unsigned int    *l = NULL;
 
    n = dim[0]*dim[1]*dim[2];
 
    /* Allocate memory for initial labelling map. */
+   count  = (int *) malloc(65536*sizeof(int));
    l  = (unsigned int *) malloc(n*sizeof(unsigned int));
    il = (unsigned int *) malloc(n*sizeof(unsigned int));
    bw_bak = (unsigned char *) malloc(n*sizeof(unsigned char));
@@ -332,10 +333,15 @@ void get_largest_cluster(unsigned char *bw, int dim[3])
    /* Translate labels to terminal numbers. */
    nl = translate_labels(il,dim,tt,ttn,l);
 
+nl = 65535;
    for (j=0; j<nl; j++) count[j] = 0;
    
    /* count cluster sizes */
-   for (i=0; i<n; i++) if(l[i]>0) count[(unsigned char)l[i]]++;
+//   for (i=0; i<n; i++) if(l[i]>0) count[(unsigned int)l[i]]++;
+   for (i=0; i<n; i++) if(l[i]>0) {
+   fprintf(stderr,"%d\n",l[i]);
+   count[(unsigned int)l[i]]++;
+   }
    
    /* find index of largest cluster */
    for (j=0; j<nl; j++) 
@@ -346,11 +352,13 @@ void get_largest_cluster(unsigned char *bw, int dim[3])
        max_count = count[j];
      }
    }
-   
-   for (i=0; i<n; i++)
-     if(l[i] != ind_max) bw[i] = 0;
-     else bw[i] = bw_bak[i];
-     
+
+fprintf(stderr,"\n%d %d\n\n",max_count,ind_max);   
+   for (i=0; i<n; i++) {
+     if(l[i] == ind_max) bw[i] = bw_bak[i];
+     else bw[i] = 0;
+   }
+
    free(il);
    free(tt);
    free(l);

@@ -239,12 +239,22 @@ int main(int argc, char **argv)
     
     double slope = 1.0;
 
-    Bayes(src, label, priors, probs, voxelsize, dims, 1);
-    
+    Bayes(src, label, priors, probs, voxelsize, dims, 0);
+
     int cleanup_strength = 1;
     
     cleanup(probs, label, dims, voxelsize, cleanup_strength, 1);
     
+float *tmp           = (float *)malloc(sizeof(float)*sourceImage->nvox);
+for (int i = 0; i < sourceImage->nvox; i++)
+tmp[i] = (float)label[i];
+
+if(!write_nifti_float("label.nii", tmp, NIFTI_TYPE_UINT8, slope, 
+            dims, voxelsize, sourceImage))
+      exit(EXIT_FAILURE);
+
+free(tmp);    
+
 int n_pure_classes = 3;
 int iters_amap = 200;
 int subsample = 16;
