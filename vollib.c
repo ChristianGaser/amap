@@ -1158,6 +1158,89 @@ smooth_subsample_float(float *vol, int dims[3], double separations[3], double s[
 }
 
 void
+get_largest_component(unsigned char *label, int *dims)
+{
+  int vol, area, i, x, y, z;
+  unsigned char *marker, *init_mask;
+  
+  vol = dims[0]*dims[1]*dims[2];
+  area = dims[0]*dims[1];
+  
+  marker    = (unsigned char *)malloc(sizeof(unsigned char)*vol);
+  init_mask = (unsigned char *)malloc(sizeof(unsigned char)*vol);
+
+  for (i = 0; i < vol; i++) {
+    init_mask[i] = label[i];
+    marker[i] = 0;
+  }
+  
+  /* find somewhere around the center a seed voxel and break */
+  for (z = ((int)dims[2]/2) - 5; z < ((int)dims[2]/2) + 5; z++) 
+    for (y = ((int)dims[1]/2) - 5; y < ((int)dims[1]/2) + 5; y++) 
+      for (x = ((int)dims[0]/2) - 5; x < ((int)dims[0]/2) + 5; x++) 
+        if (init_mask[z*area + y*dims[0] + x] > 128) break;
+        
+  /* mark only this as seed voxel */      
+  marker[z*area + y*dims[0] + x] = 1;
+
+  /* set marker at border to 2 */
+  for (z = 0; z < 2; z++) for (y = 0; y < dims[1]; y++) for (x = 0; x < dims[0]; x++) 
+    marker[z*area + y*dims[0] + x] = 2;
+  for (z = 0; z < dims[2]; z++) for (y = 0; y < 2; y++) for (x = 0; x < dims[0]; x++) 
+    marker[z*area + y*dims[0] + x] = 2;
+  for (z = 0; z < dims[2]; z++) for (y = 0; y < dims[1]; y++) for (x = 0; x < 2; x++) 
+    marker[z*area + y*dims[0] + x] = 2;
+  for (z = dims[2]-2; z < dims[2]; z++) for (y = 0; y < dims[1]; y++) for (x = 0; x < dims[0]; x++)
+    marker[z*area + y*dims[0] + x] = 2;
+  for (z = 0; z < dims[2]; z++) for (y = dims[1]-2; y < dims[1]; y++) for (x = 0; x < dims[0]; x++)
+    marker[z*area + y*dims[0] + x] = 2;
+  for (z = 0; z < dims[2]; z++) for (y = 0; y < dims[1]; y++) for (x = dims[0]-2; x < dims[0]; x++)
+    marker[z*area + y*dims[0] + x] = 2;
+
+  watershed3d(init_mask,marker,0,dims);
+  
+  /* mask out original label */
+  for (i = 0; i < vol; i++) if(init_mask[i] == 0) label[i] = 0;
+
+  free(marker);
+  free(init_mask);
+}
+
+void
+fill_holes(unsigned char *label, int *dims)
+{
+  int vol, i;
+  unsigned char *marker, *init_mask;
+  
+  vol = dims[0]*dims[1]*dims[2];
+  
+  marker    = (unsigned char *)malloc(sizeof(unsigned char)*vol);
+  init_mask = (unsigned char *)malloc(sizeof(unsigned char)*vol);
+
+  for (i = 0; i < vol; i++) {
+    if(label[i] == 0) {
+      init_mask[i] = 255;
+      marker[i] = 0;
+    } else {
+      init_mask[i] = 0;
+      marker[i] = 2;
+    }
+  }
+
+  /* set seed voxel */
+  marker[0] = 1;
+  
+  watershed3d(init_mask,marker,0,dims);
+  
+  /* mask out original label */
+//  for (i = 0; i < vol; i++) if(init_mask[i] == 0) label[i] = 1;
+  for (i = 0; i < vol; i++) label[i] = init_mask[i];
+
+  free(marker);
+  free(init_mask);
+}
+
+void
 cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize, int strength, int initial_cleanup)
 {
   
@@ -1170,7 +1253,7 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
   niter = 45;
   th_final  =  13;   /* final threshold for masking 0.05*255.0 */
   th_erode  = 153;   /* initial threshold for erosion 0.6*255.0 */
-  th_dilate = (strength + 1)*16; /* threshold for dilation */
+  th_dilate = (5*strength + 1)*16; /* threshold for dilation */
   
   vol = dims[0]*dims[1]*dims[2];
 
@@ -1181,9 +1264,12 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
     else mask[i] = 0;
 
   /* use only largest cluster */
-  get_largest_cluster(mask, dims);
+  get_largest_component(mask, dims);
+
+  /* use masked WM image for all subsequent operations */
+  for( i = 0;  i < vol;  ++i ) probs[i + WM*vol] = mask[i];
   
-if (1==9) {
+if (1==1) {
   /* mask computed from gm and wm */
   /* erosions and conditional dilations */
   for (iter=0; iter < niter; iter++) {
@@ -1204,7 +1290,9 @@ if (1==9) {
     convxyz_uint8(mask,filt,filt,filt,3,3,3,-1,-1,-1,mask,dims);
   }
   
+  fill_holes(mask, dims);
 
+if (1==0) {
   for( i = 0;  i < vol;  ++i ) {
     /* mask = ((mask>th_final).*(GM+WM))>th_final */
     sum = (((double)mask[i] > th_final)*(double)probs[i + GM*vol] + (double)probs[i + WM*vol]) > th_final;
@@ -1215,7 +1303,7 @@ if (1==9) {
   
   if(initial_cleanup) {
     morph_dilate_uint8(mask, dims, round(scale*2), 0);
-    morph_close_uint8( mask, dims, round(scale*10), 0);
+    morph_close_uint8( mask, dims, round(scale*15), 0);
     /* remove sinus sagittalis */
     for (i = 0; i < vol; i++)
       mask[i] = mask[i] && ( (probs[i + SKULL2*vol] < probs[i + GM*vol]) ||
@@ -1226,6 +1314,7 @@ if (1==9) {
     /* fill holes that may remain */
     morph_close_uint8(mask, dims, round(scale*2), 0);
   } else  distclose_uint8( mask, dims, voxelsize, round(scale*5), 0);
+}
 }
 }
 

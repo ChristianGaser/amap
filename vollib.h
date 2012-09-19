@@ -38,6 +38,9 @@
 #define SKULL2 4
 
 void
+watershed3d(unsigned char *img, unsigned char *marker, int flag_dilate, int *dims);
+
+void
 morph_erode_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th);
 
 void
@@ -85,5 +88,7 @@ median3_uint8(unsigned char *D, int *dims);
 void
 get_largest_cluster(unsigned char *bw, int dim[3]);
 
+void
+get_largest_component(unsigned char *bw, int dim[3]);
 
 #endif

@@ -196,6 +196,7 @@ if EBTKS
 	  Bayes.c \
 	  bwlabel.c \
 	  WarpPriors.c \
+      Watershed3d.c \
 	  diffeo3d.c \
 	  optimizer3d.c \
 	  vollib.c \
@@ -259,6 +260,7 @@ niiskullstrip_SOURCES = \
 	Bayes.c \
     bwlabel.c \
 	WarpPriors.c \
+	Watershed3d.c \
 	diffeo3d.c \
 	optimizer3d.c \
 	vollib.c \
