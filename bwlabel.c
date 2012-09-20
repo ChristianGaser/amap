@@ -295,56 +295,7 @@ int translate_labels(unsigned int    *il,     /* Map of initial labels. */
 
 /* Gateway function with error check. */
 
-void get_largest_cluster2(unsigned char *bw, int dim[3])
-{
-   int            n, i, j, max_count = -1, nl = 0;
-   int            ind_max = 0;
-   unsigned int   conn = 26;
-   unsigned int   ttn = 0;
-   unsigned int   *il = NULL;
-   unsigned int   *tt = NULL;
-   unsigned char   *bw_bak = NULL;
-   unsigned int    *l = NULL;
-
-   n = dim[0]*dim[1]*dim[2];
-
-   /* Allocate memory for initial labelling map. */
-   l  = (unsigned int *) malloc(n*sizeof(unsigned int));
-   il = (unsigned int *) malloc(n*sizeof(unsigned int));
-   bw_bak = (unsigned char *) malloc(n*sizeof(unsigned char));
-
-   memset(l, 0,n*sizeof(unsigned int));
-   memset(il,0,n*sizeof(unsigned int));
-
-   if((l == NULL) || (il == NULL) || (bw_bak == NULL)) {
-     fprintf(stderr,"Memory allocation error\n");
-     exit(EXIT_FAILURE);
-   }
-
-   /* rescue bw */
-   for (i=0; i<n; i++) bw_bak[i] = bw[i];
-
-   for (i=0; i<n; i++) if(bw[i]>0) bw[i] = 1;
-
-   /* Do initial labelling and create translation table. */
-   ttn = do_initial_labelling(bw,dim,conn,il,&tt);
-
-   /* Translate labels to terminal numbers. */
-   nl = translate_labels(il,dim,tt,ttn,l);
-   fprintf(stderr,"ttn=%d\tdim=%d/%d/%d\tnl=%d\n\n",ttn,dim[0],dim[1],dim[2],nl);
-
-   for (i=0; i<n; i++) bw[i] = (unsigned char)l[i];
-
-   free(il);
-   free(tt);
-   free(l);
-   free(bw_bak);
-   
-   return;
-}
-
-
-void get_largest_cluster(unsigned char *bw, int dim[3])
+void fill_cluster(unsigned char *bw, int dim[3])
 {
    int            n, i, j, *count, max_count = -1, nl = 0;
    int            ind_max = 0;
@@ -374,14 +325,13 @@ void get_largest_cluster(unsigned char *bw, int dim[3])
    /* rescue bw */
    for (i=0; i<n; i++) bw_bak[i] = bw[i];
 
-   for (i=0; i<n; i++) if(bw[i]>0) bw[i] = 1;
+   for (i=0; i<n; i++) if(bw[i]>0) bw[i] = 0; else bw[i] = 1;
 
    /* Do initial labelling and create translation table. */
    ttn = do_initial_labelling(bw,dim,conn,il,&tt);
 
    /* Translate labels to terminal numbers. */
    nl = translate_labels(il,dim,tt,ttn,l);
-   fprintf(stderr,"ttn=%d\tdim=%d/%d/%d\tnl=%d\n\n",ttn,dim[0],dim[1],dim[2],nl);
 
    for (j=0; j<ttn; j++) count[j] = 0;
    
@@ -398,7 +348,74 @@ void get_largest_cluster(unsigned char *bw, int dim[3])
      }
    }
 
-fprintf(stderr,"\n%d %d\n\n",max_count,ind_max);   
+   for (i=0; i<n; i++) {
+     if(l[i] == ind_max) bw[i] = 0;
+     else bw[i] = 255;
+   }
+
+   free(il);
+   free(tt);
+   free(l);
+   free(bw_bak);
+   
+   return;
+}
+
+
+void get_largest_cluster(unsigned char *bw, int dim[3])
+{
+   int            n, i, j, *count, max_count = -1, nl = 0;
+   int            ind_max = 0;
+   unsigned int   conn = 26;
+   unsigned int   ttn = 0;
+   unsigned int   *il = NULL;
+   unsigned int   *tt = NULL;
+   unsigned char   *bw_bak = NULL;
+   unsigned int    *l = NULL, l_max = 0;
+
+   n = dim[0]*dim[1]*dim[2];
+
+   /* Allocate memory for initial labelling map. */
+   count  = (int *) malloc(65536*sizeof(int));
+   l  = (unsigned int *) malloc(n*sizeof(unsigned int));
+   il = (unsigned int *) malloc(n*sizeof(unsigned int));
+   bw_bak = (unsigned char *) malloc(n*sizeof(unsigned char));
+
+   memset(l, 0,n*sizeof(unsigned int));
+   memset(il,0,n*sizeof(unsigned int));
+
+   if((l == NULL) || (il == NULL) || (bw_bak == NULL)) {
+     fprintf(stderr,"Memory allocation error\n");
+     exit(EXIT_FAILURE);
+   }
+
+   /* rescue bw */
+   for (i=0; i<n; i++) bw_bak[i] = bw[i];
+
+   for (i=0; i<n; i++) if(bw[i]>0) bw[i] = 1;
+
+   /* Do initial labelling and create translation table. */
+   ttn = do_initial_labelling(bw,dim,conn,il,&tt);
+
+   /* Translate labels to terminal numbers. */
+   nl = translate_labels(il,dim,tt,ttn,l);
+   
+   for (j=0; j<ttn; j++) count[j] = 0;
+   
+   /* count cluster sizes */
+   for (i=0; i<n; i++) if(l[i]>0) count[l[i]]++;
+   
+   /* find index of largest cluster */
+   for (j=0; j<ttn; j++) 
+   {
+     if (count[j] > max_count)
+     {
+       ind_max = j;
+       max_count = count[j];
+     }
+   }
+
+fprintf(stderr,"\n%d/%d %d\n\n",l_max,max_count,ind_max);   
    for (i=0; i<n; i++) {
      if(l[i] == ind_max) bw[i] = bw_bak[i];
      else bw[i] = 0;

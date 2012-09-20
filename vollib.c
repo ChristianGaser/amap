@@ -1265,6 +1265,7 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
 
   /* use only largest cluster */
   get_largest_component(mask, dims);
+//  get_largest_cluster(mask, dims);
 
   /* use masked WM image for all subsequent operations */
   for( i = 0;  i < vol;  ++i ) probs[i + WM*vol] = mask[i];
@@ -1290,7 +1291,9 @@ if (1==1) {
     convxyz_uint8(mask,filt,filt,filt,3,3,3,-1,-1,-1,mask,dims);
   }
   
-  fill_holes(mask, dims);
+//  fill_holes(mask, dims);
+  fill_cluster(mask, dims);
+distclose_uint8( mask, dims, voxelsize, round(scale*5), 0);
 
 if (1==0) {
   for( i = 0;  i < vol;  ++i ) {
