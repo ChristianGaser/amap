@@ -264,8 +264,8 @@ if(!write_nifti_float(buffer, tmp, NIFTI_TYPE_UINT8, slope,
             dims, voxelsize, sourceImage))
       exit(EXIT_FAILURE);
 }
-*/
 free(tmp);    
+*/
 
 int n_pure_classes = 3;
 int iters_amap = 200;
@@ -299,6 +299,7 @@ double max_vol = -1e15, offset, mean[6];
     max_vol = Kmeans( src, label, mask, 25, n_pure_classes, voxelsize, dims, thresh, thresh_kmeans_int, iters_nu, NOPVE,  bias_fwhm);
     free(mask);
     Amap( src, label, probs, mean, n_pure_classes, iters_amap, subsample, dims, pve, weight_MRF, voxelsize, iters_ICM, offset);
+
     if(pve==6) Pve6(src, probs, label, mean, dims);
     if(pve==5) Pve5(src, probs, label, mean, dims);
 
@@ -311,12 +312,20 @@ double max_vol = -1e15, offset, mean[6];
         probs[i+sourceImage->nvox*j] = temp[order_tissue[j]];
     }
 
+fprintf(stderr,".");
     cleanup(probs, label, dims, voxelsize, cleanup_strength, 0);
 
+fprintf(stderr,".");
     for (int i = 0; i < sourceImage->nvox; i++)
       src[i] = (float)label[i];
 
-    if(!write_nifti_float(param->outputMaskName, src, NIFTI_TYPE_UINT8, slope, 
+    if(!write_nifti_float("test.nii", src, NIFTI_TYPE_UINT8, slope, 
+            dims, voxelsize, sourceImage))
+      exit(EXIT_FAILURE);
+fprintf(stderr,".");
+fprintf(stderr,"%s\n",param->outputMaskName);
+
+    if(!write_nifti_float(param->outputMaskName, src, NIFTI_TYPE_FLOAT32, slope, 
             dims, voxelsize, sourceImage))
       exit(EXIT_FAILURE);
 

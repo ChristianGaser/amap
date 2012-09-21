@@ -336,7 +336,7 @@ void fill_cluster(unsigned char *bw, int dim[3])
    for (j=0; j<ttn; j++) count[j] = 0;
    
    /* count cluster sizes */
-   for (i=0; i<n; i++) if(l[i]>0) count[l[i]]++;
+   for (i=0; i<n; i++) if((int)l[i]>0) count[(int)l[i]]++;
    
    /* find index of largest cluster */
    for (j=0; j<ttn; j++) 

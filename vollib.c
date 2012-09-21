@@ -1207,40 +1207,6 @@ get_largest_component(unsigned char *label, int *dims)
 }
 
 void
-fill_holes(unsigned char *label, int *dims)
-{
-  int vol, i;
-  unsigned char *marker, *init_mask;
-  
-  vol = dims[0]*dims[1]*dims[2];
-  
-  marker    = (unsigned char *)malloc(sizeof(unsigned char)*vol);
-  init_mask = (unsigned char *)malloc(sizeof(unsigned char)*vol);
-
-  for (i = 0; i < vol; i++) {
-    if(label[i] == 0) {
-      init_mask[i] = 255;
-      marker[i] = 0;
-    } else {
-      init_mask[i] = 0;
-      marker[i] = 2;
-    }
-  }
-
-  /* set seed voxel */
-  marker[0] = 1;
-  
-  watershed3d(init_mask,marker,0,dims);
-  
-  /* mask out original label */
-//  for (i = 0; i < vol; i++) if(init_mask[i] == 0) label[i] = 1;
-  for (i = 0; i < vol; i++) label[i] = init_mask[i];
-
-  free(marker);
-  free(init_mask);
-}
-
-void
 cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize, int strength, int initial_cleanup)
 {
   
@@ -1257,20 +1223,24 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
   
   vol = dims[0]*dims[1]*dims[2];
 
+  /* build a first rough mask to remove noisy parts */
+  for( i = 0;  i < vol;  ++i ) {
+    sum = (double)probs[i + GM*vol] + (double)probs[i + WM*vol] + (double)probs[i + CSF*vol];
+    if (sum > 128.0)
+      mask[i] = 255;
+    else mask[i] = 0;
+  }
+  morph_erode_uint8(mask, dims, 2, 0);
+  
   /* init mask with WM values that are larger than GM and CSF and threshold for erosion */
   for( i = 0;  i < vol;  ++i )
-    if ((probs[i + WM*vol] > probs[i + GM*vol]) && (probs[i + WM*vol] > probs[i + CSF*vol]) && (probs[i + WM*vol] > th_erode))
+    if ((probs[i + WM*vol] > probs[i + GM*vol]) && (probs[i + WM*vol] > probs[i + CSF*vol]) && (probs[i + WM*vol] > th_erode) && (mask[i] > 0))
       mask[i] = probs[i + WM*vol];
     else mask[i] = 0;
-
-  /* use only largest cluster */
-  get_largest_component(mask, dims);
-//  get_largest_cluster(mask, dims);
 
   /* use masked WM image for all subsequent operations */
   for( i = 0;  i < vol;  ++i ) probs[i + WM*vol] = mask[i];
   
-if (1==1) {
   /* mask computed from gm and wm */
   /* erosions and conditional dilations */
   for (iter=0; iter < niter; iter++) {
@@ -1291,34 +1261,21 @@ if (1==1) {
     convxyz_uint8(mask,filt,filt,filt,3,3,3,-1,-1,-1,mask,dims);
   }
   
-//  fill_holes(mask, dims);
+  
   fill_cluster(mask, dims);
-distclose_uint8( mask, dims, voxelsize, round(scale*5), 0);
-
-if (1==0) {
-  for( i = 0;  i < vol;  ++i ) {
-    /* mask = ((mask>th_final).*(GM+WM))>th_final */
-    sum = (((double)mask[i] > th_final)*(double)probs[i + GM*vol] + (double)probs[i + WM*vol]) > th_final;
-    mask[i] = (unsigned char)sum;
-  }
-
-  morph_open_uint8(mask, dims, n_initial_openings, 0);
+  distclose_uint8( mask, dims, voxelsize, round(scale*5), 0);
   
   if(initial_cleanup) {
-    morph_dilate_uint8(mask, dims, round(scale*2), 0);
-    morph_close_uint8( mask, dims, round(scale*15), 0);
     /* remove sinus sagittalis */
     for (i = 0; i < vol; i++)
       mask[i] = mask[i] && ( (probs[i + SKULL2*vol] < probs[i + GM*vol]) ||
                              (probs[i + SKULL2*vol] < probs[i + WM*vol]) ||
                              (probs[i + SKULL2*vol] < probs[i + CSF*vol]) );
+  }
+  
+  /* fill holes that may remain */
+  distclose_uint8( mask, dims, voxelsize, round(scale*2), 0);
 
-
-    /* fill holes that may remain */
-    morph_close_uint8(mask, dims, round(scale*2), 0);
-  } else  distclose_uint8( mask, dims, voxelsize, round(scale*5), 0);
-}
-}
 }
 
 /* qicksort */
