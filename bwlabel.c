@@ -43,7 +43,7 @@
 
 /* Function prototypes. */
 
-unsigned int do_initial_labelling(unsigned char  *bw,   /* Binary map */
+unsigned int do_initial_labelling(double  *bw,   /* Binary map */
                                   int            *dim,  /* Dimensions of bw */
                                   unsigned int   conn,  /* Connectivity criterion */
                                   unsigned int   *il,   /* Initially labelled map */
@@ -63,17 +63,17 @@ void fill_tratab(unsigned int    *tt,      /* Translation table */
                  unsigned int    *nabo,    /* Set of neighbours */
                  unsigned int    nr_set);  /* Number of neighbours in nabo */
 
-int translate_labels(unsigned int    *il,     /* Map of initial labels. */
+double translate_labels(unsigned int    *il,     /* Map of initial labels. */
                         int             dim[3],  /* Dimensions of il. */
                         unsigned int    *tt,     /* Translation table. */
                         unsigned int    ttn,     /* Size of translation table. */
-                        unsigned int    *l);     /* Final map of labels. */
+                        double    *l);     /* Final map of labels. */
 
 
 
 /* Here starts actual code. */
 
-unsigned int do_initial_labelling(unsigned char  *bw,   /* Binary map */
+unsigned int do_initial_labelling(double  *bw,   /* Binary map */
                                   int            *dim,  /* Dimensions of bw */
                                   unsigned int   conn,  /* Connectivity criterion */
                                   unsigned int   *il,   /* Initially labelled map */
@@ -252,23 +252,23 @@ void fill_tratab(unsigned int    *tt,      /* Translation table */
    return;
 }
 
-int translate_labels(unsigned int    *il,     /* Map of initial labels. */
+double translate_labels(unsigned int    *il,     /* Map of initial labels. */
                         int             dim[3],  /* Dimensions of il. */
                         unsigned int    *tt,     /* Translation table. */
                         unsigned int    ttn,     /* Size of translation table. */
-                        unsigned int    *l)      /* Final map of labels. */
+                        double    *l)      /* Final map of labels. */
 {
    int            n=0;
    int            i=0;
    unsigned int   ml=0;
-   unsigned int   cl = 0;
-   unsigned int   *fl = NULL;
+   double   cl = 0.0;
+   double   *fl = NULL;
 
    n = dim[0]*dim[1]*dim[2];
 
    for (i=0; i<ttn; i++) {ml = MAX(ml,tt[i]);}
 
-   fl = (unsigned int *) malloc(ml*sizeof(unsigned int)); 
+   fl = (double *) malloc(ml*sizeof(double)); 
    if(fl == NULL) {
      fprintf(stderr,"Memory allocation error\n");
      exit(EXIT_FAILURE);
@@ -280,7 +280,7 @@ int translate_labels(unsigned int    *il,     /* Map of initial labels. */
       {
          if (!fl[tt[il[i]-1]-1])
          {
-            cl ++; 
+            cl += 1.0; 
             fl[tt[il[i]-1]-1] = cl;
          }
          l[i] = fl[tt[il[i]-1]-1];
@@ -289,7 +289,7 @@ int translate_labels(unsigned int    *il,     /* Map of initial labels. */
 
    free(fl);
 
-   return((int)cl);
+   return(cl);
 }
 
 
@@ -297,22 +297,23 @@ int translate_labels(unsigned int    *il,     /* Map of initial labels. */
 
 void fill_cluster(unsigned char *bw, int dim[3])
 {
-   int            n, i, j, *count, max_count = -1, nl = 0;
+   int            n, i, j, *count, max_count = -1;
    int            ind_max = 0;
    unsigned int   conn = 26;
    unsigned int   ttn = 0;
    unsigned int   *il = NULL;
    unsigned int   *tt = NULL;
-   unsigned char   *bw_bak = NULL;
-   unsigned int    *l = NULL;
+   double         nl = 0.0;
+   double         *bw_bak = NULL;
+   double         *l = NULL;
 
    n = dim[0]*dim[1]*dim[2];
 
    /* Allocate memory for initial labelling map. */
-   count  = (int *) malloc(65536*sizeof(int));
-   l  = (unsigned int *) malloc(n*sizeof(unsigned int));
+   l  = (double *) malloc(n*sizeof(double));
    il = (unsigned int *) malloc(n*sizeof(unsigned int));
-   bw_bak = (unsigned char *) malloc(n*sizeof(unsigned char));
+   bw_bak = (double *) malloc(n*sizeof(double));
+   count  = (int *) malloc((int)n*sizeof(int));
 
    memset(l, 0,n*sizeof(unsigned int));
    memset(il,0,n*sizeof(unsigned int));
@@ -323,17 +324,19 @@ void fill_cluster(unsigned char *bw, int dim[3])
    }
 
    /* rescue bw */
-   for (i=0; i<n; i++) bw_bak[i] = bw[i];
+   for (i=0; i<n; i++) bw_bak[i] = (double)bw[i];
 
-   for (i=0; i<n; i++) if(bw[i]>0) bw[i] = 0; else bw[i] = 1;
+   for (i=0; i<n; i++) if(bw_bak[i]>0) bw_bak[i] = 0.0; else bw_bak[i] = 1.0;
 
    /* Do initial labelling and create translation table. */
-   ttn = do_initial_labelling(bw,dim,conn,il,&tt);
+   ttn = do_initial_labelling(bw_bak,dim,conn,il,&tt);
 
    /* Translate labels to terminal numbers. */
    nl = translate_labels(il,dim,tt,ttn,l);
 
-   for (j=0; j<ttn; j++) count[j] = 0;
+fprintf(stderr,"%d / %g\n\n",ttn,nl);
+
+   for (j=0; j<n; j++) count[j] = 0;
    
    /* count cluster sizes */
    for (i=0; i<n; i++) if((int)l[i]>0) count[(int)l[i]]++;
@@ -348,6 +351,7 @@ void fill_cluster(unsigned char *bw, int dim[3])
      }
    }
 
+fprintf(stderr,"max_count/ind_max: %d / %d\n\n",max_count,ind_max);
    for (i=0; i<n; i++) {
      if(l[i] == ind_max) bw[i] = 0;
      else bw[i] = 255;
@@ -356,74 +360,76 @@ void fill_cluster(unsigned char *bw, int dim[3])
    free(il);
    free(tt);
    free(l);
+   free(count);
    free(bw_bak);
    
    return;
 }
 
+/* Gateway function with error check. */
 
 void get_largest_cluster(unsigned char *bw, int dim[3])
 {
-   int            n, i, j, *count, max_count = -1, nl = 0;
-   int            ind_max = 0;
-   unsigned int   conn = 26;
+   int            n, i, j, *count,max_count = -1;
+   double         nl = 0.0;
+   unsigned int   conn = 6;
    unsigned int   ttn = 0;
    unsigned int   *il = NULL;
    unsigned int   *tt = NULL;
-   unsigned char   *bw_bak = NULL;
-   unsigned int    *l = NULL, l_max = 0;
+   double   *bw_bak = NULL;
+   unsigned char  ind_max = 0;
+   double    *l = NULL;
 
    n = dim[0]*dim[1]*dim[2];
 
    /* Allocate memory for initial labelling map. */
-   count  = (int *) malloc(65536*sizeof(int));
-   l  = (unsigned int *) malloc(n*sizeof(unsigned int));
+   l  = (double *) malloc(n*sizeof(double));
    il = (unsigned int *) malloc(n*sizeof(unsigned int));
-   bw_bak = (unsigned char *) malloc(n*sizeof(unsigned char));
+   bw_bak = (double *) malloc(n*sizeof(double));
+   count  = (int *) malloc((int)n*sizeof(int));
 
-   memset(l, 0,n*sizeof(unsigned int));
+   memset(l,0,n*sizeof(double));
    memset(il,0,n*sizeof(unsigned int));
-
+   
    if((l == NULL) || (il == NULL) || (bw_bak == NULL)) {
      fprintf(stderr,"Memory allocation error\n");
      exit(EXIT_FAILURE);
    }
 
    /* rescue bw */
-   for (i=0; i<n; i++) bw_bak[i] = bw[i];
+   for (i=0; i<n; i++) bw_bak[i] = (double)bw[i];
 
-   for (i=0; i<n; i++) if(bw[i]>0) bw[i] = 1;
+   for (i=0; i<n; i++) if(bw_bak[i]>0) bw_bak[i] = 1.0;
 
    /* Do initial labelling and create translation table. */
-   ttn = do_initial_labelling(bw,dim,conn,il,&tt);
+   ttn = do_initial_labelling(bw_bak,dim,conn,il,&tt);
 
    /* Translate labels to terminal numbers. */
    nl = translate_labels(il,dim,tt,ttn,l);
-   
-   for (j=0; j<ttn; j++) count[j] = 0;
+
+   for (j=0; j<n; j++) count[j] = 0;
    
    /* count cluster sizes */
-   for (i=0; i<n; i++) if(l[i]>0) count[l[i]]++;
+   for (i=0; i<n; i++) if(l[i]>0) count[(unsigned char)l[i]]++;
    
    /* find index of largest cluster */
-   for (j=0; j<ttn; j++) 
+   for (j=0; j<nl; j++) 
    {
      if (count[j] > max_count)
      {
-       ind_max = j;
+       ind_max = (unsigned char)j;
        max_count = count[j];
      }
    }
-
-fprintf(stderr,"\n%d/%d %d\n\n",l_max,max_count,ind_max);   
-   for (i=0; i<n; i++) {
-     if(l[i] == ind_max) bw[i] = bw_bak[i];
-     else bw[i] = 0;
-   }
+   
+   for (i=0; i<n; i++)
+     if((unsigned char)l[i] != ind_max) bw[i] = 0;
+     else bw[i] = (unsigned char)bw_bak[i];
 
    free(il);
    free(tt);
    free(l);
+   free(count);
    free(bw_bak);
    
    return;

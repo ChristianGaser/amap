@@ -42,6 +42,7 @@ int main(int argc, char **argv)
 	PARAM *param = (PARAM *)calloc(1,sizeof(PARAM));
 	FLAG *flag = (FLAG *)calloc(1,sizeof(FLAG));
 	float *tpm;
+    int remove_sinus;
 	
 	flag->affineFlag = 1;
 	flag->rigidFlag = 1;
@@ -243,7 +244,8 @@ int main(int argc, char **argv)
 
     int cleanup_strength = 2;
     
-    cleanup(probs, label, dims, voxelsize, cleanup_strength, 1);
+    remove_sinus = 1;
+    cleanup(probs, label, dims, voxelsize, cleanup_strength, remove_sinus);
     
 float *tmp           = (float *)malloc(sizeof(float)*sourceImage->nvox);
 for (int i = 0; i < sourceImage->nvox; i++)
@@ -312,17 +314,15 @@ double max_vol = -1e15, offset, mean[6];
         probs[i+sourceImage->nvox*j] = temp[order_tissue[j]];
     }
 
-fprintf(stderr,".");
-    cleanup(probs, label, dims, voxelsize, cleanup_strength, 0);
+    remove_sinus = 0;
+    cleanup(probs, label, dims, voxelsize, cleanup_strength, remove_sinus);
 
-fprintf(stderr,".");
     for (int i = 0; i < sourceImage->nvox; i++)
       src[i] = (float)label[i];
 
     if(!write_nifti_float("test.nii", src, NIFTI_TYPE_UINT8, slope, 
             dims, voxelsize, sourceImage))
       exit(EXIT_FAILURE);
-fprintf(stderr,".");
 fprintf(stderr,"%s\n",param->outputMaskName);
 
     if(!write_nifti_float(param->outputMaskName, src, NIFTI_TYPE_FLOAT32, slope, 

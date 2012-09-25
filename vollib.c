@@ -1207,7 +1207,7 @@ get_largest_component(unsigned char *label, int *dims)
 }
 
 void
-cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize, int strength, int initial_cleanup)
+cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize, int strength, int remove_sinus)
 {
   
   double scale = 3.0/(voxelsize[0] + voxelsize[1] + voxelsize[2]);
@@ -1230,7 +1230,8 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
       mask[i] = 255;
     else mask[i] = 0;
   }
-  morph_erode_uint8(mask, dims, 2, 0);
+//  morph_erode_uint8(mask, dims, 2, 0);
+  get_largest_cluster(mask, dims);
   
   /* init mask with WM values that are larger than GM and CSF and threshold for erosion */
   for( i = 0;  i < vol;  ++i )
@@ -1262,10 +1263,12 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
   }
   
   
+fprintf(stderr,".");
   fill_cluster(mask, dims);
+fprintf(stderr,".");
   distclose_uint8( mask, dims, voxelsize, round(scale*5), 0);
   
-  if(initial_cleanup) {
+  if(remove_sinus) {
     /* remove sinus sagittalis */
     for (i = 0; i < vol; i++)
       mask[i] = mask[i] && ( (probs[i + SKULL2*vol] < probs[i + GM*vol]) ||
@@ -1274,6 +1277,7 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
   }
   
   /* fill holes that may remain */
+fprintf(stderr,":");
   distclose_uint8( mask, dims, voxelsize, round(scale*2), 0);
 
 }
