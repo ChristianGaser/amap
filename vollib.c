@@ -1230,8 +1230,8 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
       mask[i] = 255;
     else mask[i] = 0;
   }
-//  morph_erode_uint8(mask, dims, 2, 0);
-  get_largest_cluster(mask, dims);
+  morph_erode_uint8(mask, dims, 2, 0);
+//  get_largest_cluster(mask, dims);
   
   /* init mask with WM values that are larger than GM and CSF and threshold for erosion */
   for( i = 0;  i < vol;  ++i )
@@ -1264,6 +1264,7 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
   
   
 fprintf(stderr,".");
+if(remove_sinus == 0)  distclose_uint8( mask, dims, voxelsize, round(scale*1), 0);
   fill_cluster(mask, dims);
 fprintf(stderr,".");
   distclose_uint8( mask, dims, voxelsize, round(scale*5), 0);

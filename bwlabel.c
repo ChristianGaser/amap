@@ -339,7 +339,7 @@ fprintf(stderr,"%d / %g\n\n",ttn,nl);
    for (j=0; j<n; j++) count[j] = 0;
    
    /* count cluster sizes */
-   for (i=0; i<n; i++) if((int)l[i]>0) count[(int)l[i]]++;
+   for (i=0; i<n; i++) if(l[i]>0.0) count[(int)l[i]]++;
    
    /* find index of largest cluster */
    for (j=0; j<ttn; j++) 
@@ -353,7 +353,7 @@ fprintf(stderr,"%d / %g\n\n",ttn,nl);
 
 fprintf(stderr,"max_count/ind_max: %d / %d\n\n",max_count,ind_max);
    for (i=0; i<n; i++) {
-     if(l[i] == ind_max) bw[i] = 0;
+     if((int)l[i] == ind_max) bw[i] = 0;
      else bw[i] = 255;
    }
 
