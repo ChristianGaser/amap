@@ -243,7 +243,7 @@ int main(int argc, char **argv)
     Bayes(src, label, priors, probs, voxelsize, dims, 0);
 
     
-    int cleanup_strength = 1;
+    int cleanup_strength = 4;
     remove_sinus = 1;
     initial_cleanup(probs, label, dims, voxelsize, cleanup_strength, remove_sinus);
     

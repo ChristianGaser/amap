@@ -1426,7 +1426,7 @@ initial_cleanup(unsigned char *probs, unsigned char *label, int *dims, double *v
   for( i = 0;  i < vol;  ++i )
     sum[i] = (float)probs[i + GM*vol] + (float)probs[i + WM*vol];
 
-  morph_open_float(sum, dims, n_initial_openings, 0.2);
+  morph_open_float(sum, dims, n_initial_openings, 0.1);
   morph_dilate_float(sum, dims, round(scale*1), 0.5);
   distclose_float(sum, dims, voxelsize, round(scale*10), 0.5);
 
