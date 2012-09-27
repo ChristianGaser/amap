@@ -41,22 +41,22 @@ void
 watershed3d(unsigned char *img, unsigned char *marker, int flag_dilate, int *dims);
 
 void
-morph_erode_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th);
+morph_erode_uint8(unsigned char *vol, int dims[3], int niter, double th);
 
 void
-morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th);
+morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, double th);
 
 void
-morph_close_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th);
+morph_close_uint8(unsigned char *vol, int dims[3], int niter, double th);
 
 void
-morph_open_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th);
+morph_open_uint8(unsigned char *vol, int dims[3], int niter, double th);
 
 void
-morph_close_double(double *vol, int dims[3], int niter, double th);
+morph_close_float(float *vol, int dims[3], int niter, double th);
 
 void
-morph_open_double(double *vol, int dims[3], int niter, double th);
+morph_open_float(float *vol, int dims[3], int niter, double th);
 
 void 
 subsample_double(double *in, double *out, int dim_in[3], int dim_out[3], int offset_in, int offset_out);
@@ -80,7 +80,10 @@ void
 smooth_subsample_float(float *vol, int dims[3], double separations[3], double s[3], int use_mask, int samp);
 
 void
-cleanup(unsigned char *probs, unsigned char *mask, int dims[3], double voxelsize[3], int strength, int remove_sinus);
+initial_cleanup(unsigned char *probs, unsigned char *mask, int dims[3], double voxelsize[3], int strength, int remove_sinus);
+
+void
+cleanup(unsigned char *probs, unsigned char *mask, int dims[3], double voxelsize[3], int strength);
 
 void 
 median3_uint8(unsigned char *D, int *dims);

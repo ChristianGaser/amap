@@ -242,33 +242,19 @@ int main(int argc, char **argv)
 
     Bayes(src, label, priors, probs, voxelsize, dims, 0);
 
-    int cleanup_strength = 2;
     
+    int cleanup_strength = 1;
     remove_sinus = 1;
-    cleanup(probs, label, dims, voxelsize, cleanup_strength, remove_sinus);
+    initial_cleanup(probs, label, dims, voxelsize, cleanup_strength, remove_sinus);
     
 float *tmp           = (float *)malloc(sizeof(float)*sourceImage->nvox);
-for (int i = 0; i < sourceImage->nvox; i++)
+/*for (int i = 0; i < sourceImage->nvox; i++)
 tmp[i] = (float)label[i];
 
 if(!write_nifti_float("label.nii", tmp, NIFTI_TYPE_UINT8, slope, 
             dims, voxelsize, sourceImage))
       exit(EXIT_FAILURE);
-
-/*for (int j = 0; j < 6; j++) {
-for (int i = 0; i < sourceImage->nvox; i++) {
-tmp[i] = (float)probs[i+(dims[0]*dims[1]*dims[2]*j)];
-}
-char		buffer[1024];
-(void) sprintf( buffer, "%d.nii",j);
-fprintf(stderr,"Save %s\n",buffer);
-if(!write_nifti_float(buffer, tmp, NIFTI_TYPE_UINT8, slope, 
-            dims, voxelsize, sourceImage))
-      exit(EXIT_FAILURE);
-}
-free(tmp);    
 */
-
 int n_pure_classes = 3;
 int iters_amap = 200;
 int subsample = 16;
@@ -314,20 +300,29 @@ double max_vol = -1e15, offset, mean[6];
         probs[i+sourceImage->nvox*j] = temp[order_tissue[j]];
     }
 
-    remove_sinus = 0;
-    cleanup(probs, label, dims, voxelsize, cleanup_strength, remove_sinus);
+cleanup_strength = 2;
+    cleanup(probs, label, dims, voxelsize, cleanup_strength);
 
     for (int i = 0; i < sourceImage->nvox; i++)
       src[i] = (float)label[i];
 
-    if(!write_nifti_float("test.nii", src, NIFTI_TYPE_UINT8, slope, 
-            dims, voxelsize, sourceImage))
-      exit(EXIT_FAILURE);
-fprintf(stderr,"%s\n",param->outputMaskName);
-
     if(!write_nifti_float(param->outputMaskName, src, NIFTI_TYPE_FLOAT32, slope, 
             dims, voxelsize, sourceImage))
       exit(EXIT_FAILURE);
+if (0) {
+for (int j = 0; j < 6; j++) {
+for (int i = 0; i < sourceImage->nvox; i++) {
+tmp[i] = (float)probs[i+(dims[0]*dims[1]*dims[2]*j)];
+}
+char		buffer[1024];
+(void) sprintf( buffer, "%d.nii",j);
+fprintf(stderr,"Save %s\n",buffer);
+if(!write_nifti_float(buffer, tmp, NIFTI_TYPE_UINT8, slope, 
+            dims, voxelsize, sourceImage))
+      exit(EXIT_FAILURE);
+}
+free(tmp);    
+}
 
     free(tpmImage);
     free(sourceImage);

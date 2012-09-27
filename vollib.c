@@ -608,6 +608,12 @@ distclose_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter,
 {
   float *buffer;
   int i,x,y,z,j,band,dims2[3];
+  unsigned char max_vol;
+  
+  if (niter < 1) return;
+
+  for (i=0; i<dims[0]*dims[1]*dims[2]; i++) max_vol = MAX(max_vol,vol[i]);
+  th *= (double)max_vol;
 
   /* add band with zeros to image to avoid clipping */  
   band = niter;
@@ -624,19 +630,63 @@ distclose_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter,
   
   /* threshold input */
   for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
-    buffer[index(x+band,y+band,z+band,dims2)] = (float)(vol[index(x,y,z,dims)]>th);
+    buffer[index(x+band,y+band,z+band,dims2)] = (float)((double)vol[index(x,y,z,dims)]>th);
         
   vbdist(buffer, dims2, voxelsize);
   for (i=0;i<dims2[2]*dims2[1]*dims2[0];i++)
-    buffer[i] = buffer[i] > niter;
+    buffer[i] = buffer[i] > (float)niter;
 
   vbdist(buffer, dims2, voxelsize);
   for (i=0;i<dims2[2]*dims2[1]*dims2[0];i++)
-    buffer[i] = buffer[i] > niter;
+    buffer[i] = buffer[i] > (float)niter;
 
   /* return image */
   for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
-    vol[index(x,y,z,dims)] = (unsigned char)round(buffer[index(x+band,y+band,z+band,dims2)]);
+    vol[index(x,y,z,dims)] = (unsigned char)buffer[index(x+band,y+band,z+band,dims2)];
+    
+  free(buffer);
+}
+
+void
+distclose_float(float *vol, int dims[3], double voxelsize[3], int niter, double th)
+{
+  float *buffer;
+  int i,x,y,z,j,band,dims2[3];
+  float max_vol;
+  
+  if (niter < 1) return;
+
+  for (i=0; i<dims[0]*dims[1]*dims[2]; i++) max_vol = MAX(max_vol,vol[i]);
+  th *= (double)max_vol;
+
+  /* add band with zeros to image to avoid clipping */  
+  band = niter;
+  for (i=0;i<3;i++) dims2[i] = dims[i] + 2*band;
+
+  buffer = (float *)malloc(sizeof(float)*dims2[0]*dims2[1]*dims2[2]);
+
+  if(buffer == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  memset(buffer,0,sizeof(float)*dims2[0]*dims2[1]*dims2[2]);
+  
+  /* threshold input */
+  for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
+    buffer[index(x+band,y+band,z+band,dims2)] = (vol[index(x,y,z,dims)]>(float)th);
+        
+  vbdist(buffer, dims2, voxelsize);
+  for (i=0;i<dims2[2]*dims2[1]*dims2[0];i++)
+    buffer[i] = buffer[i] > (float)niter;
+
+  vbdist(buffer, dims2, voxelsize);
+  for (i=0;i<dims2[2]*dims2[1]*dims2[0];i++)
+    buffer[i] = buffer[i] > (float)niter;
+
+  /* return image */
+  for (z=0;z<dims[2];z++) for (y=0;y<dims[1];y++) for (x=0;x<dims[0];x++) 
+    vol[index(x,y,z,dims)] = buffer[index(x+band,y+band,z+band,dims2)];
     
   free(buffer);
 }
@@ -646,8 +696,12 @@ distopen_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter, 
 {
   float *buffer;
   int i,j;
+  unsigned char max_vol;
+  
+  if (niter < 1) return;
 
-  if (niter == 0); return;
+  for (i=0; i<dims[0]*dims[1]*dims[2]; i++) max_vol = MAX(max_vol,vol[i]);
+  th *= (double)max_vol;
   
   buffer = (float *)malloc(sizeof(float)*dims[0]*dims[1]*dims[2]);
 
@@ -658,32 +712,76 @@ distopen_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter, 
   
   /* threshold input */
   for (i=0;i<dims[2]*dims[1]*dims[0];i++)
-    buffer[i] = 1.0 - (float)(vol[i]>th);
+    buffer[i] = 1.0 - (float)((double)vol[i]>th);
         
   vbdist(buffer, dims, voxelsize);
   for (i=0;i<dims[2]*dims[1]*dims[0];i++)
-    buffer[i] = buffer[i] > niter;
+    buffer[i] = buffer[i] > (float)niter;
 
   vbdist(buffer, dims, voxelsize);
   for (i=0;i<dims[2]*dims[1]*dims[0];i++)
-    buffer[i] = buffer[i] < niter;
+    buffer[i] = buffer[i] < (float)niter;
 
   /* return image */
   for (i=0;i<dims[2]*dims[1]*dims[0];i++)
-    vol[i] = (unsigned char)round(buffer[i]);
+    vol[i] = (unsigned char)buffer[i];
 
   free(buffer);
 }
 
 void
-morph_erode_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
+distopen_float(float *vol, int dims[3], double voxelsize[3], int niter, double th)
+{
+  float *buffer;
+  int i,j;
+  float max_vol;
+  
+  if (niter < 1) return;
+
+  for (i=0; i<dims[0]*dims[1]*dims[2]; i++) max_vol = MAX(max_vol,vol[i]);
+  th *= (double)max_vol;
+  
+  buffer = (float *)malloc(sizeof(float)*dims[0]*dims[1]*dims[2]);
+
+  if(buffer == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  /* threshold input */
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    buffer[i] = 1.0 - ((float)vol[i]>th);
+        
+  vbdist(buffer, dims, voxelsize);
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    buffer[i] = buffer[i] > (float)niter;
+
+  vbdist(buffer, dims, voxelsize);
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    buffer[i] = buffer[i] < (float)niter;
+
+  /* return image */
+  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
+    vol[i] = buffer[i];
+
+  free(buffer);
+}
+
+void
+morph_erode_uint8(unsigned char *vol, int dims[3], int niter, double th)
 {
   double filt[3]={1,1,1};
   int i,j;
+  unsigned char max_vol;
+  
+  if (niter < 1) return;
+
+  for (i=0; i<dims[0]*dims[1]*dims[2]; i++) max_vol = MAX(max_vol,vol[i]);
+  th *= (double)max_vol;
   
   /* threshold input */
   for (j=0;j<dims[2]*dims[1]*dims[0];j++)
-    vol[j] = (vol[j]>th);
+    vol[j] = (unsigned char)((double)vol[j]>th);
 
   for (i=0;i<niter;i++) {
     convxyz_uint8(vol,filt,filt,filt,3,3,3,-1,-1,-1,vol,dims);
@@ -692,48 +790,41 @@ morph_erode_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
   }
 }
 
-
 void
-morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
-{
-  double filt[3]={1,1,1};
-  int i, j;
-
-  /* threshold input */
-  for (j=0; j<dims[0]*dims[1]*dims[2]; j++) 
-    vol[j] = vol[j]>th;
-
-  for (i=0;i<niter;i++) {
-    convxyz_uint8(vol,filt,filt,filt,3,3,3,-1,-1,-1,vol,dims);
-    for (j=0; j<dims[0]*dims[1]*dims[2]; j++) 
-      vol[j] = (vol[j]>0);
-  }
-}
-
-void
-morph_dilate_double(double *vol, int dims[3], int niter, double th)
+morph_erode_float(float *vol, int dims[3], int niter, double th)
 {
   double filt[3]={1,1,1};
   int i,j;
+  float max_vol;
   
+  if (niter < 1) return;
+
+  for (i=0; i<dims[0]*dims[1]*dims[2]; i++) max_vol = MAX(max_vol,vol[i]);
+  th *= (double)max_vol;
+
   /* threshold input */
-  for (j=0; j<dims[0]*dims[1]*dims[2]; j++) 
-    vol[j] = vol[j]>th;
+  for (j=0;j<dims[2]*dims[1]*dims[0];j++)
+    vol[j] = vol[j]>(float)th;
 
   for (i=0;i<niter;i++) {
-    convxyz_double(vol,filt,filt,filt,3,3,3,-1,-1,-1,vol,dims);
-  for (j=0; j<dims[0]*dims[1]*dims[2]; j++) 
-      vol[j] = (vol[j]>0);
+    convxyz_float(vol,filt,filt,filt,3,3,3,-1,-1,-1,vol,dims);
+    for (j=0;j<dims[2]*dims[1]*dims[0];j++)
+      vol[j] = vol[j]>=9.0;
   }
 }
 
 void
-morph_close_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
+morph_dilate_uint8(unsigned char *vol, int dims[3], int niter, double th)
 {
-  unsigned char *buffer;
+  double filt[3]={1,1,1};
   int i,x,y,z,j,band,dims2[3];
+  unsigned char max_vol;
+  unsigned char *buffer;
+  
+  if (niter < 1) return;
 
-  if (niter == 0); return;
+  for (i=0; i<dims[0]*dims[1]*dims[2]; i++) max_vol = MAX(max_vol,vol[i]);
+  th *= (double)max_vol;
 
   /* add band with zeros to image to avoid clipping */  
   band = niter;
@@ -750,10 +841,109 @@ morph_close_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
   
   /* threshold input */
   for (x=0;x<dims[0];x++) for (y=0;y<dims[1];y++) for (z=0;z<dims[2];z++) 
-    buffer[index(x+band,y+band,z+band,dims2)] = (vol[index(x,y,z,dims)]>th);
-        
-  morph_dilate_uint8(buffer, dims2, niter, 0);
-  morph_erode_uint8(buffer, dims2, niter, 0);  
+    buffer[index(x+band,y+band,z+band,dims2)] = (unsigned char)((double)vol[index(x,y,z,dims)]>th);
+
+  for (i=0;i<niter;i++) {
+    convxyz_uint8(buffer,filt,filt,filt,3,3,3,-1,-1,-1,buffer,dims2);
+    for (j=0; j<dims2[0]*dims2[1]*dims2[2]; j++) 
+      buffer[j] = buffer[j]>0;
+  }
+
+  /* return image */
+  for (x=0;x<dims[0];x++) for (y=0;y<dims[1];y++) for (z=0;z<dims[2];z++) 
+    vol[index(x,y,z,dims)] = buffer[index(x+band,y+band,z+band,dims2)];
+    
+  free(buffer);
+  
+}
+
+void
+morph_dilate_float(float *vol, int dims[3], int niter, double th)
+{
+  double filt[3]={1,1,1};
+  int i,x,y,z,j,band,dims2[3];
+  float max_vol;
+  unsigned char *buffer;
+  
+  if (niter < 1) return;
+
+  for (i=0; i<dims[0]*dims[1]*dims[2]; i++) max_vol = MAX(max_vol,vol[i]);
+  th *= (double)max_vol;
+
+  /* add band with zeros to image to avoid clipping */  
+  band = niter;
+  for (i=0;i<3;i++) dims2[i] = dims[i] + 2*band;
+
+  buffer = (unsigned char *)malloc(sizeof(unsigned char)*dims2[0]*dims2[1]*dims2[2]);
+
+  if(buffer == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  memset(buffer,0,sizeof(unsigned char)*dims2[0]*dims2[1]*dims2[2]);
+  
+  /* threshold input */
+  for (x=0;x<dims[0];x++) for (y=0;y<dims[1];y++) for (z=0;z<dims[2];z++) 
+    buffer[index(x+band,y+band,z+band,dims2)] = (unsigned char)((double)vol[index(x,y,z,dims)]>th);
+
+  for (i=0;i<niter;i++) {
+    convxyz_uint8(buffer,filt,filt,filt,3,3,3,-1,-1,-1,buffer,dims2);
+    for (j=0; j<dims2[0]*dims2[1]*dims2[2]; j++) 
+      buffer[j] = buffer[j]>0;
+  }
+
+  /* return image */
+  for (x=0;x<dims[0];x++) for (y=0;y<dims[1];y++) for (z=0;z<dims[2];z++) 
+    vol[index(x,y,z,dims)] = (float)buffer[index(x+band,y+band,z+band,dims2)];
+    
+  free(buffer);
+  
+}
+
+void
+morph_close_uint8(unsigned char *vol, int dims[3], int niter, double th)
+{
+  double filt[3]={1,1,1};
+  unsigned char *buffer;
+  int i,x,y,z,j,band,dims2[3];
+  unsigned char max_vol;
+  
+  if (niter < 1) return;
+
+  for (i=0; i<dims[0]*dims[1]*dims[2]; i++) max_vol = MAX(max_vol,vol[i]);
+  th *= (double)max_vol;
+
+  /* add band with zeros to image to avoid clipping */  
+  band = niter;
+  for (i=0;i<3;i++) dims2[i] = dims[i] + 2*band;
+
+  buffer = (unsigned char *)malloc(sizeof(unsigned char)*dims2[0]*dims2[1]*dims2[2]);
+
+  if(buffer == NULL) {
+    fprintf(stderr,"Memory allocation error\n");
+    exit(EXIT_FAILURE);
+  }
+  
+  memset(buffer,0,sizeof(unsigned char)*dims2[0]*dims2[1]*dims2[2]);
+  
+  /* threshold input */
+  for (x=0;x<dims[0];x++) for (y=0;y<dims[1];y++) for (z=0;z<dims[2];z++) 
+    buffer[index(x+band,y+band,z+band,dims2)] = (unsigned char)((double)vol[index(x,y,z,dims)]>th);
+
+  /* dilate */
+  for (i=0;i<niter;i++) {
+    convxyz_uint8(buffer,filt,filt,filt,3,3,3,-1,-1,-1,buffer,dims2);
+    for (j=0; j<dims2[0]*dims2[1]*dims2[2]; j++) 
+      buffer[j] = (buffer[j]>0);
+  }
+
+  /* erode */
+  for (i=0;i<niter;i++) {
+    convxyz_uint8(buffer,filt,filt,filt,3,3,3,-1,-1,-1,buffer,dims2);
+    for (j=0; j<dims2[0]*dims2[1]*dims2[2]; j++) 
+      buffer[j] = (buffer[j]>=9);
+  }
 
   /* return image */
   for (x=0;x<dims[0];x++) for (y=0;y<dims[1];y++) for (z=0;z<dims[2];z++) 
@@ -763,47 +953,98 @@ morph_close_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
 }
 
 void
-morph_open_uint8(unsigned char *vol, int dims[3], int niter, unsigned char th)
+morph_close_float(float *vol, int dims[3], int niter, double th)
 {
-  if (niter == 0); return;
-
-  morph_erode_uint8(vol, dims, niter, th);
-  morph_dilate_uint8(vol, dims, niter, 0);
-}
-
-void
-morph_close_double(double *vol, int dims[3], int niter, double th)
-{
+  double filt[3]={1,1,1};
   unsigned char *buffer;
-  int i;
+  int i,x,y,z,j,band,dims2[3];
+  float max_vol;
+  
+  if (niter < 1) return;
 
-  if (niter == 0); return;
+  for (i=0; i<dims[0]*dims[1]*dims[2]; i++) max_vol = MAX(max_vol,vol[i]);
+  th *= (double)max_vol;
 
-  buffer = (unsigned char *)malloc(sizeof(unsigned char)*dims[0]*dims[1]*dims[2]);
+  /* add band with zeros to image to avoid clipping */  
+  band = niter;
+  for (i=0;i<3;i++) dims2[i] = dims[i] + 2*band;
+
+  buffer = (unsigned char *)malloc(sizeof(unsigned char)*dims2[0]*dims2[1]*dims2[2]);
 
   if(buffer == NULL) {
     fprintf(stderr,"Memory allocation error\n");
     exit(EXIT_FAILURE);
   }
-  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
-    buffer[i] = (unsigned char) (vol[i] > th);
+  
+  memset(buffer,0,sizeof(unsigned char)*dims2[0]*dims2[1]*dims2[2]);
+  
+  /* threshold input */
+  for (x=0;x<dims[0];x++) for (y=0;y<dims[1];y++) for (z=0;z<dims[2];z++) 
+    buffer[index(x+band,y+band,z+band,dims2)] = (unsigned char)((double)vol[index(x,y,z,dims)]>th);
         
-  morph_dilate_uint8(buffer, dims, niter, 0);
-  morph_erode_uint8(buffer, dims, niter, 0);
+  /* dilate */
+  for (i=0;i<niter;i++) {
+    convxyz_uint8(buffer,filt,filt,filt,3,3,3,-1,-1,-1,buffer,dims2);
+    for (j=0; j<dims2[0]*dims2[1]*dims2[2]; j++) 
+      buffer[j] = (buffer[j]>0);
+  }
 
-  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
-    vol[i] = (double)buffer[i];
+  /* erode */
+  for (i=0;i<niter;i++) {
+    convxyz_uint8(buffer,filt,filt,filt,3,3,3,-1,-1,-1,buffer,dims2);
+    for (j=0; j<dims2[0]*dims2[1]*dims2[2]; j++) 
+      buffer[j] = (buffer[j]>=9);
+  }
+
+  /* return image */
+  for (x=0;x<dims[0];x++) for (y=0;y<dims[1];y++) for (z=0;z<dims[2];z++) 
+    vol[index(x,y,z,dims)] = (float)buffer[index(x+band,y+band,z+band,dims2)];
     
   free(buffer);
 }
 
 void
-morph_open_double(double *vol, int dims[3], int niter, double th)
+morph_open_uint8(unsigned char *vol, int dims[3], int niter, double th)
+{
+  double filt[3]={1,1,1};
+  int i, j;
+  unsigned char max_vol;
+  
+  if (niter < 1) return;
+
+  for (i=0; i<dims[0]*dims[1]*dims[2]; i++) max_vol = MAX(max_vol,vol[i]);
+  th *= (double)max_vol;
+
+  /* threshold input */
+  for (j=0;j<dims[2]*dims[1]*dims[0];j++)
+    vol[j] = (unsigned char)((double)vol[j]>th);
+
+  for (i=0;i<niter;i++) {
+    convxyz_uint8(vol,filt,filt,filt,3,3,3,-1,-1,-1,vol,dims);
+    for (j=0;j<dims[2]*dims[1]*dims[0];j++)
+      vol[j] = (vol[j]>=9);
+  }
+
+  for (i=0;i<niter;i++) {
+    convxyz_uint8(vol,filt,filt,filt,3,3,3,-1,-1,-1,vol,dims);
+    for (j=0; j<dims[0]*dims[1]*dims[2]; j++) 
+      vol[j] = (vol[j]>0);
+  }
+
+}
+
+void
+morph_open_float(float *vol, int dims[3], int niter, double th)
 {
   unsigned char *buffer;
-  int i;
+  double filt[3]={1,1,1};
+  int i, j;
+  float max_vol;
+  
+  if (niter < 1) return;
 
-  if (niter == 0); return;
+  for (i=0; i<dims[0]*dims[1]*dims[2]; i++) max_vol = MAX(max_vol,vol[i]);
+  th *= (double)max_vol;
 
   buffer = (unsigned char *)malloc(sizeof(unsigned char)*dims[0]*dims[1]*dims[2]);
 
@@ -812,14 +1053,24 @@ morph_open_double(double *vol, int dims[3], int niter, double th)
     exit(EXIT_FAILURE);
   }
 
-  for (i=0;i<dims[2]*dims[1]*dims[0];i++)
-    buffer[i] = (unsigned char) (vol[i] > th);
-        
-  morph_erode_uint8(buffer, dims, niter, 0);
-  morph_dilate_uint8(buffer, dims, niter, 0);
+  /* threshold input */
+  for (j=0;j<dims[2]*dims[1]*dims[0];j++)
+    buffer[j] = (unsigned char)((double)vol[j]>th);
+
+  for (i=0;i<niter;i++) {
+    convxyz_uint8(buffer,filt,filt,filt,3,3,3,-1,-1,-1,buffer,dims);
+    for (j=0;j<dims[2]*dims[1]*dims[0];j++)
+      buffer[j] = (buffer[j]>=9);
+  }
+
+  for (i=0;i<niter;i++) {
+    convxyz_uint8(buffer,filt,filt,filt,3,3,3,-1,-1,-1,buffer,dims);
+    for (j=0; j<dims[0]*dims[1]*dims[2]; j++) 
+      buffer[j] = (buffer[j]>0);
+  }
 
   for (i=0;i<dims[2]*dims[1]*dims[0];i++)
-    vol[i] = (double)buffer[i];
+    vol[i] = (float)buffer[i];
     
   free(buffer);
 }
@@ -1158,84 +1409,70 @@ smooth_subsample_float(float *vol, int dims[3], double separations[3], double s[
 }
 
 void
-get_largest_component(unsigned char *label, int *dims)
-{
-  int vol, area, i, x, y, z;
-  unsigned char *marker, *init_mask;
-  
-  vol = dims[0]*dims[1]*dims[2];
-  area = dims[0]*dims[1];
-  
-  marker    = (unsigned char *)malloc(sizeof(unsigned char)*vol);
-  init_mask = (unsigned char *)malloc(sizeof(unsigned char)*vol);
-
-  for (i = 0; i < vol; i++) {
-    init_mask[i] = label[i];
-    marker[i] = 0;
-  }
-  
-  /* find somewhere around the center a seed voxel and break */
-  for (z = ((int)dims[2]/2) - 5; z < ((int)dims[2]/2) + 5; z++) 
-    for (y = ((int)dims[1]/2) - 5; y < ((int)dims[1]/2) + 5; y++) 
-      for (x = ((int)dims[0]/2) - 5; x < ((int)dims[0]/2) + 5; x++) 
-        if (init_mask[z*area + y*dims[0] + x] > 128) break;
-        
-  /* mark only this as seed voxel */      
-  marker[z*area + y*dims[0] + x] = 1;
-
-  /* set marker at border to 2 */
-  for (z = 0; z < 2; z++) for (y = 0; y < dims[1]; y++) for (x = 0; x < dims[0]; x++) 
-    marker[z*area + y*dims[0] + x] = 2;
-  for (z = 0; z < dims[2]; z++) for (y = 0; y < 2; y++) for (x = 0; x < dims[0]; x++) 
-    marker[z*area + y*dims[0] + x] = 2;
-  for (z = 0; z < dims[2]; z++) for (y = 0; y < dims[1]; y++) for (x = 0; x < 2; x++) 
-    marker[z*area + y*dims[0] + x] = 2;
-  for (z = dims[2]-2; z < dims[2]; z++) for (y = 0; y < dims[1]; y++) for (x = 0; x < dims[0]; x++)
-    marker[z*area + y*dims[0] + x] = 2;
-  for (z = 0; z < dims[2]; z++) for (y = dims[1]-2; y < dims[1]; y++) for (x = 0; x < dims[0]; x++)
-    marker[z*area + y*dims[0] + x] = 2;
-  for (z = 0; z < dims[2]; z++) for (y = 0; y < dims[1]; y++) for (x = dims[0]-2; x < dims[0]; x++)
-    marker[z*area + y*dims[0] + x] = 2;
-
-  watershed3d(init_mask,marker,0,dims);
-  
-  /* mask out original label */
-  for (i = 0; i < vol; i++) if(init_mask[i] == 0) label[i] = 0;
-
-  free(marker);
-  free(init_mask);
-}
-
-void
-cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize, int strength, int remove_sinus)
+initial_cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize, int strength, int remove_sinus)
 {
   
   double scale = 3.0/(voxelsize[0] + voxelsize[1] + voxelsize[2]);
-  int niter, iter, vol, th, th_erode, th_dilate, th_final, i;
+  int vol, th, i;
   int n_initial_openings = MAX(1,round(scale*strength));
-  double sum;
+  float *sum;
   double filt[3] = {0.75, 1.0, 0.75};
   
-  niter = 45;
-  th_final  =  13;   /* final threshold for masking 0.05*255.0 */
+  vol = dims[0]*dims[1]*dims[2];
+
+  sum = (float *)malloc(sizeof(float)*vol);
+
+  /* build a first rough mask to remove noisy parts */
+  for( i = 0;  i < vol;  ++i )
+    sum[i] = (float)probs[i + GM*vol] + (float)probs[i + WM*vol];
+
+  morph_open_float(sum, dims, n_initial_openings, 0.2);
+  morph_dilate_float(sum, dims, round(scale*1), 0.5);
+  distclose_float(sum, dims, voxelsize, round(scale*10), 0.5);
+
+  if(remove_sinus) {
+    /* remove sinus sagittalis */
+    for (i = 0; i < vol; i++)
+      sum[i] = sum[i] && ( ((float)probs[i + SKULL2*vol] < (float)probs[i + GM*vol]) ||
+                           ((float)probs[i + SKULL2*vol] < (float)probs[i + WM*vol]) ||
+                           ((float)probs[i + SKULL2*vol] < (float)probs[i + CSF*vol]) );
+  }
+
+  distclose_float(sum, dims, voxelsize, round(scale*2), 0.5);
+
+  for( i = 0;  i < vol;  ++i )
+    mask[i] = (unsigned char)sum[i];
+  
+  free(sum);
+}
+
+void
+cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize, int strength)
+{
+  
+  double scale = 3.0/(voxelsize[0] + voxelsize[1] + voxelsize[2]);
+  int niter, iter, vol, th, th_erode, th_dilate, i;
+  int n_initial_openings = MAX(1,round(scale*strength));
+  float *sum;
+  double filt[3] = {0.75, 1.0, 0.75};
+  
+  niter     =  45;
   th_erode  = 153;   /* initial threshold for erosion 0.6*255.0 */
   th_dilate = (5*strength + 1)*16; /* threshold for dilation */
   
   vol = dims[0]*dims[1]*dims[2];
 
+  sum = (float *)malloc(sizeof(float)*vol);
+
   /* build a first rough mask to remove noisy parts */
-  for( i = 0;  i < vol;  ++i ) {
-    sum = (double)probs[i + GM*vol] + (double)probs[i + WM*vol] + (double)probs[i + CSF*vol];
-    if (sum > 128.0)
-      mask[i] = 255;
-    else mask[i] = 0;
-  }
-  morph_erode_uint8(mask, dims, 2, 0);
-//  get_largest_cluster(mask, dims);
+  for( i = 0;  i < vol;  ++i )
+    sum[i] = (float)probs[i + GM*vol] + (float)probs[i + WM*vol];
+
+  morph_open_float(sum, dims, n_initial_openings, 0.25);
   
   /* init mask with WM values that are larger than GM and CSF and threshold for erosion */
   for( i = 0;  i < vol;  ++i )
-    if ((probs[i + WM*vol] > probs[i + GM*vol]) && (probs[i + WM*vol] > probs[i + CSF*vol]) && (probs[i + WM*vol] > th_erode) && (mask[i] > 0))
+    if ((probs[i + WM*vol] > probs[i + GM*vol]) && (probs[i + WM*vol] > probs[i + CSF*vol]) && (probs[i + WM*vol] > th_erode) && (sum[i] > 0))
       mask[i] = probs[i + WM*vol];
     else mask[i] = 0;
 
@@ -1253,8 +1490,8 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
     /* mask = (mask>th).*(white+gray) */
     for( i = 0;  i < vol;  ++i ) {
       if( mask[i] > th ) {
-        sum = (double)probs[i + GM*vol] + (double)probs[i + WM*vol];
-        mask[i] = (unsigned char)MIN(sum, 255);
+        sum[i] = (float)probs[i + GM*vol] + (float)probs[i + WM*vol];
+        mask[i] = (unsigned char)MIN(sum[i], 255.0);
       } else  mask[i] = 0;		    
     }
 
@@ -1262,25 +1499,22 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
     convxyz_uint8(mask,filt,filt,filt,3,3,3,-1,-1,-1,mask,dims);
   }
   
-  
-fprintf(stderr,".");
-if(remove_sinus == 0)  distclose_uint8( mask, dims, voxelsize, round(scale*1), 0);
-  fill_cluster(mask, dims);
-fprintf(stderr,".");
-  distclose_uint8( mask, dims, voxelsize, round(scale*5), 0);
-  
-  if(remove_sinus) {
-    /* remove sinus sagittalis */
-    for (i = 0; i < vol; i++)
-      mask[i] = mask[i] && ( (probs[i + SKULL2*vol] < probs[i + GM*vol]) ||
-                             (probs[i + SKULL2*vol] < probs[i + WM*vol]) ||
-                             (probs[i + SKULL2*vol] < probs[i + CSF*vol]) );
-  }
-  
-  /* fill holes that may remain */
-fprintf(stderr,":");
-  distclose_uint8( mask, dims, voxelsize, round(scale*2), 0);
+  for( i = 0;  i < vol;  ++i )
+    sum[i] = (float)mask[i];
 
+  /* use copy of mask to erode and fill holes */
+  morph_erode_float(sum, dims, round(scale*5), 0.5);
+  morph_close_float(sum, dims, round(scale*20), 0.5);
+
+  /* use either original mask or new eroded and filled mask */
+  for( i = 0;  i < vol;  ++i )
+    mask[i] = (sum[i] > 0) ||  (mask[i] > 0);
+
+  /* fill remaining CSF spaces */
+  distclose_uint8(mask, dims, voxelsize, round(scale*4), 0.5);
+
+  free(sum);
+  
 }
 
 /* qicksort */
