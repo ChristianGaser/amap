@@ -35,7 +35,9 @@
 #define GM     0
 #define WM     1
 #define CSF    2
+#define SKULL1 3
 #define SKULL2 4
+#define SKULL3 5
 
 void
 watershed3d(unsigned char *img, unsigned char *marker, int flag_dilate, int *dims);

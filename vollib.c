@@ -1409,7 +1409,7 @@ smooth_subsample_float(float *vol, int dims[3], double separations[3], double s[
 }
 
 void
-initial_cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize, int strength, int remove_sinus)
+initial_cleanup(unsigned char *probs, unsigned char *label, int *dims, double *voxelsize, int strength, int remove_sinus)
 {
   
   double scale = 3.0/(voxelsize[0] + voxelsize[1] + voxelsize[2]);
@@ -1433,15 +1433,13 @@ initial_cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *vo
   if(remove_sinus) {
     /* remove sinus sagittalis */
     for (i = 0; i < vol; i++)
-      sum[i] = sum[i] && ( ((float)probs[i + SKULL2*vol] < (float)probs[i + GM*vol]) ||
-                           ((float)probs[i + SKULL2*vol] < (float)probs[i + WM*vol]) ||
-                           ((float)probs[i + SKULL2*vol] < (float)probs[i + CSF*vol]) );
+      sum[i] = sum[i] && ( label[i] < 4 );
   }
 
   distclose_float(sum, dims, voxelsize, round(scale*2), 0.5);
 
   for( i = 0;  i < vol;  ++i )
-    mask[i] = (unsigned char)sum[i];
+    label[i] = (unsigned char)sum[i];
   
   free(sum);
 }
@@ -1503,7 +1501,7 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
     sum[i] = (float)mask[i];
 
   /* use copy of mask to erode and fill holes */
-  morph_erode_float(sum, dims, round(scale*5), 0.5);
+  morph_erode_float(sum, dims, round(scale*4), 0.5);
   morph_close_float(sum, dims, round(scale*20), 0.5);
 
   /* use either original mask or new eroded and filled mask */
