@@ -16,13 +16,13 @@
 
 void WarpPriors(unsigned char *prob, unsigned char *priors, float *flow, int *dims, int n_loops, int n_classes, int samp);
 
-void Bayes(float *src, unsigned char *label, unsigned char *priors, unsigned char *prob, double *separations, int *dims, int correct_nu)
+void Bayes(float *src, unsigned char *label, unsigned char *priors, unsigned char *prob, double *separations, int *dims, int correct_nu, int do_warp)
 {
   int i, j, k, l, k1, subit, subsample_warp, kmax, k2;
   int count, subsample, masked_smoothing;
   double ll = -HUGE, llr=0.0, fwhm[3];
   float *nu, *meaninvcov, *resmean;
-  double mn[MAXK], vr[MAXK], mg[MAXK], mn2[MAXK], vr2[MAXK], mg2[MAXK];
+  double mn[MAXK], vr[MAXK], mg[MAXK], mn2[MAXK], vr2[MAXK], mg2[MAXK], wp[MAXK];
   double mnt[MAXK], vrt[MAXK];
   double mom0[MAXK], mom1[MAXK], mom2[MAXK], mgm[MAXK];
   double q[MAXK], bt[MAXK], b[MAXK], qt[MAXK];
@@ -32,10 +32,9 @@ void Bayes(float *src, unsigned char *label, unsigned char *priors, unsigned cha
   int area = dims[0]*dims[1];
   int vol = area*dims[2];
   int K = 0;
-  int do_warp = 0;
   
   /* multiple gaussians are not yet working */
-  int ngauss[6]   = {2,2,2,3,3,3};
+  int ngauss[6]   = {2,2,2,3,4,2};
   int iters_EM[5] = {5, 10, 10, 10, 10};
 
   int histo[65536], lkp[MAXK];

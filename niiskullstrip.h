@@ -93,7 +93,7 @@ extern "C" {
 #include "niilib.h"
 #include "vollib.h"
 #include "Amap.h"
-void Bayes(float *src, unsigned char *label, unsigned char *priors, unsigned char *prob, double *separations, int *dims, int correct_nu);
+void Bayes(float *src, unsigned char *label, unsigned char *priors, unsigned char *prob, double *separations, int *dims, int correct_nu, int do_warp);
 }
 
 #endif

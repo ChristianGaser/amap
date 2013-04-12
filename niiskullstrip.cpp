@@ -43,6 +43,7 @@ int main(int argc, char **argv)
 	FLAG *flag = (FLAG *)calloc(1,sizeof(FLAG));
 	float *tpm;
     int remove_sinus;
+    char *basename, *extension, buffer[1024], filename[1024];
 	
 	flag->affineFlag = 1;
 	flag->rigidFlag = 1;
@@ -118,12 +119,30 @@ int main(int argc, char **argv)
 		}
 	}
 	
-	if(!flag->targetImageFlag || !flag->sourceImageFlag || !flag->tpmImageFlag || !flag->outputMaskFlag){
-		fprintf(stderr,"Err:\tThe target, source, tpm, and output images have to be defined.\n");
+	if(!flag->targetImageFlag || !flag->sourceImageFlag || !flag->tpmImageFlag){
+		fprintf(stderr,"Err:\tThe target, source, and tpm images have to be defined.\n");
 		PetitUsage(argv[0]);
 		return 1;
 	}
 	
+	/* if no output is defined use source image name */
+	if(!flag->outputMaskFlag)
+      strcpy( buffer, param->sourceImageName);
+    else
+      strcpy( buffer, param->outputMaskName);
+	
+    /* get basename */
+    basename = nifti_makebasename(buffer);
+
+    /* deal with extension */
+    extension = nifti_find_file_extension(buffer);
+
+    /* if no valid extension was found use .nii */
+    if (extension == NULL) {
+      fprintf(stdout,"Use .nii as extension for %s.\n",buffer);
+      strcpy( extension, ".nii");
+    }
+
 	if(!flag->levelNumberFlag) param->levelNumber=3;
 	
 	/* Read the maximum number of iteration */
@@ -226,7 +245,7 @@ int main(int argc, char **argv)
 
     unsigned char *label = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox);
     unsigned char *probs = (unsigned char *)malloc(sizeof(unsigned char)*sourceImage->nvox*tpmImage->nt);
-    float *src           = (float *)malloc(sizeof(float)*sourceImage->nvox);
+    float           *src = (float *)malloc(sizeof(float)*sourceImage->nvox);
     
     ptr_to_float_4D(sourceImage, src, 0);
 
@@ -240,21 +259,28 @@ int main(int argc, char **argv)
     
     double slope = 1.0;
 
-    Bayes(src, label, priors, probs, voxelsize, dims, 0);
+    int do_warp = 1;
+    int correct_nu = 0;
+    Bayes(src, label, priors, probs, voxelsize, dims, correct_nu, do_warp);
 
     
-    int cleanup_strength = 4;
-    remove_sinus = 1;
-    initial_cleanup(probs, label, dims, voxelsize, cleanup_strength, remove_sinus);
-    
 float *tmp           = (float *)malloc(sizeof(float)*sourceImage->nvox);
-/*for (int i = 0; i < sourceImage->nvox; i++)
-tmp[i] = (float)label[i];
+for (int i = 0; i < sourceImage->nvox; i++) tmp[i] = (float)label[i];
 
 if(!write_nifti_float("label.nii", tmp, NIFTI_TYPE_UINT8, slope, 
             dims, voxelsize, sourceImage))
       exit(EXIT_FAILURE);
-*/
+
+    int cleanup_strength = 2;
+    remove_sinus = 1;
+//    initial_cleanup(probs, label, dims, voxelsize, cleanup_strength, remove_sinus);
+    
+for (int i = 0; i < sourceImage->nvox; i++) tmp[i] = (float)priors[i];
+
+if(!write_nifti_float("priors.nii", tmp, NIFTI_TYPE_UINT8, slope, 
+            dims, voxelsize, sourceImage))
+      exit(EXIT_FAILURE);
+
 int n_pure_classes = 3;
 int iters_amap = 200;
 int subsample = 16;
@@ -300,24 +326,25 @@ double max_vol = -1e15, offset, mean[6];
         probs[i+sourceImage->nvox*j] = temp[order_tissue[j]];
     }
 
-cleanup_strength = 2;
+cleanup_strength = 1;
     cleanup(probs, label, dims, voxelsize, cleanup_strength);
 
     for (int i = 0; i < sourceImage->nvox; i++)
       src[i] = (float)label[i];
 
-    if(!write_nifti_float(param->outputMaskName, src, NIFTI_TYPE_FLOAT32, slope, 
+     (void) sprintf( filename, "%s_skullstripped%s",basename, extension); 
+    if(!write_nifti_float(filename, src, NIFTI_TYPE_FLOAT32, slope, 
             dims, voxelsize, sourceImage))
       exit(EXIT_FAILURE);
+      
 if (0) {
 for (int j = 0; j < 6; j++) {
 for (int i = 0; i < sourceImage->nvox; i++) {
 tmp[i] = (float)probs[i+(dims[0]*dims[1]*dims[2]*j)];
 }
-char		buffer[1024];
-(void) sprintf( buffer, "%d.nii",j);
-fprintf(stderr,"Save %s\n",buffer);
-if(!write_nifti_float(buffer, tmp, NIFTI_TYPE_UINT8, slope, 
+(void) sprintf( filename, "%d.nii",j);
+fprintf(stderr,"Save %s\n",filename);
+if(!write_nifti_float(filename, tmp, NIFTI_TYPE_UINT8, slope, 
             dims, voxelsize, sourceImage))
       exit(EXIT_FAILURE);
 }
