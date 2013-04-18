@@ -14,7 +14,7 @@ double h;
 
 static ArgvInfo argTable[] = {
   {"-h", ARGV_FLOAT, (char *) 1, (char *) &h, 
-       "FWHM in mm."},
+       "Noise parameter h."},
    {NULL, ARGV_END, NULL, NULL, NULL}
 };
 
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
   /* Get arguments */
   if  (ParseArgv(&argc, argv, argTable, 0) ||(argc < 2)) {
    (void) fprintf(stderr, 
-   "\nUsage: %s -h smoothing_size <in.nii> <out.nii>\n",
+   "\nUsage: %s -h smoothing_size in.nii out.nii\n",
         argv[0]);
    (void) fprintf(stderr, 
    "    %s -help\n\n", argv[0]);

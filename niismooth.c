@@ -34,7 +34,7 @@ ArgvInfo argTable[] = {
 int
 main(int argc, char *argv[])
 {
-  char *infile, *outfile;
+  char *infile, outfile[1024];
   int i, dims[3];
   double *input, separations[3], s[3];
   nifti_image *nii_ptr;
@@ -79,11 +79,10 @@ main(int argc, char *argv[])
   
   /* if not defined use original name as basename for output */
   if(argc == 3)
-    outfile = argv[2];
+      (void) sprintf(outfile, "%s", argv[2]); 
   else {
-    outfile = argv[1];
     #if !defined(_WIN32)
-      (void) sprintf(outfile, "%s/s%g%s", dirname(outfile), fwhm, basename(outfile)); 
+      (void) sprintf(outfile, "%s/s%g%s", dirname(infile), fwhm, basename(infile)); 
     #endif
   }
 

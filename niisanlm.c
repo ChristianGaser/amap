@@ -6,6 +6,9 @@
 
 #include <float.h>
 #include <stdlib.h>
+#if !defined(_WIN32)
+  #include <libgen.h>
+#endif
 
 #include "niilib.h"
 
@@ -13,13 +16,13 @@
 
 int main(int argc, char *argv[])
 {
-  char *infile, *outfile;
+  char *infile, outfile[1024];
   int i, j, dims[3];
   float *input;
   double separations[3];
   nifti_image *nii_ptr;
   
-  if(argc < 3)
+  if(argc < 2)
   {
     fprintf(stderr,"\n\
 Usage: %s input.nii output.nii\n\n\
@@ -28,7 +31,20 @@ Usage: %s input.nii output.nii\n\n\
   }
   
   infile  = argv[1];
-  outfile = argv[2];
+
+  /* if not defined use original name as basename for output */
+  if(argc == 3)
+      (void) sprintf(outfile, "%s", argv[2]); 
+  else {
+    #if !defined(_WIN32)
+      (void) sprintf(outfile, "%s/n%s", dirname(infile), basename(infile)); 
+    #else
+      fprintf(stderr,"\n\
+Usage: %s input.nii output.nii\n\n\
+	Spatial adaptive non-local means denoising filter.\n\n", argv[0]);
+      return( 1 );
+    #endif
+  }
   
   /* read first image to get image parameters */
   nii_ptr = read_nifti_float(infile, &input, 0);
