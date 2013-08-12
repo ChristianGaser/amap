@@ -182,16 +182,16 @@ EXAMPLE
    parallelize_xserves -c "niismooth -v -fwhm 8" sTRIO*.nii
    smoothing with fwhm of 8mm for all files sTRIO*.nii. Use verbose mode to see diagnostic output.
    
-   parallelize_xserves -s "141.35.68.68 141.35.68.71 141.35.68.72 141.35.68.73" -c "/Volumes/UltraMax/spm8/toolbox/vbm8/cg_vbm8_batch.sh -w -m /usr/local/bin/matlab" /Volumes/UltraMax/ADNI/*sc*/ADNI*.nii
-   VBM8 batch for all files in /Volumes/UltraMax/ADNI/*sc*/ADNI*.nii with 4 servers 141.35.68.68 141.35.68.71 141.35.68.72 141.35.68.73 
+   parallelize_xserves -s "141.35.68.68 141.35.68.72 141.35.68.73" -c "/Volumes/UltraMax/spm8/toolbox/vbm8/cg_vbm8_batch.sh -w -m /Volumes/UltraMax/MATLAB_R2010b.app/bin/matlab" /Volumes/UltraMax/ADNI/*sc*/ADNI*.nii
+   VBM8 batch for all files in /Volumes/UltraMax/ADNI/*sc*/ADNI*.nii with 3 servers 141.35.68.68 141.35.68.72 141.35.68.73 
 
    parallelize_xserves -s "141.35.68.68 141.35.68.72 141.35.68.73 141.35.68.74 141.35.68.75" -c "/Volumes/UltraMax/spm12b/toolbox/vbm12/cg_vbm_batch.sh -p 8 -d /Volumes/UltraMax/cg_vbm_defaults_p0123.m -m /Volumes/UltraMax/MATLAB_R2010b.app/bin/matlab" /Volumes/UltraMax/SVE.LPBA40.testdata/S*.nii
    VBM12 batch for all files in /Volumes/UltraMax/SVE.LPBA40.testdata/S*.nii with 8 parallel jobs and optional default file 
 
    parallelize_xserves -c "/Volumes/UltraMax/bin/parallelize -c /Volumes/UltraMax/niismooth" /Volumes/UltraMax/IXI-database/raw/rp1IXI*nii
 
-   parallelize_xserves -s "141.35.68.68 141.35.68.71 141.35.68.73 141.35.68.74 141.35.68.75" -c "/Volumes/UltraMax/bin/parallelize -l /Volumes/UltraMax -c /Volumes/UltraMax/subjects/recon-all-cg-no_skullstripping" /Volumes/UltraMax/MEDI_50_50/data/[MU]*.img
-   recon-all files in /Volumes/UltraMax/MEDI_50_50/data/[MU]*.img and save log-files in /Volumes/UltraMax
+   parallelize_xserves -s "141.35.68.68 141.35.68.72 141.35.68.73" -c "/Volumes/UltraMax/bin/parallelize -l /Volumes/UltraMax/subjects -c /Volumes/UltraMax/subjects/recon-all-cg" /Volumes/UltraMax/MEDI_50_50/data/[MU]*.img
+   recon-all files in /Volumes/UltraMax/MEDI_50_50/data/[MU]*.img and save log-files in /Volumes/UltraMax/subjects
 
 This script was written by Christian Gaser (christian.gaser@uni-jena.de).
 This is ${version}.

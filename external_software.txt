@@ -1,6 +1,6 @@
 EBTKS      http://packages.bic.mni.mcgill.ca/tgz/ebtks-1.6.4.tar.gz
 Splines    http://packages.bic.mni.mcgill.ca/tgz/N3-1.12.0.tar.gz
-reg-apps/reg-lib 1.3
+reg-apps/reg-lib 1.3.9
            http://sourceforge.net/projects/niftyreg/files/latest/download
 nifti      http://nifti.nimh.nih.gov/pub/dist/src/niftilib/
            http://nifti.nimh.nih.gov/pub/dist/src/znzlib/
