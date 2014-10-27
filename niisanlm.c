@@ -10,7 +10,19 @@
   #include <libgen.h>
 #endif
 
+#include "ParseArgv.h"
 #include "niilib.h"
+
+int rician = 0;
+
+static
+ArgvInfo argTable[] = {
+  {"-rician", ARGV_CONSTANT, (char *) 1, (char *) &rician,
+       "Use Rician noise estimation. MRIs can have Gaussian or Rician distributed noise with uniform or nonuniform variance across the image. If SNR is high enough (>3) noise can be well approximated by Gaussian noise in the foreground. However, for SENSE reconstruction or DTI data a Rician distribution is expected. Please note that the Rician noise estimation is sensitive for large signals in the neighbourhood and can lead to artefacts (e.g. cortex can be affected by very high values in the scalp or in blood vessels."},
+   {NULL, ARGV_END, NULL, NULL, NULL}
+};
+
+void anlm(float* ima, int v, int f, int rician, const int* dims);
 
 /* Main program */
 
@@ -22,12 +34,10 @@ int main(int argc, char *argv[])
   double separations[3];
   nifti_image *nii_ptr;
   
-  if(argc < 2)
-  {
-    fprintf(stderr,"\n\
-Usage: %s input.nii output.nii\n\n\
-	Spatial adaptive non-local means denoising filter.\n\n", argv[0]);
-    return( 1 );
+  if  (ParseArgv(&argc, argv, argTable, 0) ||(argc < 2)) {
+     (void) fprintf(stderr, "\nUsage: %s [options] in.nii [out.nii]\nSpatial adaptive non-local means denoising filter.\n\n", argv[0]);
+     (void) fprintf(stderr, "    %s -help\n\n", argv[0]);
+   exit(EXIT_FAILURE);
   }
   
   infile  = argv[1];
@@ -61,7 +71,7 @@ Usage: %s input.nii output.nii\n\n\
   dims[2] = nii_ptr->nz;
   
   
-  sanlm(input, 3, 1, 1, dims);
+  anlm(input, 3, 1, rician, dims);
 
   if (!write_nifti_float( outfile, input, DT_FLOAT32, 1.0, dims, separations, nii_ptr)) 
     exit(EXIT_FAILURE);

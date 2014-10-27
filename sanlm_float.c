@@ -56,7 +56,7 @@ typedef struct{
     int radioS;   
 } myargument;
 
-int rician = 1;
+int rician;
 double max;
 
 /*Returns the modified Bessel function I0(x) for any real x.*/
@@ -164,7 +164,6 @@ int x_pos,y_pos,z_pos;
 int is_outside;
 double value = 0.0;
 unsigned char label = 0;
-double denoised_value  = 0.0;
 int count = 0 ;
 int a,b,c,ns,sxy;
 
@@ -440,7 +439,7 @@ for (i = 0;i<cols;i+= 2)
                   t1i =  (max-(double)means[k*(rc)+(j*cols)+i])/(max-(double)means[nk*(rc)+(nj*cols)+ni]);  
                   t2 = ((double)variances[k*rc+(j*cols)+i])/((double)variances[nk*rc+(nj*cols)+ni]);
     
-                  if ( (t1>mu1 && t1<(1/mu1)) || (t1i>mu1 && t1i<(1/mu1)) && t2>var1 && t2<(1/var1))
+                  if ( (t1>mu1 && t1<(1.0/mu1)) || ((t1i>mu1 && t1i<(1.0/mu1)) && t2>var1 && t2<(1.0/var1)))
                   {                                                         
                     d = distance2(ima,means,i,j,k,ni,nj,nk,f,cols,rows,slices);
                     if (d<distanciaminima) distanciaminima = d;
@@ -494,7 +493,7 @@ for (i = 0;i<cols;i+= 2)
                         t1i =  (max-(double)means[k*(rc)+(j*cols)+i])/(max-(double)means[nk*(rc)+(nj*cols)+ni]);  
                         t2 = ((double)variances[k*rc+(j*cols)+i])/((double)variances[nk*rc+(nj*cols)+ni]);
     
-                        if ( (t1>mu1 && t1<(1/mu1)) || (t1i>mu1 && t1i<(1/mu1)) && t2>var1 && t2<(1/var1))
+                        if ( (t1>mu1 && t1<(1.0/mu1)) || ((t1i>mu1 && t1i<(1.0/mu1)) && t2>var1 && t2<(1.0/var1)))
                         {                                                       
                             d = distance(ima,i,j,k,ni,nj,nk,f,cols,rows,slices);
                                        
@@ -534,13 +533,15 @@ return 0;
 }
 
 
-void sanlm(float* ima, int v, int f, int rician, const int* dims)
+void anlm(float* ima, int v, int f, int use_rician, const int* dims)
 {
 float *means, *variances, *Estimate, *average, *bias;
 unsigned char *Label;
 int ndim = 3;
-double SNR,h,mean,var,estimate,d;
+double SNR,mean,var,estimate,d;
 int vol,slice,label,Ndims,i,j,k,ii,jj,kk,ni,nj,nk,indice,Nthreads,ini,fin,r;
+
+extern int rician;
 
 myargument *ThreadArgs;  
 
@@ -554,6 +555,10 @@ means = (float*)malloc(vol*sizeof(float));
 variances = (float*)malloc(vol*sizeof(float));
 Estimate = (float*)malloc(vol*sizeof(float));
 Label = (unsigned char*)malloc(vol*sizeof(unsigned char));
+
+/* set global parameter */
+if (use_rician)
+    rician = 1;
 
 if (rician) bias = (float*)malloc(vol*sizeof(float));
 
@@ -642,6 +647,7 @@ Nthreads = 1;
 
 #ifdef _OPENMP
     Nthreads = omp_get_num_procs();
+    omp_set_num_threads(Nthreads);
     printf("Using %d processors\n",Nthreads);fflush(stdout);
 #endif
 

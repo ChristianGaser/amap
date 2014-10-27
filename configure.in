@@ -46,8 +46,6 @@ fi
 AM_CONDITIONAL([EBTKS], [test "$disable_ebtks" = no])
 
 dnl Build only static libs by default
-AM_DISABLE_SHARED
-AC_PROG_LIBTOOL
 
 smr_WITH_BUILD_PATH
 

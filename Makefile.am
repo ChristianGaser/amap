@@ -177,7 +177,7 @@ if EBTKS
 	  Kmeans.c \
 	  Pve.c \
 	  MrfPrior.c \
-	  sanlm.c \
+	  sanlm_float.c \
 	  $(nifti_SOURCES) \
 	  $(ebtks_SOURCES) \
       $(splines_SOURCES) \
@@ -240,7 +240,7 @@ else
 	  Kmeans.c \
 	  Pve.c \
 	  MrfPrior.c \
-	  sanlm.c \
+	  sanlm_float.c \
 	  $(nifti_SOURCES) \
 	  niilib.c \
 	  vollib.c \

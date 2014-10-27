@@ -42,6 +42,8 @@ static ArgvInfo argTable[] = {
        "Write label image (default)."},
   {"-nowrite_label", ARGV_CONSTANT, (char *) 0, (char *) &write_label,
        "Do not write label image."},
+  {"-debug", ARGV_CONSTANT, (char *) 1, (char *) &debug,
+       "Print debug information."},
    {NULL, ARGV_END, NULL, NULL, NULL}
 };
 
@@ -198,6 +200,9 @@ main( int argc, char **argv )
     max_vol = MAX((double)src[i], max_vol);
   }
 
+  if(debug)
+    fprintf(stdout,"Intensity range: %3.2f - %3.2f\n", min_vol, max_vol);
+
   /* if no mask file is given use minimum value or zeros in the image to get mask value */
   if (mask_filename == NULL) {
     for (i = 0; i < src_ptr->nvox; i++) {
@@ -219,7 +224,7 @@ main( int argc, char **argv )
 
   count_zero = 0;
   for (i = 0; i < src_ptr->nvox; i++)
-    if ((mask[i] == 0)) count_zero++;
+    if (mask[i] == 0) count_zero++;
   
   ratio_zeros = 100.0*(double)count_zero/(double)(src_ptr->nvox);
   if(ratio_zeros < 5)
