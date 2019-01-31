@@ -9,7 +9,7 @@ COMMAND=""
 TEST=""
 CPUINFO=/proc/cpuinfo
 ARCH=`uname`
-LOGDIR=$PWD
+LOGDIR=""
 time=`date "+%Y%b%d_%H%M"`
 
 ########################################################
@@ -187,14 +187,16 @@ parallelize ()
     ((i++))
   done
 
-  time=`date "+%Y%b%d_%H%M"`
-  log=${LOGDIR}/parallelize_${HOSTNAME}_${time}.log
-  if [ "${TEST}" == "" ]; then
-    echo Check $log for logging information
-    echo > $log
-    echo
+  if [ ! "${LOGDIR}" == "" ]; then
+    time=`date "+%Y%b%d_%H%M"`
+    log=${LOGDIR}/parallelize_${HOSTNAME}_${time}.log
+    if [ "${TEST}" == "" ]; then
+      echo Check $log for logging information
+      echo > $log
+      echo
+    fi
   fi
-    
+  
   i=0
   while [ "$i" -lt "$NUMBER_OF_JOBS" ]
   do
@@ -202,7 +204,7 @@ parallelize ()
       j=$(($i+1))
       echo job ${j}/"$NUMBER_OF_JOBS":
       echo $COMMAND ${ARG_LIST[$i]}
-      if [ "${TEST}" == "" ]; then
+      if [ "${TEST}" == "" ] && [ ! "${LOGDIR}" == "" ]; then
           echo job ${j}/"$NUMBER_OF_JOBS": $COMMAND ${ARG_LIST[$i]} >> $log
           nohup bash -c "for k in ${ARG_LIST[$i]}; do $COMMAND \$k; done" >> $log 2>&1 &
       fi
@@ -236,7 +238,7 @@ PURPOSE:
    Parallelize a job or command
 
 OUTPUT:
-   parallelize_${HOSTNAME}_${time}.log with current data and time in name as log-file
+   parallelize_${HOSTNAME}_${time}.log with current data and time in name as log-file if logdir is defined
 
 EXAMPLE
    parallelize -c "niismooth -v -fwhm 8" sTRIO*.nii
