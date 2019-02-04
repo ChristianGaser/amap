@@ -204,9 +204,13 @@ parallelize ()
       j=$(($i+1))
       echo job ${j}/"$NUMBER_OF_JOBS":
       echo $COMMAND ${ARG_LIST[$i]}
-      if [ "${TEST}" == "" ] && [ ! "${LOGDIR}" == "" ]; then
+      if [ "${TEST}" == "" ]; then
+        if [ ! "${LOGDIR}" == "" ]; then
           echo job ${j}/"$NUMBER_OF_JOBS": $COMMAND ${ARG_LIST[$i]} >> $log
           nohup bash -c "for k in ${ARG_LIST[$i]}; do $COMMAND \$k; done" >> $log 2>&1 &
+        else
+          nohup bash -c "for k in ${ARG_LIST[$i]}; do $COMMAND \$k; done" >> /tmp/nohup.log 2>&1 &
+        fi
       fi
     fi
     ((i++))
