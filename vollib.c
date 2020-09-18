@@ -502,7 +502,7 @@ void
 vbdist(float *V, int *dims, double *voxelsize) 
 {
   
-  /* main informations about input data (size, dimensions, ...) */
+  /* main information about input data (size, dimensions, ...) */
   const int     nL = dims[0]*dims[1]*dims[2];
   const int     x  = dims[0];
   const int     y  = dims[1];

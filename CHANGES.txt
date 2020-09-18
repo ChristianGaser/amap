@@ -1,0 +1,1017 @@
+M      parallelize
+
+Removed extension from parallelize.
+------------------------------------------------------------------------
+r136 | gaser | 2010-06-14 11:29:14
+
+M      diffeo3d.c
+
+Updated diffeo3d.c to recent SPM8 update.
+
+------------------------------------------------------------------------
+r138 | gaser | 2010-08-12 00:45:07
+
+M      Kmeans.c
+
+Set weighting of nu-correction for residual smoothing back to 0.5.
+------------------------------------------------------------------------
+r139 | gaser | 2010-08-12 07:48:22
+
+M      niibrainmask.c
+M      niiamap.c
+M      Amap.c
+M      Amap.h
+M      Kmeans.c
+
+(1) To the source image in AmapMex.c an offset is added for areas above
+    background. This prevents poor CSF segmentations for images, where CSF
+    values are too close to background.
+(2) Changed Amap.h and Amap.c to consider changes above. 
+------------------------------------------------------------------------
+r140 | gaser | 2010-08-23 16:57:32
+
+M      Kmeans.c
+
+Improved bias correction in Kmeans.c that leads to better segmentation
+esp. of subcortical structures.
+------------------------------------------------------------------------
+r143 | gaser | 2010-09-03 09:39:59
+
+M      parallelize
+A      parallelize_xserves
+M      Makefile.am
+
+(1) Added parallelize_xserves for submitting jobs to xserves.
+(2) Added test mode to parallize.
+------------------------------------------------------------------------
+r144 | gaser | 2011-02-08 11:26:05
+
+M      parallelize_xserves
+M      Makefile.am
+
+Corrected typo in Makefile.am for correct installation of parallize_xserves.
+------------------------------------------------------------------------
+r145 | gaser | 2011-02-08 13:25:10
+
+M      niiamap.c
+M      parallelize_xserves
+M      Kmeans.c
+M      Makefile.am
+
+(1) Added priliminary version of niinucorrect.c.
+(2) Allow nu-correction only for niiamap.c.
+(3) Initial nu-correction with smoothing is now unmasked.
+------------------------------------------------------------------------
+r146 | gaser | 2011-02-15 14:32:29
+
+A      niinucorrect.c
+
+New version of niinucorrect with lots of changes.
+------------------------------------------------------------------------
+r147 | gaser | 2011-02-16 17:18:54
+
+M      niinucorrect.c
+
+Removed unused variables in niinucorrect.c
+
+------------------------------------------------------------------------
+r148 | gaser | 2011-02-16 17:22:12
+
+A      niinucorrect.h
+
+Added niinucorrect.h.
+
+------------------------------------------------------------------------
+r149 | gaser | 2011-02-16 22:13:29
+
+M      optimizer3d.c
+M      parallelize
+M      parallelize_xserves
+
+New optiomizer3d.c version from update 4290.
+------------------------------------------------------------------------
+r150 | gaser | 2011-04-06 09:32:21
+
+M      parallelize
+M      parallelize_xserves
+
+Corrected some typos in parallelize and parallelize_xserves.
+------------------------------------------------------------------------
+r151 | gaser | 2011-04-13 09:48:13
+
+M      Bayes.c
+M      diffeo3d.c
+M      vollib.c
+
+Use modified versions from vbm8.
+------------------------------------------------------------------------
+r152 | gaser | 2011-06-09 12:14:09
+
+M      parallelize_xserves
+
+Modified help text for parallelize_xserves.
+------------------------------------------------------------------------
+r153 | gaser | 2011-06-21 12:02:41
+ 1>/dev/null
+MM     m4/smr_CGAL_MAKEFILE.m4
+MM     m4/mni_REQUIRE_LIB.m4
+ M     m4/mni_REQUIRE_OPENINVENTOR.m4
+MM     m4/smr_REQUIRED_LIB.m4
+MM     m4/smr_WITH_BUILD_PATH.m4
+ M     m4/mni_REQUIRE_MNILIBS.m4
+MM     m4/smr_OPTIONAL_LIB.m4
+MM     m4/mni_cxx_have_koenig_lookup.m4
+ M     aniso3d.c
+ M     MrfPrior.c
+ M     CRemoveBridges.cpp
+ M     Bayes.c
+ M     AUTHORS
+ M     mincremovebridges.cpp
+ M     niilib.c
+ M     niibrainmask.c
+ M     bwlabel.c
+ M     optimizer3d.c
+ M     niismooth.c
+MM     sanlm.c
+ M     niibrainmask.h
+ M     niiamap.c
+ M     Amap.c
+ M     optimizer3d.h
+ M     Numap.c
+ M     mincmarchingcubes.c
+ M     parallelize
+ M     niiamap.h
+ M     Amap.h
+ M     diffeo3d.c
+ M     INSTALL
+ M     mincnumap_old.c
+MM     niiornlm.c
+ M     COPYING
+ M     mincnumap.c
+ M     diffeo3d.h
+ M     ParseArgv.c
+ M     autogen.sh
+ M     NEWS
+ M     mincnumap.h
+ M     ParseArgv.h
+A      svn_ci_log
+ M     parallelize_xserves
+MM     niinucorrect.c
+MM     configure.in
+ M     CRemoveBridges.h
+ M     ChangeLog
+ M     nifti1/nifti1.h
+ M     nifti1/nifti1_io.c
+ M     nifti1/nifti1_io.h
+ M     nifti1/znzlib.c
+ M     nifti1/nifti1_local.h
+ M     nifti1/znzlib.h
+MM     niinucorrect.h
+ M     niiaverage.c
+MM     niisanlm.c
+ M     README
+ M     Watershed3d.c
+ M     Kmeans.c
+ M     SplineSmooth.cc
+ M     vollib.c
+MM     ornlm.c
+ M     Makefile.am
+MM     Pve.c
+
+Added svn_ci_log.
+------------------------------------------------------------------------
+r154 | gaser | 2011-06-21 14:09:51
+
+M      parallelize_xserves
+
+Modified help text for parallize_xserves.
+------------------------------------------------------------------------
+r154 | gaser | 2011-07-20 14:18:46
+
+M      niilib.c
+M      configure.in
+
+(1) In niilib.c offset for writing integer data was wrong. This affected integer
+    data with negative values. This is now solved.
+(2) Set use of OpenMP as default in configure.in.
+------------------------------------------------------------------------
+r154 | gaser | 2011-07-28 10:01:54
+
+M      CRemoveBridges.cpp
+M      niiamap.c
+M      svn_ci_log
+M      CRemoveBridges.h
+M      Makefile.am
+
+New tool niireomvebridges.cpp added.
+------------------------------------------------------------------------
+r157 | gaser | 2011-08-25 17:15:48
+
+M      bwlabel.c
+ M     svn_ci_log
+M      Makefile.am
+A      niiremovebridges.cpp
+
+Updated niireomvebridges.cpp.
+------------------------------------------------------------------------
+r158 | gaser | 2011-09-12 13:36:16
+
+M       configure.in
+M       Makefile.am
+
+Corrected configure.in to deal with OPENMP.
+------------------------------------------------------------------------
+r159 | gaser | 2011-12-05 14:25:35
+
+A       reg-lib
+A       reg-lib/_reg_tools.h
+A       reg-lib/_reg_blockMatching.cpp
+A       reg-lib/_reg_resampling.h
+A       reg-lib/_reg_blockMatching.h
+A       reg-lib/_reg_bspline_comp.cpp
+A       reg-lib/_reg_mutualinformation.cpp
+A       reg-lib/_reg_affineTransformation.cpp
+A       reg-lib/_reg_bspline_comp.h
+A       reg-lib/_reg_mutualinformation.h
+A       reg-lib/_reg_affineTransformation.h
+A       reg-lib/_reg_ssd.cpp
+A       reg-lib/_reg_bspline.cpp
+A       reg-lib/_reg_ssd.h
+A       reg-lib/_reg_tools.cpp
+A       reg-lib/_reg_resampling.cpp
+A       reg-lib/_reg_bspline.h
+M       niilib.c
+M       niismooth.c
+M       niibrainmask.h
+M       niiamap.c
+A       zlib
+A       zlib/inffast.h
+A       zlib/inffixed.h
+A       zlib/deflate.c
+A       zlib/zlib.h
+A       zlib/zutil.c
+A       zlib/gzio.c
+A       zlib/deflate.h
+A       zlib/zutil.h
+A       zlib/README
+A       zlib/crc32.c
+A       zlib/inftrees.c
+A       zlib/crc32.h
+A       zlib/trees.c
+A       zlib/inflate.c
+A       zlib/uncompr.c
+A       zlib/inftrees.h
+A       zlib/zconf.h
+A       zlib/FAQ
+A       zlib/minigzip.c
+A       zlib/inflate.h
+A       zlib/trees.h
+A       zlib/inffast.c
+A       zlib/compress.c
+A       zlib/adler32.c
+A       zlib/infback.c
+M       niiornlm.c
+A       reg-apps
+A       reg-apps/checkCudaCard.cpp
+A       reg-apps/reg_aladin.cpp
+A       reg-apps/reg_resample.cpp
+A       reg-apps/reg_benchmark.cpp
+A       reg-apps/reg_full.sh
+A       reg-apps/reg_f3d.cpp
+A       reg-apps/reg_tools.cpp
+M       niinucorrect.c
+M       configure.in
+D       nifti1
+D       nifti1/nifti1.h
+D       nifti1/nifti1_io.c
+D       nifti1/nifti1_io.h
+D       nifti1/znzlib.c
+D       nifti1/nifti1_local.h
+D       nifti1/znzlib.h
+M       niiaverage.c
+M       niisanlm.c
+M       Makefile.am
+A  +    nifti
+M  +    nifti/nifti1.h
+M  +    nifti/nifti1_io.c
+A       nifti/analyze75.h
+M  +    nifti/nifti1_io.h
+M  +    nifti/znzlib.h
+MM      niiremovebridges.cpp
+
+(1) Renamed nifti1 to nifti and changed all files accordingly.
+(2) Updated nifti-lib to version 1.3.5
+(3) Added zlib and removed --with-zlib flag in configure.in.
+(3) Added reg-lib and reg-apps from nifty_reg-1.3.5.
+------------------------------------------------------------------------
+r160 | gaser | 2011-12-19 11:46:21
+
+A       EBTKS
+A       EBTKS/include
+A       EBTKS/include/Path.h
+A       EBTKS/include/trivials.h
+A       EBTKS/include/Histogram.h
+A       EBTKS/include/matlabSupport.h
+A       EBTKS/include/assert.h
+A       EBTKS/include/backProp.h
+A       EBTKS/include/OrderedCltn.h
+A       EBTKS/include/MPoint.h
+A       EBTKS/include/Complex.h
+A       EBTKS/include/FileIO.h
+A       EBTKS/include/dcomplex.h
+A       EBTKS/include/fcomplex.h
+A       EBTKS/include/OpTimer.h
+A       EBTKS/include/popen.h
+A       EBTKS/include/MTypes.h
+A       EBTKS/include/MString.h
+A       EBTKS/include/Polynomial.h
+A       EBTKS/include/amoeba.h
+A       EBTKS/include/Minc.h
+A       EBTKS/include/TrainingSet.h
+A       EBTKS/AUTHORS
+A       EBTKS/INSTALL
+A       EBTKS/ChangeLog
+A       EBTKS/src
+A       EBTKS/src/dcomplex.cc
+A       EBTKS/src/Path.cc
+A       EBTKS/src/fcomplex.cc
+A       EBTKS/src/Histogram.cc
+A       EBTKS/src/OpTimer.cc
+A       EBTKS/src/backProp.cc
+A       EBTKS/src/MString.cc
+A       EBTKS/src/Polynomial.cc
+A       EBTKS/src/amoeba.cc
+A       EBTKS/src/OrderedCltn.cc
+A       EBTKS/src/MPoint.cc
+A       EBTKS/src/FileIO.cc
+A       EBTKS/src/TrainingSet.cc
+A       EBTKS/COPYING
+A       EBTKS/version.cc
+A       EBTKS/NEWS
+A       EBTKS/README
+A       EBTKS/clapack
+A       EBTKS/clapack/s_cmp.c
+A       EBTKS/clapack/lsame.c
+A       EBTKS/clapack/dgemv.c
+A       EBTKS/clapack/idamax.c
+A       EBTKS/clapack/dsysv.c
+A       EBTKS/clapack/dsytf2.c
+A       EBTKS/clapack/dsytrf.c
+A       EBTKS/clapack/xerbla.c
+A       EBTKS/clapack/ilaenv.c
+A       EBTKS/clapack/dcopy.c
+A       EBTKS/clapack/dswap.c
+A       EBTKS/clapack/f2c.h
+A       EBTKS/clapack/blaswrap.h
+A       EBTKS/clapack/dger.c
+A       EBTKS/clapack/dsyr.c
+A       EBTKS/clapack/dlasyf.c
+A       EBTKS/clapack/ieeeck.c
+A       EBTKS/clapack/dscal.c
+A       EBTKS/clapack/dsytrs.c
+A       EBTKS/clapack/dgemm.c
+A       EBTKS/clapack/s_copy.c
+A       EBTKS/templates
+A       EBTKS/templates/Matrix3D.h
+A       EBTKS/templates/MatrixSupport.cc
+A       EBTKS/templates/SimpleArraySpec.cc
+A       EBTKS/templates/MatrixSupport.h
+A       EBTKS/templates/miscTemplateFunc.cc
+A       EBTKS/templates/Matrix.cc
+A       EBTKS/templates/miscTemplateFunc.h
+A       EBTKS/templates/Dictionary.cc
+A       EBTKS/templates/CachedArray.cc
+A       EBTKS/templates/Matrix.h
+A       EBTKS/templates/MatrixTest.h
+A       EBTKS/templates/Stack.h
+A       EBTKS/templates/Dictionary.h
+A       EBTKS/templates/CachedArray.h
+A       EBTKS/templates/Pool.cc
+A       EBTKS/templates/ValueMap.cc
+A       EBTKS/templates/Pool.h
+A       EBTKS/templates/ValueMap.h
+A       EBTKS/templates/Array.cc
+A       EBTKS/templates/MatrixSpec.cc
+A       EBTKS/templates/Array.h
+A       EBTKS/templates/SimpleArray.cc
+A       EBTKS/templates/MatrixConv.cc
+A       EBTKS/templates/SimpleArray.h
+A       external_software.txt
+A       Splines
+A       Splines/Spline.h
+A       Splines/TBSpline.cc
+A       Splines/TBSpline.h
+A  +    Splines/SplineSmooth.cc
+A       Splines/Spline.cc
+M       configure.in
+D       SplineSmooth.cc
+M       Makefile.am
+M       nifti/nifti1_io.c
+D       nifti/analyze75.h
+M       nifti/nifti1_io.h
+
+(1) Added ebtks-1.6.4 to source code.
+(2) Updated niftlib.
+(3) Added external_software.txt.
+------------------------------------------------------------------------
+r161 | gaser | 2011-12-20 10:28:39
+
+ M      reg-lib/_reg_tools.h
+ M      reg-lib/_reg_blockMatching.cpp
+ M      reg-lib/_reg_resampling.h
+ M      reg-lib/_reg_blockMatching.h
+ M      reg-lib/_reg_bspline_comp.cpp
+ M      reg-lib/_reg_mutualinformation.cpp
+ M      reg-lib/_reg_affineTransformation.cpp
+ M      reg-lib/_reg_bspline_comp.h
+ M      reg-lib/_reg_mutualinformation.h
+ M      reg-lib/_reg_affineTransformation.h
+ M      reg-lib/_reg_ssd.cpp
+ M      reg-lib/_reg_bspline.cpp
+ M      reg-lib/_reg_ssd.h
+ M      reg-lib/_reg_tools.cpp
+ M      reg-lib/_reg_resampling.cpp
+ M      reg-lib/_reg_bspline.h
+M       niismooth.c
+ M      zlib/inffast.h
+ M      zlib/inffixed.h
+ M      zlib/deflate.c
+ M      zlib/zlib.h
+ M      zlib/zutil.c
+ M      zlib/gzio.c
+ M      zlib/deflate.h
+ M      zlib/crc32.c
+ M      zlib/README
+ M      zlib/zutil.h
+ M      zlib/inftrees.c
+ M      zlib/crc32.h
+ M      zlib/inflate.c
+ M      zlib/trees.c
+ M      zlib/uncompr.c
+ M      zlib/inftrees.h
+ M      zlib/zconf.h
+ M      zlib/FAQ
+ M      zlib/minigzip.c
+ M      zlib/inflate.h
+ M      zlib/trees.h
+ M      zlib/inffast.c
+ M      zlib/compress.c
+ M      zlib/adler32.c
+ M      zlib/infback.c
+M       EBTKS/include/trivials.h
+M       Splines/Spline.h
+M       Splines/TBSpline.h
+M       Splines/SplineSmooth.cc
+M       Splines/Spline.cc
+ M      reg-apps/checkCudaCard.cpp
+ M      reg-apps/reg_aladin.cpp
+ M      reg-apps/reg_resample.cpp
+ M      reg-apps/reg_benchmark.cpp
+ M      reg-apps/reg_full.sh
+ M      reg-apps/reg_f3d.cpp
+ M      reg-apps/reg_tools.cpp
+M       nifti/nifti1_local.h
+M       niiremovebridges.cpp
+
+Made some changes to compile amap for ubuntu and windows XP.
+------------------------------------------------------------------------
+r162 | gaser | 2011-12-20 16:25:03
+
+MM      EBTKS/include/Path.h
+MM      EBTKS/include/matlabSupport.h
+MM      EBTKS/include/Histogram.h
+MM      EBTKS/include/trivials.h
+MM      EBTKS/include/backProp.h
+MM      EBTKS/include/assert.h
+MM      EBTKS/include/OrderedCltn.h
+MM      EBTKS/include/MPoint.h
+MM      EBTKS/include/FileIO.h
+MM      EBTKS/include/Complex.h
+MM      EBTKS/include/dcomplex.h
+MM      EBTKS/include/fcomplex.h
+MM      EBTKS/include/OpTimer.h
+MM      EBTKS/include/MTypes.h
+MM      EBTKS/include/popen.h
+MM      EBTKS/include/MString.h
+MM      EBTKS/include/Polynomial.h
+MM      EBTKS/include/amoeba.h
+MM      EBTKS/include/Minc.h
+MM      EBTKS/include/TrainingSet.h
+ M      EBTKS/AUTHORS
+ M      EBTKS/INSTALL
+ M      EBTKS/ChangeLog
+MM      EBTKS/src/dcomplex.cc
+MM      EBTKS/src/Path.cc
+MM      EBTKS/src/fcomplex.cc
+MM      EBTKS/src/Histogram.cc
+MM      EBTKS/src/OpTimer.cc
+MM      EBTKS/src/backProp.cc
+MM      EBTKS/src/MString.cc
+MM      EBTKS/src/Polynomial.cc
+MM      EBTKS/src/amoeba.cc
+MM      EBTKS/src/OrderedCltn.cc
+MM      EBTKS/src/MPoint.cc
+MM      EBTKS/src/FileIO.cc
+MM      EBTKS/src/TrainingSet.cc
+ M      EBTKS/COPYING
+ M      EBTKS/version.cc
+ M      EBTKS/NEWS
+ M      EBTKS/README
+ M      EBTKS/clapack/s_cmp.c
+ M      EBTKS/clapack/lsame.c
+ M      EBTKS/clapack/dgemv.c
+ M      EBTKS/clapack/idamax.c
+ M      EBTKS/clapack/dsysv.c
+ M      EBTKS/clapack/dsytf2.c
+ M      EBTKS/clapack/dsytrf.c
+ M      EBTKS/clapack/xerbla.c
+ M      EBTKS/clapack/ilaenv.c
+ M      EBTKS/clapack/dcopy.c
+ M      EBTKS/clapack/dswap.c
+ M      EBTKS/clapack/f2c.h
+ M      EBTKS/clapack/blaswrap.h
+ M      EBTKS/clapack/dger.c
+ M      EBTKS/clapack/dsyr.c
+ M      EBTKS/clapack/dlasyf.c
+ M      EBTKS/clapack/ieeeck.c
+ M      EBTKS/clapack/dscal.c
+ M      EBTKS/clapack/dsytrs.c
+ M      EBTKS/clapack/dgemm.c
+ M      EBTKS/clapack/s_copy.c
+MM      EBTKS/templates/Matrix3D.h
+MM      EBTKS/templates/MatrixSupport.cc
+ M      EBTKS/templates/SimpleArraySpec.cc
+MM      EBTKS/templates/MatrixSupport.h
+MM      EBTKS/templates/miscTemplateFunc.cc
+MM      EBTKS/templates/Matrix.cc
+MM      EBTKS/templates/miscTemplateFunc.h
+MM      EBTKS/templates/Dictionary.cc
+MM      EBTKS/templates/CachedArray.cc
+MM      EBTKS/templates/Matrix.h
+MM      EBTKS/templates/MatrixTest.h
+MM      EBTKS/templates/Stack.h
+MM      EBTKS/templates/Dictionary.h
+MM      EBTKS/templates/CachedArray.h
+MM      EBTKS/templates/Pool.cc
+MM      EBTKS/templates/ValueMap.cc
+MM      EBTKS/templates/Pool.h
+MM      EBTKS/templates/ValueMap.h
+MM      EBTKS/templates/Array.cc
+ M      EBTKS/templates/MatrixSpec.cc
+MM      EBTKS/templates/Array.h
+MM      EBTKS/templates/SimpleArray.cc
+MM      EBTKS/templates/MatrixConv.cc
+MM      EBTKS/templates/SimpleArray.h
+ M      external_software.txt
+MM      Splines/Spline.h
+MM      Splines/TBSpline.cc
+MM      Splines/TBSpline.h
+MM      Splines/Spline.cc
+
+Made some changes to compile amap for ubuntu and windows XP.
+------------------------------------------------------------------------
+r163 | gaser | 2011-12-20 16:26:51
+
+M       niilib.c
+M       niibrainmask.c
+M       niismooth.c
+M       sanlm.c
+M       Amap.c
+M       niiamap.c
+M       Amap.h
+M       INSTALL
+M       COPYING
+M       niiornlm.c
+M       Splines/SplineSmooth.cc
+M       niinucorrect.c
+M       ChangeLog
+M       niiaverage.c
+M       niisanlm.c
+M       Kmeans.c
+M       vollib.c
+M       Makefile.am
+M       Pve.c
+M       niiremovebridges.cpp
+
+For most functions the standard data type is now float to save memory.
+------------------------------------------------------------------------
+r166 | gaser | 2011-12-27 09:43:14
+
+M       Bayes.c
+D       mincremovebridges.cpp
+M       niilib.c
+M       niibrainmask.c
+M       niismooth.c
+A       niilib.h
+M       niibrainmask.h
+M       niiamap.c
+D       mincmarchingcubes.c
+M       Amap.h
+M       niiamap.h
+!       mincnumap_old.c
+M       niiornlm.c
+M       external_software.txt
+M       ParseArgv.c
+M       niinucorrect.c
+M       niinucorrect.h
+M       niiaverage.c
+M       niisanlm.c
+M       Kmeans.c
+M       vollib.c
+A       vollib.h
+
+(1) Added vollib.h and niilib.h.
+(2) Changed code to consider vollib.h and niilib.h.
+
+------------------------------------------------------------------------
+r167 | gaser | 2011-12-27 10:28:17
+
+M       niilib.h
+M       vollib.h
+
+Removed "extern" from niilib.h and vollib.h.
+------------------------------------------------------------------------
+r168 | gaser | 2011-12-27 13:57:22
+
+MM      niilib.h
+A       niiskullstrip.cpp
+A       skullstrip.cpp
+A       niiskullstrip.h
+M       Makefile.am
+MM      vollib.h
+
+Initial version of niiskullstrip.c.
+------------------------------------------------------------------------
+r169 | gaser | 2011-12-27 17:07:46
+
+M       optimizer3d.c
+M       niiskullstrip.cpp
+M       niiskullstrip.h
+M       Makefile.am
+
+New temporary version of niiskullstrip.c.
+------------------------------------------------------------------------
+r172 | gaser | 2012-01-02 16:57:57
+
+M       Bayes.c
+MM      niiskullstrip.cpp
+MM      skullstrip.cpp
+MM      niiskullstrip.h
+MM      sanlm_float.c
+M       Makefile.am
+
+New version of niiskullstrip.cpp.
+------------------------------------------------------------------------
+r174 | gaser | 2012-01-03 14:35:57
+
+M       niiskullstrip.cpp
+M       NEWS
+MM      WarpPriors.c
+M       Makefile.am
+
+Added files to Makefile.am to build distribution.
+------------------------------------------------------------------------
+r175 | gaser | 2012-02-28 15:43:17
+
+M       EBTKS/src/Path.cc
+M       EBTKS/src/backProp.cc
+M       EBTKS/src/TrainingSet.cc
+M       EBTKS/templates/Matrix.cc
+M       EBTKS/templates/Array.cc
+M       EBTKS/templates/SimpleArray.cc
+M       skullstrip.cpp
+M       autogen.sh
+M       reg-apps/reg_aladin.cpp
+M       reg-apps/reg_f3d.cpp
+M       Makefile.am
+
+Added DRAND48 macro to replace drand48.
+------------------------------------------------------------------------
+r176 | gaser | 2012-04-03 10:23:12
+
+M       niilib.h
+M       niiremovebridges.cpp
+
+niiremovebridges.cpp is now using label values >= and <=. 
+------------------------------------------------------------------------
+r181 | gaser | 2012-04-12 14:40:34
+
+M       niiskullstrip.cpp
+M       niiamap.c
+
+Changed # of iterations for skullstripping in niiskullstrip.cpp.
+
+------------------------------------------------------------------------
+r182 | gaser | 2012-05-04 08:33:12
+
+M       CRemoveBridges.cpp
+M       niiremovebridges.cpp
+
+1. Changed maximum size of CRemoveBridges.cpp to 512x512x512.
+2. Changed default label value in niiremovebridges.cpp to 0..1.
+3. Lable value is now thresholded at lt/gt.
+------------------------------------------------------------------------
+r183 | gaser | 2012-06-04 12:33:52
+
+M       CRemoveBridges.cpp
+M       CRemoveBridges.h
+M       niiremovebridges.cpp
+
+1. Forgot to changed maximum size in CRemoveBridges.h and niiremovebridges.cpp.
+2. Label value is now thresholded again >= and <=.
+------------------------------------------------------------------------
+r185 | gaser | 2012-06-05 11:41:23
+
+M       niiremovebridges.cpp
+
+Changed some data types in niiremovebridges.cpp to float.
+------------------------------------------------------------------------
+r186 | gaser | 2012-06-20 11:06:21
+
+M       Bayes.c
+M       niiskullstrip.cpp
+A  +    affineRegistration.cpp
+M       WarpPriors.c
+D       skullstrip.cpp
+M       niiskullstrip.h
+M       vollib.c
+M       vollib.h
+M       reg-lib/_reg_tools.cpp
+A       ptr4Dlib.cpp
+M       Makefile.am
+
+(1) Corrected wrong datatype in _reg_tools.cpp (INT16).
+(2) Bunch of changes to Bayes.c and relating code.
+(2) Added ptr4Dlib.cpp.
+(4) Renamed skulltrip.cpp to affineRegistration.cpp.
+------------------------------------------------------------------------
+r187 | gaser | 2012-07-27 13:20:42
+
+M       niiskullstrip.cpp
+M       niiskullstrip.h
+M       vollib.c
+M       vollib.h
+M       bwlabel.c
+
+Modified cleanup in vollib.c
+------------------------------------------------------------------------
+r188 | gaser | 2012-07-30 12:04:50
+
+MM      ptr4Dlib.cpp
+
+Modified cleanup in vollib.c
+------------------------------------------------------------------------
+r189 | gaser | 2012-07-30 12:05:13
+
+M       Bayes.c
+M       CRemoveBridges.cpp
+M       Amap.c
+M       diffeo3d.c
+
+Removed some unnecessary variables.
+------------------------------------------------------------------------
+r190 | gaser | 2012-07-30 12:18:50
+
+M       niismooth.c
+M       niiskullstrip.cpp
+M       affineRegistration.cpp
+M       niiornlm.c
+M       niinucorrect.c
+M       niiaverage.c
+M       niiskullstrip.h
+M       reg-lib/_reg_tools.h
+M       reg-lib/_reg_blockMatching.h
+M       reg-lib/_reg_affineTransformation.h
+M       niilib.c
+M       niilib.h
+M       niiamap.c
+M       ptr4Dlib.cpp
+M       niisanlm.c
+
+(1) Extended function read_nifti_float in niilib.c by reading-flag.
+(2) Affine registration in niiskullstrip.cpp is now working!
+(3) Enabled flags to disable debug printouts.
+------------------------------------------------------------------------
+r191 | gaser | 2012-07-31 17:41:30
+
+M       Bayes.c
+M       niiskullstrip.cpp
+M       niiskullstrip.h
+M       vollib.c
+M       vollib.h
+M       ptr4Dlib.cpp
+M       Makefile.am
+
+(1) Bayes now converted to float input.
+(2) Added new ptr_to_float_4D tp ptr4Dlib.cpp.
+(3) Added morph_dilate_double to vollib.c.
+(4) cleanup in vollib.c now supports two differnt modes.
+(5) niiskullstrip now includes Amap segmentation.
+------------------------------------------------------------------------
+r193 | gaser | 2012-08-01 18:05:09
+
+M       niibrainmask.c
+M       niiskullstrip.cpp
+M       vollib.c
+M       bwlabel.c
+M       Makefile.am
+
+(1) Some changes to bwlabel.c that is still not running.
+(2) Some changes to dilate and distclose in vollib.c.
+------------------------------------------------------------------------
+r195 | gaser | 2012-08-02 16:42:39
+
+M       parallelize
+M       vollib.c
+M       parallelize_xserves
+
+(1) Morphological operations are only estimated if iterations > 0.
+(2) Added definition of log-file location to parallize.
+------------------------------------------------------------------------
+r197 | gaser | 2012-08-28 17:36:38
+
+M       parallelize_xserves
+
+parallize_xserve was not correctly calling ssh and bash.
+------------------------------------------------------------------------
+r198 | gaser | 2012-08-28 17:57:34
+
+M       parallelize
+
+parallelize is now accepting "=" inside commands.
+------------------------------------------------------------------------
+r199 | gaser | 2012-08-29 11:07:41
+
+M       niiskullstrip.cpp
+M       vollib.c
+M       vollib.h
+M       bwlabel.c
+M       Makefile.am
+
+(1) Added get_largest_component based on watershed3d to vollib.c that 
+    replaces get_largest_cluster.
+(2) Added fill_holes based on watershed3d to vollib.c. 
+
+------------------------------------------------------------------------
+r201 | gaser | 2012-09-19 16:50:42
+
+M       vollib.c
+M       bwlabel.c
+
+New preliminary version of skullstripping.
+------------------------------------------------------------------------
+r202 | gaser | 2012-09-20 17:20:36
+
+M       niiskullstrip.cpp
+M       vollib.c
+M       bwlabel.c
+
+New preliminary version of skullstripping.
+------------------------------------------------------------------------
+r203 | gaser | 2012-09-21 17:02:45
+
+M       niiskullstrip.cpp
+M       vollib.c
+M       vollib.h
+M       bwlabel.c
+
+New preliminary version of skullstripping.
+------------------------------------------------------------------------
+r204 | gaser | 2012-09-25 17:26:23
+
+M       vollib.c
+M       bwlabel.c
+
+New preliminary version of skullstripping.
+------------------------------------------------------------------------
+r205 | gaser | 2012-09-26 17:31:09
+
+M       niiskullstrip.cpp
+M       vollib.c
+M       vollib.h
+M       bwlabel.c
+M       Makefile.am
+
+(1) Updated all morphological operations!!!
+(2) New version for cleanup in vollib.c
+------------------------------------------------------------------------
+r206 | gaser | 2012-09-27 17:00:12
+
+M       Bayes.c
+M       niiskullstrip.cpp
+M       niiskullstrip.h
+
+Some debugging for Bayes update.
+------------------------------------------------------------------------
+r209 | gaser | 2013-04-12 10:27:17
+
+M       Bayes.c
+M       niiskullstrip.cpp
+M       niiskullstrip.h
+
+Some debugging for Bayes update.
+------------------------------------------------------------------------
+r209 | gaser | 2013-04-12 10:51:59
+
+M       niismooth.c
+M       niiornlm.c
+M       niisanlm.c
+
+Updated automated generating of output filename in some functions.
+------------------------------------------------------------------------
+r210 | gaser | 2013-04-18 09:51:17
+
+M       parallelize_xserves
+
+New help text for parallelize_xserves.
+------------------------------------------------------------------------
+r211 | gaser | 2013-04-23 09:39:12
+
+M       external_software.txt
+M       parallelize_xserves
+
+New help text for parallelize_xserves.
+------------------------------------------------------------------------
+r212 | gaser | 2013-08-12 10:57:31
+
+M       Kmeans.c
+M       Makefile.am
+M       configure.in
+M       niiamap.c
+M       niiamap.h
+M       niisanlm.c
+M       optimizer3d.c
+M       parallelize_xserves
+M       sanlm_float.c
+
+(1) Added rician flag to niisanlm.c and sanlm_float.c.
+(2) Changed active servers in parallize_xserve.
+(3) Renamed restrict to restrict3 in optimizer3d.c.
+(4) Added debug flag in niiamap.c and niiamap.h.
+(5) Some smaller changes in Makefile.am and configure.in.
+(6) Removed typo in Kmeans.c.
+
+------------------------------------------------------------------------
+r213 | gaser | 2014-10-27 11:24:46
+
+M       INSTALL
+M       configure.in
+M       parallelize
+M       sanlm_float.c
+M       vollib.c
+
+(1) Write log file in parallellize only of logdir is defined.
+(2) Changed sanlm_float.c to pthread.
+(3) Smoothing size in vollib.c was changed for repeated calls.
+------------------------------------------------------------------------
+r214 | gaser | 2019-01-31 12:13:56
+
+M       INSTALL
+M       configure.in
+M       parallelize
+M       sanlm_float.c
+M       vollib.c
+
+(1) Write log file in parallellize only of logdir is defined.
+(2) Changed sanlm_float.c to pthread.
+(3) Smoothing size in vollib.c was changed for repeated calls.
+------------------------------------------------------------------------
+r214 | gaser | 2019-01-31 12:17:01
+
+M       INSTALL
+M       configure.in
+M       parallelize
+M       sanlm_float.c
+M       vollib.c
+
+(1) Write log file in parallellize only of logdir is defined.
+(2) Changed sanlm_float.c to pthread.
+(3) Smoothing size in vollib.c was changed for repeated calls.
+------------------------------------------------------------------------
+r214 | gaser | 2019-01-31 12:18:49
+
+M       INSTALL
+M       configure.in
+M       parallelize
+M       sanlm_float.c
+M       vollib.c
+
+(1) Write log file in parallellize only of logdir is defined.
+(2) Changed sanlm_float.c to pthread.
+(3) Smoothing size in vollib.c was changed for repeated calls.
+------------------------------------------------------------------------
+r214 | gaser | 2019-01-31 12:19:11
+
+M       parallelize
+
+Removed error from paralleize that prevented to run jobs.
+------------------------------------------------------------------------
+r215 | gaser | 2019-02-04 09:03:06
+
+A       CHANGES.txt
+M       vollib.c
+
+(1) Added:   Changes.txt
+(2) Changed: Corrected typos.
+------------------------------------------------------------------------
+r216 | gaser | 2020-09-18 09:46:30
