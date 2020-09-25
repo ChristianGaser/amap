@@ -1015,3 +1015,16 @@ M       vollib.c
 (2) Changed: Corrected typos.
 ------------------------------------------------------------------------
 r216 | gaser | 2020-09-18 09:46:30
+
+M       CHANGES.txt
+M       WarpPriors.c
+M       diffeo3d.h
+M       niiornlm.c
+M       ornlm.c
+M       parallelize
+
+(1) Changed: Added direct serial call to commands to parallelize.
+(2) Changed: Added header information to prevent error about implicit 
+             declaration of functions.
+------------------------------------------------------------------------
+r217 | gaser | 2020-09-25 10:48:55

@@ -172,7 +172,20 @@ get_no_of_cpus () {
 
 parallelize ()
 {
+    
   SIZE_OF_ARRAY="${#ARRAY[@]}"
+
+  # if number of processors is equal 0 call command serially
+  if [ "$NUMBER_OF_JOBS" -eq "0" ]; then
+    i=0
+    while [ "$i" -lt "$SIZE_OF_ARRAY" ]
+    do
+      $COMMAND ${ARRAY[$i]}; 
+      ((i++))
+    done
+    return
+  fi
+
   BLOCK=$((10000* $SIZE_OF_ARRAY / $NUMBER_OF_JOBS ))
 
   i=0
@@ -198,6 +211,7 @@ parallelize ()
   fi
   
   i=0
+  
   while [ "$i" -lt "$NUMBER_OF_JOBS" ]
   do
     if [ ! "${ARG_LIST[$i]}" == "" ]; then
@@ -215,7 +229,6 @@ parallelize ()
     fi
     ((i++))
   done
-
 }
 
 ########################################################

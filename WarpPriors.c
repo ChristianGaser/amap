@@ -10,6 +10,7 @@
 #include "optimizer3d.h"
 #include "diffeo3d.h"
 #include "Amap.h"
+#include "vollib.h"
 
 struct dartel_prm {
   int rform;         /* regularization form: 0 - linear elastic energy; 1 - membrane energy; 2 - bending energy */

@@ -12,6 +12,8 @@
 
 double h;
 
+void ornlm(double* ima, double* fima, int v, int f, double h, const int* dims);
+
 static ArgvInfo argTable[] = {
   {"-h", ARGV_FLOAT, (char *) 1, (char *) &h, 
        "Noise parameter h."},

@@ -19,4 +19,4 @@ extern void iteration(int dm[], int k, float v[], float g[], float f[], float jd
                       float ov[], double ll[], float *buf);
 extern void bracket(int dm[], float *A, float *B, float *C);
 extern void push(int dm[], int m, int n, float def[], float pf[], float po[], float so[]);
-
+extern void sampn(int dm[], float f[], int n, int mm, double x, double y, double z, double v[]);
