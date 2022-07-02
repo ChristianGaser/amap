@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: niibrainmask.h 167 2011-12-27 09:28:29Z gaser $ 
  *
  */
 

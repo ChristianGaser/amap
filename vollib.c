@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: vollib.c 216 2020-09-18 07:46:33Z gaser $ 
  *
  * This code is a substantially modified version of spm_conv_vol.c 
  * from J. Ashburner

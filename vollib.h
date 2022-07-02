@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: vollib.h 207 2012-09-27 22:06:31Z gaser $ 
  *
  */
 

@@ -3,7 +3,7 @@ dnl
 dnl Define CXX_HAVE_KOENIG_LOOKUP if the C++ compiler has 
 dnl argument-dependent name lookup (a.k.a. Koenig lookup).
 dnl
-dnl @version $Id$
+dnl @version $Id: mni_cxx_have_koenig_lookup.m4 154 2011-06-21 12:10:34Z gaser $
 dnl @author Steve Robbins
 dnl
 AC_DEFUN([mni_CXX_HAVE_KOENIG_LOOKUP],

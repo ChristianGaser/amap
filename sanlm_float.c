@@ -1,5 +1,5 @@
 /* Christian Gaser
- * $Id$ 
+ * $Id: sanlm_float.c 214 2019-01-31 11:20:14Z gaser $ 
  *
  *
  * This code is a modified version of MABONLM3D.c 

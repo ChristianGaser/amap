@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: Amap.c 190 2012-07-30 10:18:52Z gaser $ 
  *
  *
  * This code is a substantially modified version of Amap.C 

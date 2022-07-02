@@ -1,4 +1,4 @@
-/* $Id$ */
+/* $Id: diffeo3d.c 190 2012-07-30 10:18:52Z gaser $ */
 /* (c) John Ashburner (2007) */
 
 /* #include <mex.h> */

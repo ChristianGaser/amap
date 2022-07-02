@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: ptr4Dlib.cpp 193 2012-08-01 16:05:12Z gaser $ 
  *
  */
 

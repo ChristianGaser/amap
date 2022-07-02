@@ -3,7 +3,7 @@
 ########################################################
 # global parameters
 ########################################################
-version='parallelize_xserves $Id$'
+version='parallelize_xserves $Id: parallelize_xserves 213 2014-10-27 10:24:50Z gaser $'
 
 COMMAND=""
 XSERVES="141.35.68.68 141.35.68.71 141.35.68.72 141.35.68.73 141.35.68.74 141.35.68.75"

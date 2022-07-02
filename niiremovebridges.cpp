@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: niiremovebridges.cpp 186 2012-06-20 09:06:26Z gaser $ 
  *
  */
 

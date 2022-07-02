@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: ornlm.c 217 2020-09-25 08:49:06Z gaser $ 
  *
  *
  * This code is a modified version of ornlm.c 

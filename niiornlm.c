@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: niiornlm.c 217 2020-09-25 08:49:06Z gaser $ 
  *
  */
 

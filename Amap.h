@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: Amap.h 167 2011-12-27 09:28:29Z gaser $ 
  *
  */
 
@@ -52,6 +52,8 @@
 #ifndef MIN3
 #define MIN3(a,b,c) (MIN(a,MIN(b,c)))
 #endif
+
+#include <math.h>
 
 extern double Kmeans(float *src, unsigned char *label, unsigned char *mask, int NI, int n_clusters, double *voxelsize, int *dims, int thresh_mask, int thresh_kmeans, int iters_nu, int pve, double bias_fwhm);
 extern void Amap(float *src, unsigned char *label, unsigned char *prob, double *mean, int nc, int niters, int sub, int *dims, int pve, double weight_MRF, double *voxelsize, int niters_ICM, double offset);

@@ -1,10 +1,11 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: niiamap.c 213 2014-10-27 10:24:50Z gaser $ 
  *
  */
 
 #include <float.h>
+#include <math.h>
 
 #include "ParseArgv.h"
 #include "niilib.h"

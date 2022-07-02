@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: niilib.h 191 2012-07-31 15:41:36Z gaser $ 
  *
  */
 

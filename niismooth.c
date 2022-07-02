@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: niismooth.c 210 2013-04-18 07:51:14Z gaser $ 
  *
  */
 

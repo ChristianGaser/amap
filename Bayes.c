@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: Bayes.c 209 2013-04-12 08:52:39Z gaser $ 
  *
  */
 

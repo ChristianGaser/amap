@@ -1,6 +1,6 @@
 /*
  * Christian Gaser
- * $Id$ 
+ * $Id: niisanlm.c 213 2014-10-27 10:24:50Z gaser $ 
  *
  */
 
