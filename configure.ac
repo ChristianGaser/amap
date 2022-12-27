@@ -37,8 +37,7 @@ else
   AC_DEFINE(OPENMP,0,[Define to enable OpenMP.])
 fi
 AM_CONDITIONAL([OPENMP], [test "$enable_openmp" = yes])
-
-
+      
 dnl Build only static libs by default
 
 AC_FUNC_FORK
@@ -46,6 +45,8 @@ AC_CHECK_HEADERS(values.h malloc.h)
 AC_CHECK_FUNCS(finite isfinite mkstemp)
 
 AC_CHECK_LIB([m], [sqrt], LDFLAGS="$LDFLAGS -lm")
+
+LDFLAGS="$LDFLAGS"
 
 AC_CHECK_HEADERS()
 

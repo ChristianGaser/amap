@@ -132,6 +132,7 @@ niiamap_SOURCES = \
   MrfPrior.c \
   sanlm_float.c \
   $(nifti_SOURCES) \
+  $(zlib_SOURCES) \
   niilib.c \
   vollib.c \
   ParseArgv.c
@@ -161,6 +162,7 @@ niinucorrect_SOURCES = \
   niinucorrect.c \
   Kmeans.c \
   $(nifti_SOURCES) \
+  $(zlib_SOURCES) \
   niilib.c \
   vollib.c \
   ParseArgv.c

@@ -1,0 +1,15 @@
+.deps
+autom4te.cache
+*.o
+*/.deps
+config.*
+*/.dirstamp
+libtool
+Makefile
+stamp-h1
+Makefile.in
+configure.in
+depcomp
+missing
+install-sh
+compile

@@ -27,6 +27,7 @@
     <br>The library version can be viewed via "nifti_tool -nifti_ver".
  */
 
+#define HAVE_ZLIB 1
 /*! global history and version strings, for printing */
 static char * gni_history[] = 
 {

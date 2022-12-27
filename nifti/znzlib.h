@@ -54,6 +54,7 @@ extern "C" {
 */
 /* #define HAVE_FDOPEN */
 
+#define HAVE_ZLIB 1
 
 #ifdef HAVE_ZLIB
 #if defined(ITKZLIB)
