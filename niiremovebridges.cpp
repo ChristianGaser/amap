@@ -69,7 +69,7 @@ double EstimateKmeans(float *src, int n_classes, double *mean, int ni, int *dims
     v = (int)ROUND(255.0*src[i]/max_src);
     if (v < 1) continue;
     if (v < 0) v = 0;
-    if (v > 255) v = 255;	
+    if (v > 255) v = 255; 
     histo[v]++;  
   }
 
@@ -87,12 +87,12 @@ double EstimateKmeans(float *src, int n_classes, double *mean, int ni, int *dims
     for (i = 0; i < 256; i++) {
       dmin = 256.0 * 256.0;
       for (j = 0; j < n_classes; j++) {
-	      dx = (double) i - mean[j];
-	      dx *= dx;
-	      if (dx < dmin) {
-	        lut[i] = j;
-	        dmin = dx;
-	      }
+        dx = (double) i - mean[j];
+        dx *= dx;
+        if (dx < dmin) {
+          lut[i] = j;
+          dmin = dx;
+        }
       }
     }
 
@@ -102,10 +102,10 @@ double EstimateKmeans(float *src, int n_classes, double *mean, int ni, int *dims
       xnorm = 0.0;
       sum = 0.0;
       for (j = 0; j < 256; j++)
-	    if (lut[j] == i) {
-	      xnorm += histo[j];
-	      sum +=  j * histo[j];
-	    }
+      if (lut[j] == i) {
+        xnorm += histo[j];
+        sum +=  j * histo[j];
+      }
       sum = xnorm > 0 ? sum /= xnorm : 0.0;
       dx = sum - mean[i];
       mean[i] = sum;
@@ -121,8 +121,8 @@ double EstimateKmeans(float *src, int n_classes, double *mean, int ni, int *dims
     j0 = 0;
     for (j = 0; j < n_classes; j++) {
       if (fabs((double) i - mean[j]) < dmin) {
-	      dmin = fabs((double)i - mean[j]);
-	      j0 = j;
+        dmin = fabs((double)i - mean[j]);
+        j0 = j;
       }
     }
     lut[i] = j0;
@@ -138,10 +138,10 @@ double EstimateKmeans(float *src, int n_classes, double *mean, int ni, int *dims
     if (v >= 1) {
       if (v < 0) v = 0;
       if (v > 255) v = 255;
-      label[i] = (unsigned char)(lut[v] + 1);	
+      label[i] = (unsigned char)(lut[v] + 1); 
       diff += SQR((double)v - mean[lut[v]]);
     }
-    else label[i] = 0;	
+    else label[i] = 0;  
   }
 
   free(label);
@@ -240,12 +240,12 @@ int  main(
   unsigned long nii_lens[MAX_NII_DIMS];
   int       nii_ndims, n_classes;
   int       nifti_file_type;
-  int	    x, y, z, dims[3], i, z_area, y_dims;
+  int     x, y, z, dims[3], i, z_area, y_dims;
   int       n_added, n_removed;
-  long	    area, vol;
-  char	    *arg_string, *extension;
-  unsigned char	*wm, *wm_out;
-  char	    *wm_filename, *t1_filename, *wm_out_filename;
+  long      area, vol;
+  char      *arg_string, *extension;
+  unsigned char *wm, *wm_out;
+  char      *wm_filename, *t1_filename, *wm_out_filename;
   float     *t1, *vol_tmp;
   double     mu[3], voxelsize[3];
 
@@ -376,16 +376,16 @@ int  main(
   
   n_added = 0; n_removed = 0;
   for (i = 0; i < vol; i++) {
-  	if((wm_out[i] == ADDED) || (wm_out[i] == ALTERNATIVE)) {
-  		wm_out[i] = 255;
-  		n_added++;
-  	}
-  	if(wm_out[i] == UNCHANGED)
-  		wm_out[i] = 255;
-  	if(wm_out[i] == REMOVED) {
-  		wm_out[i] = 0;
-  		n_removed++;
-  	}
+    if((wm_out[i] == ADDED) || (wm_out[i] == ALTERNATIVE)) {
+      wm_out[i] = 255;
+      n_added++;
+    }
+    if(wm_out[i] == UNCHANGED)
+      wm_out[i] = 255;
+    if(wm_out[i] == REMOVED) {
+      wm_out[i] = 0;
+      n_removed++;
+    }
   }
   fprintf(stderr,"%04d voxels added\n%04d voxels removed\n",n_added, n_removed);
   

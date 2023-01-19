@@ -147,11 +147,11 @@ write_nifti_double( const char *output_filename, double image[], int data_type, 
 
   nii_ptr->nifti_type = 1;
   
-  if (!strcmp(extension,".img") == 1) {
+  if (strcmp(extension,".img") == 0) {
     nii_ptr->nifti_type = 2;
   }
   
-  if (!strcmp(extension,".hdr") == 1) {
+  if (strcmp(extension,".hdr") == 0) {
     nii_ptr->nifti_type = 2;
     strcpy(extension,".img");
   }
@@ -380,15 +380,15 @@ write_nifti_float( const char *output_filename, float image[], int data_type, do
 
   nii_ptr->nifti_type = 1;
   
-  if (!strcmp(extension,".img") == 1) {
+  if (strcmp(extension,".img") == 0) {
     nii_ptr->nifti_type = 2;
   }
   
-  if (!strcmp(extension,".hdr") == 1) {
+  if (strcmp(extension,".hdr") == 0) {
     nii_ptr->nifti_type = 2;
     strcpy(extension,".img");
   }
-
+  
   output_filename = nifti_makebasename(output_filename);
 
   nii_ptr->nx = dim[0];

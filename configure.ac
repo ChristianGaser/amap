@@ -20,23 +20,6 @@ AC_ENABLE_STATIC
 AC_DISABLE_SHARED
 
 smr_WITH_BUILD_PATH
-
-AC_OPENMP
-AC_CHECK_HEADERS([omp.h],[
-  AC_DEFINE(OPENMP,1,[Define to enable OpenMP.])
-    CFLAGS="$CFLAGS $OPENMP_CFLAGS"
-    CXXFLAGS="$CXXFLAGS $OPENMP_CFLAGS"
-  CPPFLAGS="$CPPFLAGS $OPENMP_CFLAGS"
-  LDFLAGS="$LDFLAGS $OPENMP_CFLAGS"
-])
-
-AC_ARG_ENABLE(openmp, [AC_HELP_STRING([--enable-openmp],[enable OpenMP support [default=yes]])], enable_openmp=$enableval, enable_openmp=yes)
-if test "$enable_openmp" = "yes"; then
-  AC_DEFINE(OPENMP,1,[Define to enable OpenMP.])
-else
-  AC_DEFINE(OPENMP,0,[Define to enable OpenMP.])
-fi
-AM_CONDITIONAL([OPENMP], [test "$enable_openmp" = yes])
       
 dnl Build only static libs by default
 

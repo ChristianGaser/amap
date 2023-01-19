@@ -664,9 +664,6 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
-OPENMP_FALSE
-OPENMP_TRUE
-OPENMP_CFLAGS
 CXXCPP
 LT_SYS_LIBRARY_PATH
 OTOOL64
@@ -804,7 +801,6 @@ with_gnu_ld
 with_sysroot
 enable_libtool_lock
 with_build_path
-enable_openmp
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1457,8 +1453,6 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
-  --disable-openmp        do not use OpenMP
-  --enable-openmp         enable OpenMP support [default=yes]
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -16782,128 +16776,6 @@ fi
 
 
 
-if test -e penmp || test -e mp; then
-  as_fn_error $? "AC_OPENMP clobbers files named 'mp' and 'penmp'. Aborting configure because one of these files already exists." "$LINENO" 5
-fi
-# Check whether --enable-openmp was given.
-if test ${enable_openmp+y}
-then :
-  enableval=$enable_openmp;
-fi
-
-  OPENMP_CFLAGS=
-  if test "$enable_openmp" != no; then
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $CC option to support OpenMP" >&5
-printf %s "checking for $CC option to support OpenMP... " >&6; }
-if test ${ac_cv_prog_c_openmp+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  ac_cv_prog_c_openmp='not found'
-                                                                        for ac_option in '' -fopenmp -xopenmp -openmp -mp -omp -qsmp=omp -homp \
-                       -Popenmp --openmp; do
-
-        ac_save_CFLAGS=$CFLAGS
-        CFLAGS="$CFLAGS $ac_option"
-        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#ifndef _OPENMP
-#error "OpenMP not supported"
-#endif
-#include <omp.h>
-int main (void) { return omp_get_num_threads (); }
-
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#ifndef _OPENMP
-#error "OpenMP not supported"
-#endif
-#include <omp.h>
-int main (void) { return omp_get_num_threads (); }
-
-_ACEOF
-if ac_fn_c_try_link "$LINENO"
-then :
-  ac_cv_prog_c_openmp=$ac_option
-else $as_nop
-  ac_cv_prog_c_openmp='unsupported'
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-        CFLAGS=$ac_save_CFLAGS
-
-        if test "$ac_cv_prog_c_openmp" != 'not found'; then
-          break
-        fi
-      done
-      if test "$ac_cv_prog_c_openmp" = 'not found'; then
-        ac_cv_prog_c_openmp='unsupported'
-      elif test "$ac_cv_prog_c_openmp" = ''; then
-        ac_cv_prog_c_openmp='none needed'
-      fi
-                        rm -f penmp mp
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_prog_c_openmp" >&5
-printf "%s\n" "$ac_cv_prog_c_openmp" >&6; }
-    if test "$ac_cv_prog_c_openmp" != 'unsupported' && \
-       test "$ac_cv_prog_c_openmp" != 'none needed'; then
-      OPENMP_CFLAGS="$ac_cv_prog_c_openmp"
-    fi
-  fi
-
-
-       for ac_header in omp.h
-do :
-  ac_fn_c_check_header_compile "$LINENO" "omp.h" "ac_cv_header_omp_h" "$ac_includes_default"
-if test "x$ac_cv_header_omp_h" = xyes
-then :
-  printf "%s\n" "#define HAVE_OMP_H 1" >>confdefs.h
-
-
-printf "%s\n" "#define OPENMP 1" >>confdefs.h
-
-    CFLAGS="$CFLAGS $OPENMP_CFLAGS"
-    CXXFLAGS="$CXXFLAGS $OPENMP_CFLAGS"
-  CPPFLAGS="$CPPFLAGS $OPENMP_CFLAGS"
-  LDFLAGS="$LDFLAGS $OPENMP_CFLAGS"
-
-fi
-
-done
-
-# Check whether --enable-openmp was given.
-if test ${enable_openmp+y}
-then :
-  enableval=$enable_openmp; enable_openmp=$enableval
-else $as_nop
-  enable_openmp=yes
-fi
-
-if test "$enable_openmp" = "yes"; then
-
-printf "%s\n" "#define OPENMP 1" >>confdefs.h
-
-else
-
-printf "%s\n" "#define OPENMP 0" >>confdefs.h
-
-fi
- if test "$enable_openmp" = yes; then
-  OPENMP_TRUE=
-  OPENMP_FALSE='#'
-else
-  OPENMP_TRUE='#'
-  OPENMP_FALSE=
-fi
-
-
 
 
   ac_fn_c_check_type "$LINENO" "pid_t" "ac_cv_type_pid_t" "$ac_includes_default
@@ -17385,10 +17257,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCXX\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${OPENMP_TRUE}" && test -z "${OPENMP_FALSE}"; then
-  as_fn_error $? "conditional \"OPENMP\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

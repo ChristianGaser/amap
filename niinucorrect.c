@@ -130,7 +130,7 @@ main( int argc, char **argv )
 
   count_zero = 0;
   for (i = 0; i < src_ptr->nvox; i++)
-    if ((mask[i] == 0)) count_zero++;
+    if (mask[i] == 0) count_zero++;
   
   ratio_zeros = 100.0*(double)count_zero/(double)(src_ptr->nvox);
   if(ratio_zeros < 5)

@@ -27,7 +27,7 @@ void WarpPriors(unsigned char *prob, unsigned char *priors, float *flow, int *di
 {
   int vol_samp, vol, i, j;
   int size_samp[4], size[4], area;
-  double buf[6], ll[3], samp_1; 
+  double buf[6], ll[3]; 
   float *f, *g, *v, *flow1, *flow2, *scratch, max, *priors_float;
   int it, it0, it1, it_scratch, ndims4, dims_samp[3], area_samp;
    
@@ -43,9 +43,6 @@ void WarpPriors(unsigned char *prob, unsigned char *priors, float *flow, int *di
 
   /* define grid dimensions */
   for(j=0; j<3; j++) dims_samp[j] = (int) ceil((dims[j]-1)/((double) samp))+1;
-
-  /* find grid point conversion factor */
-  samp_1 = 1.0/((double) samp);
 
   area = dims[0]*dims[1];
   vol  = dims[0]*dims[1]*dims[2];
@@ -149,7 +146,7 @@ void WarpPriors(unsigned char *prob, unsigned char *priors, float *flow, int *di
         flow2[i] = v[i];
   } else {
     for (i = 0; i < 3; i++) {
-      subsample_float(v, flow2, dims_samp, dims, i*vol, i*vol_samp);    
+      subsample_float(v, flow2, dims_samp, dims, i*vol_samp, i*vol);    
     }
   }
 

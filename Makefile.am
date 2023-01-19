@@ -2,7 +2,11 @@
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = -I m4
 
-AM_CPPFLAGS=-I$(top_srcdir)/zlib -I$(top_srcdir)/nifti -I$(top_srcdir)/reg-lib
+ZLIBCFLAGS=-I$(top_srcdir)/zlib
+NIFTICFLAGS=-I$(top_srcdir)/nifti
+REGCFLAGS=-I$(top_srcdir)/reg-lib
+
+AM_CPPFLAGS=$(ZLIBCFLAGS) $(NIFTICFLAGS) $(REGCFLAGS) 
 
 EXTRA_DIST = \
   autogen.sh \
@@ -14,6 +18,7 @@ dist_bin_SCRIPTS = \
   reg-apps/reg_full.sh
 
 bin_PROGRAMS = \
+  niibayes \
   niiamap \
   niiaverage \
   niismooth \
@@ -21,12 +26,12 @@ bin_PROGRAMS = \
   niisanlm \
   niinucorrect \
   niiremovebridges \
-  niiskullstrip \
+  niiseg2mask \
   reg_aladin \
   reg_f3d \
   reg_resample \
+  reg_resample \
   reg_tools
-  
 
 zlib_SOURCES = \
   zlib/adler32.c \
@@ -137,26 +142,29 @@ niiamap_SOURCES = \
   vollib.c \
   ParseArgv.c
 
-niiskullstrip_SOURCES = \
-  niiskullstrip.cpp \
-  affineRegistration.cpp \
-  Amap.c \
-  Kmeans.c \
-  MrfPrior.c \
-  Pve.c \
-  Bayes.c \
-  WarpPriors.c \
-  diffeo3d.c \
-  optimizer3d.c \
+niiseg2mask_SOURCES = \
+  niiseg2mask.c \
   vollib.c \
   $(nifti_SOURCES) \
   $(zlib_SOURCES) \
-  niilib.c \
+  niilib.c
+
+niibayes_SOURCES = \
+  niibayes.cpp \
   ptr4Dlib.cpp \
   reg-lib/_reg_resampling.cpp \
   reg-lib/_reg_affineTransformation.cpp \
   reg-lib/_reg_blockMatching.cpp \
-  reg-lib/_reg_tools.cpp
+  reg-lib/_reg_tools.cpp \
+  affineRegistration.cpp \
+  Bayes.c \
+  $(nifti_SOURCES) \
+  $(zlib_SOURCES) \
+  WarpPriors.c \
+  diffeo3d.c \
+  optimizer3d.c \
+  vollib.c \
+  niilib.c
 
 niinucorrect_SOURCES = \
   niinucorrect.c \
@@ -216,15 +224,13 @@ noinst_HEADERS = \
   niiamap.h \
   niinucorrect.h \
   niibrainmask.h \
-  niiskullstrip.h \
+  niibayes.h \
   optimizer3d.h \
   diffeo3d.h \
   ParseArgv.h \
   Amap.h \
   CRemoveBridges.h \
-  vollib.h \
-  Splines/TBSpline.h \
-  Splines/Spline.h 
+  vollib.h
 
 m4_files = m4/mni_REQUIRE_LIB.m4 \
   m4/mni_REQUIRE_MNILIBS.m4 \
@@ -234,5 +240,3 @@ m4_files = m4/mni_REQUIRE_LIB.m4 \
   m4/smr_OPTIONAL_LIB.m4 \
   m4/smr_REQUIRED_LIB.m4 \
   m4/smr_WITH_BUILD_PATH.m4
-
-

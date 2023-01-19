@@ -12,9 +12,9 @@
               express or implied warranty.
 ---------------------------------------------------------------------------- 
 $RCSfile: TBSpline.h,v $
-$Revision: 163 $
-$Author: gaser $
-$Date: 2011-12-20 16:26:57 +0100 (Di, 20 Dez 2011) $
+$Revision: 1.1 $
+$Author: claude $
+$Date: 2010-12-09 19:35:01 $
 $State: Exp $
 --------------------------------------------------------------------------*/
 /* ----------------------------- MNI Header -----------------------------------
@@ -79,9 +79,9 @@ $State: Exp $
 #ifndef TBSPLINE_H
 #define TBSPLINE_H
 
-#include "EBTKS/templates/SimpleArray.h"
-#include "EBTKS/templates/Matrix.h"
-#include "EBTKS/templates/MatrixSupport.h"
+#include "SimpleArray.h"
+#include "Matrix.h"
+#include "MatrixSupport.h"
 #include "Spline.h"
 
 #define DEBUG_TBSPLINE

@@ -43,60 +43,60 @@ template<class C> class psq {
 //special bridge removal class declarations
 
 struct voxT{
-	int x;
-	int y;
-	int z;
-	voxT(int xx, int yy, int zz);
-	voxT();
+  int x;
+  int y;
+  int z;
+  voxT(int xx, int yy, int zz);
+  voxT();
 };
 
 //cut description class declarations
 class cutC{
 public:
-	psq<voxT> cutContour;
-	psq<voxT> cutFilling;
-	
-	float damage;
+  psq<voxT> cutContour;
+  psq<voxT> cutFilling;
+  
+  float damage;
 
-	bool marked;
+  bool marked;
 
-	cutC();
-	~cutC();
+  cutC();
+  ~cutC();
 };
 
 //represents one choice
 class choiceC{
 public:
-	int choiceI;
+  int choiceI;
 
-	psq<cutC*> listOfPosCutPs; //corresponding sets of pos. and neg. cuts
-	float totalPosCutDamage;
+  psq<cutC*> listOfPosCutPs; //corresponding sets of pos. and neg. cuts
+  float totalPosCutDamage;
 
-	psq<cutC*> listOfNegCutPs;
-	float totalNegCutDamage;
+  psq<cutC*> listOfNegCutPs;
+  float totalNegCutDamage;
 
-	choiceC();
-	~choiceC();
+  choiceC();
+  ~choiceC();
 
 };
 
 
 //arrayFringeQueue
 class arrayFringeQueueC{
-	voxT** arrayOfArrays;
-	int blockSize;
-	int maxNblocks;
-	int cPushBlock;
-	int cPushPos;
-	int cPopBlock;
-	int cPopPos;
+  voxT** arrayOfArrays;
+  int blockSize;
+  int maxNblocks;
+  int cPushBlock;
+  int cPushPos;
+  int cPopBlock;
+  int cPopPos;
 
 public:
-	int size;
-	arrayFringeQueueC(int blockSize, int maxNblocks);
-	~arrayFringeQueueC();
-	bool pop(voxT& vox);
-	bool push(voxT vox);
+  int size;
+  arrayFringeQueueC(int blockSize, int maxNblocks);
+  ~arrayFringeQueueC();
+  bool pop(voxT& vox);
+  bool push(voxT vox);
 };
 
 // I tried to make these static const class vars, but Visual C doesn't like that.
@@ -112,10 +112,10 @@ class CRemoveBridges{
  public:
   //****************************************************
   //CONSTANTS & CONVENTIONS
-  //air				0
-  //outermost skin	1
-  //innermost skin	0<x<63
-  //object core		63
+  //air       0
+  //outermost skin  1
+  //innermost skin  0<x<63
+  //object core   63
   //if currently in fringe: +=64 (second highest bit set)
   //if currently in fluid: +=128 (highest bit set)
 
@@ -130,14 +130,14 @@ class CRemoveBridges{
   CRemoveBridges();
   ~CRemoveBridges();
   unsigned char remove(unsigned char *preSegData,
-		       float *unSegData,
-		       unsigned char *resultData,
-		       int x,
-		       int y,
-		       int z,											   
-		       float averageWhiteIntensity,
-		       float thresholdIntensity,
-		       float averageGrayIntensity);
+           float *unSegData,
+           unsigned char *resultData,
+           int x,
+           int y,
+           int z,                        
+           float averageWhiteIntensity,
+           float thresholdIntensity,
+           float averageGrayIntensity);
   void showMessage(string msg);
   void showMessage(int msgNum);
   void showMessage(double msgNum);
@@ -219,9 +219,9 @@ class CRemoveBridges{
   bool saveBridgelessVMR(char *filespec);
   bool saveVisualizationVMR(char*filespec);
   void searchPartners_zerocrossing(cutC* sourceCutP, bool targetCutNegF, psq<cutC*>& sourceListOfCutPs, 
-				   psq<cutC*>& targetListOfCutPs, choiceC* cChoiceP);
+           psq<cutC*>& targetListOfCutPs, choiceC* cChoiceP);
   void searchPartners(cutC* sourceCutP, bool sourceCutPosF, psq<cutC*>& sourceListOfCutPs, 
-		      psq<cutC*>& targetListOfCutPs, choiceC* cChoiceP);
+          psq<cutC*>& targetListOfCutPs, choiceC* cChoiceP);
   bool establishCorrespondence(psq<cutC*>& listOfPosCutPs, psq<cutC*>& listOfNegCutPs, psq<choiceC*>& listOfChoicePs);
   float cutSetCost(choiceC* cChoiceP, bool posCutSetCostF);
   void setTheseCutsTo(psq<cutC*>& listOfCutPs, unsigned char newCid, bool logF, unsigned char obj[DIMS][DIMS][DIMS]);
