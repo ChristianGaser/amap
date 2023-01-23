@@ -1,0 +1,3 @@
+- init with 6 classes only such as used in spm_preproc8.m
+- wp-weighting does not yet work
+- use of ~/Dropbox/Template_?.nii for different stages of warping
