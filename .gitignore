@@ -13,3 +13,17 @@ depcomp
 missing
 install-sh
 compile
+.vscode/settings.json
+niiamap
+niiaverage
+niibayes
+niinucorrect
+niiornlm
+niiremovebridges
+niisanlm
+niiseg2mask
+niismooth
+reg_aladin
+reg_f3d
+reg_resample
+reg_tools
