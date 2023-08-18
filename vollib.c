@@ -936,7 +936,7 @@ distopen_uint8(unsigned char *vol, int dims[3], double voxelsize[3], int niter, 
 
   vbdist(buffer, NULL, dims, voxelsize);
   for (i=0; i<nvol; i++)
-    buffer[i] = buffer[i] < (float)niter;
+    buffer[i] = buffer[i] <= (float)niter;
 
   /* return image */
   for (i=0; i<nvol; i++)
@@ -975,7 +975,7 @@ distopen_float(float *vol, int dims[3], double voxelsize[3], int niter, double t
 
   vbdist(buffer, NULL, dims, voxelsize);
   for (i=0; i<nvol; i++)
-    buffer[i] = buffer[i] < (float)niter;
+    buffer[i] = buffer[i] <= (float)niter;
 
   /* return image */
   for (i=0; i<nvol; i++)
@@ -1925,7 +1925,7 @@ cleanup(unsigned char *probs, unsigned char *mask, int *dims, double *voxelsize,
   for (iter=0; iter < niter; iter++) {
     
     fprintf(stderr,"."); 
-    /*  start with 2 iterations of erosions*/
+    /*  start with 2 iterations of erosions */
     if( iter < 2 ) th = th_erode;
     else           th = th_dilate;
     
