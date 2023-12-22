@@ -22,7 +22,7 @@ static ArgvInfo argTable[] = {
   {"-iters_nu", ARGV_INT, (char *) 1, (char *) &iters_nu,
        "Number of iterations for nu correction."},
   {"-iters_adf", ARGV_INT, (char *) 2, (char *) &iters_adf,
-       "Number of iterations for anisotropic diffucion filter."},
+       "Number of iterations for anisotropic diffusion filter."},
   {"-no_nucorrect", ARGV_CONSTANT, (char *) FALSE, (char *) &correct_nu,
        "Do not use nu correction."},
   {"-thresh", ARGV_FLOAT, (char *) 1, (char *) &thresh_brainmask,

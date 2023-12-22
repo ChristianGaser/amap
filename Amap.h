@@ -1,6 +1,9 @@
-/*
- * Christian Gaser
- * $Id: Amap.h 167 2011-12-27 09:28:29Z gaser $ 
+/* Christian Gaser - christian.gaser@uni-jena.de
+ * Department of Psychiatry
+ * University of Jena
+ *
+ * Copyright Christian Gaser, University of Jena.
+ * $Id$
  *
  */
 
