@@ -338,7 +338,7 @@ int  main(
   /* check size */ 
   if (!equal_image_dimensions(wm_ptr,t1_ptr)) {   
     fprintf(stderr,"WM and T1 image have different sizes\n");
-    exit(EXIT_FAILURE);
+    //exit(EXIT_FAILURE);
   }
 
   /* convert t1 inside bounding box */
